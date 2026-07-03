@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { useListCourses } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
 import { Card } from '@/components/ui/Card';
@@ -19,6 +20,7 @@ import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 export default function CoursesScreen() {
   const colors = useColors();
   const router = useRouter();
+  const { t, isRTL } = usePreferences();
   const [search, setSearch] = useState('');
   const { data, isLoading } = useListCourses({ search: search || undefined });
 
@@ -31,11 +33,11 @@ export default function CoursesScreen() {
         <Feather name="search" size={18} color={colors.mutedForeground} />
         <TextInput
           style={[s.searchInput, { color: colors.foreground }]}
-          placeholder="ابحث عن مادة…"
+          placeholder={t('courses.searchPlaceholder')}
           placeholderTextColor={colors.mutedForeground}
           value={search}
           onChangeText={setSearch}
-          textAlign="right"
+          textAlign={isRTL ? 'right' : 'left'}
         />
         {search.length > 0 && (
           <TouchableOpacity onPress={() => setSearch('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -54,8 +56,8 @@ export default function CoursesScreen() {
           ListEmptyComponent={
             <EmptyState
               icon="book-open"
-              title="لا توجد مواد بعد"
-              body="ستظهر هنا موادك بعد اختيار الجامعة والقسم والسنة."
+              title={t('courses.empty')}
+              body={t('courses.emptyBody')}
             />
           }
           renderItem={({ item }: { item: any }) => (
@@ -71,20 +73,20 @@ export default function CoursesScreen() {
                   </Text>
                   {item.professorName && (
                     <Text style={[s.courseProfessor, { color: colors.mutedForeground }]}>
-                      د. {item.professorName}
+                      {t('courses.professorPrefix')}{item.professorName}
                     </Text>
                   )}
                   <View style={s.courseStats}>
                     {item.fileCount != null && (
                       <View style={s.stat}>
                         <Feather name="file" size={12} color={colors.mutedForeground} />
-                        <Text style={[s.statText, { color: colors.mutedForeground }]}>{item.fileCount} ملف</Text>
+                        <Text style={[s.statText, { color: colors.mutedForeground }]}>{t('courses.fileCount', { n: item.fileCount })}</Text>
                       </View>
                     )}
                     {item.assignmentCount != null && (
                       <View style={s.stat}>
                         <Feather name="clipboard" size={12} color={colors.mutedForeground} />
-                        <Text style={[s.statText, { color: colors.mutedForeground }]}>{item.assignmentCount} واجب</Text>
+                        <Text style={[s.statText, { color: colors.mutedForeground }]}>{t('courses.assignmentCount', { n: item.assignmentCount })}</Text>
                       </View>
                     )}
                   </View>

@@ -108,7 +108,7 @@ export default function CalendarScreen() {
                     <Text style={[s.sessionName, { color: colors.foreground }, align]}>{session.courseName}</Text>
                     {session.professorName && (
                       <Text style={[s.sessionMeta, { color: colors.mutedForeground }, align]}>
-                        {isRTL ? 'د. ' : ''}{session.professorName}
+                        {t('courses.professorPrefix')}{session.professorName}
                       </Text>
                     )}
                     <View style={[s.sessionTags, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>

@@ -6,12 +6,13 @@ import { Card } from '@/components/ui/Card';
 import { Badge, BadgeColor } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
-const EXAM_TYPE_AR: Record<string, string> = { midterm: 'فصلي', final: 'نهائي', quiz: 'مصغّر', practical: 'تطبيقي', oral: 'شفهي' };
 const EXAM_TYPE_COLOR: Record<string, BadgeColor> = { midterm: 'primary', final: 'danger', quiz: 'success', practical: 'warning', oral: 'gold' };
 
 export default function ExamsScreen() {
   const colors = useColors();
+  const { t } = usePreferences();
   const { data, isLoading, refetch, isRefetching } = useListExams({ upcoming: 'true' } as any);
   const exams: any[] = (data as any)?.data ?? [];
 
@@ -26,7 +27,7 @@ export default function ExamsScreen() {
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
-            <EmptyState icon="bar-chart-2" title="لا توجد امتحانات قادمة" body="ستظهر هنا امتحاناتك القادمة." />
+            <EmptyState icon="bar-chart-2" title={t('exams.empty')} body={t('exams.emptyBody')} />
           }
           renderItem={({ item }: { item: any }) => {
             const dLeft = Math.ceil((new Date(item.date).getTime() - Date.now()) / 86400000);
@@ -34,9 +35,9 @@ export default function ExamsScreen() {
             return (
               <Card accent={urgent ? colors.destructive : colors.gold} style={s.card}>
                 <View style={s.cardTop}>
-                  <Badge label={EXAM_TYPE_AR[item.examType] ?? item.examType} color={EXAM_TYPE_COLOR[item.examType] ?? 'primary'} />
+                  <Badge label={t(`examTypes.${item.examType}`)} color={EXAM_TYPE_COLOR[item.examType] ?? 'primary'} />
                   <Text style={[s.daysLeft, { color: urgent ? colors.destructive : colors.mutedForeground }]}>
-                    {dLeft <= 0 ? 'اليوم!' : dLeft === 1 ? 'غداً' : `${dLeft} أيام`}
+                    {dLeft <= 0 ? t('exams.todayBang') : dLeft === 1 ? t('common.tomorrow') : t('exams.daysLeft', { n: dLeft })}
                   </Text>
                 </View>
                 <Text style={[s.examTitle, { color: colors.foreground }]} numberOfLines={2}>
@@ -47,7 +48,7 @@ export default function ExamsScreen() {
                   <Text style={[s.meta, { color: colors.mutedForeground }]}>📅 {item.date}</Text>
                   {item.startTime && <Text style={[s.meta, { color: colors.mutedForeground }]}>🕐 {item.startTime?.slice(0, 5)}</Text>}
                   {item.location && <Text style={[s.meta, { color: colors.mutedForeground }]}>📍 {item.location}</Text>}
-                  {item.maxScore && <Text style={[s.meta, { color: colors.mutedForeground }]}>📊 {item.maxScore} نقطة</Text>}
+                  {item.maxScore && <Text style={[s.meta, { color: colors.mutedForeground }]}>📊 {t('exams.points', { n: item.maxScore })}</Text>}
                 </View>
               </Card>
             );

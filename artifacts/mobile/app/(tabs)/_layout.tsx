@@ -18,11 +18,26 @@ function TabIcon({ name, color, focused }: { name: FeatherName; color: string; f
   );
 }
 
+// Canonical LTR tab order (visual left → right for French).
+// Route name → icon + label key. Reversed as a whole for Arabic (RTL).
+const TAB_ORDER: { name: string; icon: FeatherName; titleKey: string }[] = [
+  { name: 'index', icon: 'home', titleKey: 'nav.home' },
+  { name: 'courses', icon: 'book-open', titleKey: 'nav.courses' },
+  { name: 'calendar', icon: 'calendar', titleKey: 'nav.timetable' },
+  { name: 'community', icon: 'users', titleKey: 'nav.community' },
+  { name: 'profile', icon: 'user', titleKey: 'nav.profile' },
+];
+
 export default function TabLayout() {
   const colors = useColors();
   const { t, isRTL } = usePreferences();
   const isDark = useResolvedScheme() === 'dark';
   const isIOS = Platform.OS === 'ios';
+
+  // Arabic: reverse the whole array so الرئيسية (Home) renders far right and
+  // الملف (Profile) far left. French: keep canonical order (Accueil far left).
+  // The tab bar itself uses a plain 'row' — order is driven by declaration order.
+  const tabs = isRTL ? [...TAB_ORDER].reverse() : TAB_ORDER;
 
   return (
     <Tabs
@@ -34,9 +49,7 @@ export default function TabLayout() {
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '700', fontSize: 17 },
         tabBarStyle: {
-          // RTL (Arabic): first tab (Home) sits on the far right.
-          // LTR (French): first tab sits on the far left.
-          flexDirection: isRTL ? 'row-reverse' : 'row',
+          flexDirection: 'row',
           position: 'absolute',
           backgroundColor: isIOS ? 'transparent' : colors.card,
           borderTopWidth: 1,
@@ -61,51 +74,18 @@ export default function TabLayout() {
           ) : null,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: t('nav.home'),
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="home" color={color} focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="courses"
-        options={{
-          title: t('nav.courses'),
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="book-open" color={color} focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="calendar"
-        options={{
-          title: t('nav.timetable'),
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="calendar" color={color} focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="community"
-        options={{
-          title: t('nav.community'),
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="users" color={color} focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: t('nav.profile'),
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="user" color={color} focused={focused} />
-          ),
-        }}
-      />
+      {tabs.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            title: t(tab.titleKey),
+            tabBarIcon: ({ color, focused }) => (
+              <TabIcon name={tab.icon} color={color} focused={focused} />
+            ),
+          }}
+        />
+      ))}
     </Tabs>
   );
 }

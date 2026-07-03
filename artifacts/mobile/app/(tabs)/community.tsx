@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useListPosts, useCreatePost, useReactToPost } from '@workspace/api-client-react';
 import { getListPostsQueryKey } from '@workspace/api-client-react';
@@ -23,16 +24,17 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
-function timeAgo(date: string) {
+function timeAgo(date: string, t: (key: string, vars?: Record<string, any>) => string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (diff < 60) return 'الآن';
-  if (diff < 3600) return `${Math.floor(diff / 60)}د`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}س`;
-  return `${Math.floor(diff / 86400)}ي`;
+  if (diff < 60) return t('time.now');
+  if (diff < 3600) return `${Math.floor(diff / 60)}${t('time.min')}`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}${t('time.hour')}`;
+  return `${Math.floor(diff / 86400)}${t('time.day')}`;
 }
 
 export default function CommunityScreen() {
   const colors = useColors();
+  const { t, isRTL } = usePreferences();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
@@ -48,7 +50,7 @@ export default function CommunityScreen() {
         setNewPost('');
         setShowCreate(false);
       },
-      onError: () => Alert.alert('خطأ', 'تعذّر نشر المنشور.'),
+      onError: () => Alert.alert(t('common.error'), t('community.postError')),
     },
   });
 
@@ -70,7 +72,7 @@ export default function CommunityScreen() {
           >
             <Avatar name={user?.fullName ?? 'U'} size={36} />
             <View style={[s.createPlaceholder, { backgroundColor: colors.secondary, borderRadius: radius.full }]}>
-              <Text style={[s.createPlaceholderText, { color: colors.mutedForeground }]}>شاركنا أفكارك…</Text>
+              <Text style={[s.createPlaceholderText, { color: colors.mutedForeground }, { textAlign: isRTL ? 'right' : 'left' }]}>{t('community.sharePlaceholder')}</Text>
             </View>
           </TouchableOpacity>
         }
@@ -78,9 +80,9 @@ export default function CommunityScreen() {
           !isLoading ? (
             <EmptyState
               icon="users"
-              title="لا توجد منشورات بعد"
-              body="كن أول من يطرح سؤالًا أو يشارك معلومة مع زملائك."
-              actionLabel="إنشاء منشور"
+              title={t('community.empty')}
+              body={t('community.emptyBody')}
+              actionLabel={t('community.createPost')}
               onAction={() => setShowCreate(true)}
             />
           ) : null
@@ -91,7 +93,7 @@ export default function CommunityScreen() {
               <Avatar name={item.authorName} size={38} />
               <View style={s.postMeta}>
                 <Text style={[s.authorName, { color: colors.foreground }]}>{item.authorName}</Text>
-                <Text style={[s.postTime, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt)}</Text>
+                <Text style={[s.postTime, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt, t)}</Text>
               </View>
               {item.isPinned && <Feather name="bookmark" size={16} color={colors.gold} />}
             </View>
@@ -117,10 +119,10 @@ export default function CommunityScreen() {
       <Modal visible={showCreate} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowCreate(false)}>
         <View style={[s.modal, { backgroundColor: colors.background }]}>
           <View style={[s.modalHeader, { borderBottomColor: colors.border }]}>
-            <Button label="إلغاء" variant="ghost" size="sm" fullWidth={false} onPress={() => setShowCreate(false)} />
-            <Text style={[s.modalTitle, { color: colors.foreground }]}>منشور جديد</Text>
+            <Button label={t('common.cancel')} variant="ghost" size="sm" fullWidth={false} onPress={() => setShowCreate(false)} />
+            <Text style={[s.modalTitle, { color: colors.foreground }]}>{t('community.newPost')}</Text>
             <Button
-              label="نشر"
+              label={t('community.publish')}
               variant="primary"
               size="sm"
               fullWidth={false}
@@ -135,12 +137,12 @@ export default function CommunityScreen() {
               style={[s.postInput, { color: colors.foreground }]}
               multiline
               autoFocus
-              placeholder="شارك شيئاً مع زملائك الطلاب…"
+              placeholder={t('community.postPlaceholder')}
               placeholderTextColor={colors.mutedForeground}
               value={newPost}
               onChangeText={setNewPost}
               textAlignVertical="top"
-              textAlign="right"
+              textAlign={isRTL ? 'right' : 'left'}
             />
           </View>
         </View>

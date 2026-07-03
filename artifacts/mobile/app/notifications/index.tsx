@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Feather } from '@expo/vector-icons';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Card } from '@/components/ui/Card';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 type FeatherName = React.ComponentProps<typeof Feather>['name'];
@@ -15,16 +16,17 @@ const NOTIF_ICON: Record<string, FeatherName> = {
   file: 'file', event: 'calendar', subscription: 'star', system: 'info', ai: 'cpu',
 };
 
-function timeAgo(date: string) {
+function timeAgo(date: string, t: (key: string, vars?: Record<string, string | number>) => string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (diff < 60) return 'الآن';
-  if (diff < 3600) return `${Math.floor(diff / 60)}د`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}س`;
-  return `${Math.floor(diff / 86400)}ي`;
+  if (diff < 60) return t('time.now');
+  if (diff < 3600) return `${Math.floor(diff / 60)}${t('time.min')}`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}${t('time.hour')}`;
+  return `${Math.floor(diff / 86400)}${t('time.day')}`;
 }
 
 export default function NotificationsScreen() {
   const colors = useColors();
+  const { t } = usePreferences();
   const qc = useQueryClient();
   const { data, isLoading, refetch, isRefetching } = useListNotifications();
   const markAll = useMarkAllNotificationsRead({
@@ -42,7 +44,7 @@ export default function NotificationsScreen() {
           onPress={() => markAll.mutate()}
         >
           <Feather name="check" size={14} color={colors.navy} />
-          <Text style={[s.markAllText, { color: colors.navy }]}>تحديد الكل كمقروء ({unreadCount})</Text>
+          <Text style={[s.markAllText, { color: colors.navy }]}>{t('notifications.markAllRead', { n: unreadCount })}</Text>
         </TouchableOpacity>
       )}
       {isLoading ? (
@@ -54,7 +56,7 @@ export default function NotificationsScreen() {
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
-            <EmptyState icon="bell-off" title="لا توجد إشعارات" body="ستظهر هنا إشعاراتك من التطبيق." />
+            <EmptyState icon="bell-off" title={t('notifications.empty')} body={t('notifications.emptyBody')} />
           }
           renderItem={({ item }: { item: any }) => (
             <Card accent={!item.isRead ? colors.navy : undefined} style={s.card}>
@@ -64,7 +66,7 @@ export default function NotificationsScreen() {
               <View style={s.cardBody}>
                 <Text style={[s.notifTitle, { color: colors.foreground }]} numberOfLines={2}>{item.title}</Text>
                 {item.body && <Text style={[s.notifBody, { color: colors.mutedForeground }]} numberOfLines={2}>{item.body}</Text>}
-                <Text style={[s.notifTime, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt)}</Text>
+                <Text style={[s.notifTime, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt, t)}</Text>
               </View>
               {!item.isRead && <View style={[s.unreadDot, { backgroundColor: colors.navy }]} />}
             </Card>

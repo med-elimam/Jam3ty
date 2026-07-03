@@ -7,13 +7,14 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
-const OPP_TYPES: { key: string | undefined; label: string }[] = [
-  { key: undefined, label: 'الكل' }, { key: 'internship', label: 'تدريب' },
-  { key: 'job', label: 'وظيفة' }, { key: 'scholarship', label: 'منحة' },
-  { key: 'training', label: 'دورة' }, { key: 'hackathon', label: 'هاكاثون' },
-  { key: 'freelance', label: 'عمل حر' }, { key: 'competition', label: 'مسابقة' },
+const OPP_TYPE_KEYS: { key: string | undefined; labelKey: string }[] = [
+  { key: undefined, labelKey: 'all' }, { key: 'internship', labelKey: 'internship' },
+  { key: 'job', labelKey: 'job' }, { key: 'scholarship', labelKey: 'scholarship' },
+  { key: 'training', labelKey: 'training' }, { key: 'hackathon', labelKey: 'hackathon' },
+  { key: 'freelance', labelKey: 'freelance' }, { key: 'competition', labelKey: 'competition' },
 ];
 const OPP_COLOR: Record<string, string> = {
   internship: '#3B82F6', job: '#10B981', scholarship: '#D4A853',
@@ -25,13 +26,10 @@ const OPP_ICON: Record<string, React.ComponentProps<typeof Feather>['name']> = {
   training: 'book', hackathon: 'code', freelance: 'dollar-sign',
   competition: 'zap', volunteering: 'heart',
 };
-const OPP_TYPE_AR: Record<string, string> = {
-  internship: 'تدريب', job: 'وظيفة', scholarship: 'منحة', training: 'دورة',
-  hackathon: 'هاكاثون', freelance: 'عمل حر', competition: 'مسابقة', volunteering: 'تطوع',
-};
 
 export default function OpportunitiesScreen() {
   const colors = useColors();
+  const { t, isRTL } = usePreferences();
   const [activeType, setActiveType] = useState<string | undefined>(undefined);
   const { data, isLoading, refetch, isRefetching } = useListOpportunities({ type: activeType as any });
   const opps: any[] = (data as any)?.data ?? [];
@@ -39,14 +37,14 @@ export default function OpportunitiesScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.typeRow}>
-        {OPP_TYPES.map((t) => (
+        {OPP_TYPE_KEYS.map((opt) => (
           <TouchableOpacity
-            key={String(t.key)}
+            key={String(opt.key)}
             activeOpacity={0.75}
-            style={[s.typeChip, { backgroundColor: activeType === t.key ? colors.navy : colors.card, borderColor: activeType === t.key ? colors.navy : colors.border }]}
-            onPress={() => setActiveType(t.key)}
+            style={[s.typeChip, { backgroundColor: activeType === opt.key ? colors.navy : colors.card, borderColor: activeType === opt.key ? colors.navy : colors.border }]}
+            onPress={() => setActiveType(opt.key)}
           >
-            <Text style={[s.typeLabel, { color: activeType === t.key ? '#fff' : colors.mutedForeground }]}>{t.label}</Text>
+            <Text style={[s.typeLabel, { color: activeType === opt.key ? '#fff' : colors.mutedForeground }]}>{t(`opportunityTypes.${opt.labelKey}`)}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -60,7 +58,7 @@ export default function OpportunitiesScreen() {
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
-            <EmptyState icon="briefcase" title="لا توجد فرص متاحة" body="ستظهر هنا الفرص الوظيفية والتدريبية والمنح." />
+            <EmptyState icon="briefcase" title={t('opportunities.empty')} body={t('opportunities.emptyBody')} />
           }
           renderItem={({ item }: { item: any }) => {
             const color = OPP_COLOR[item.type] ?? colors.navy;
@@ -68,16 +66,16 @@ export default function OpportunitiesScreen() {
             const dLeft = item.deadline ? Math.ceil((new Date(item.deadline).getTime() - Date.now()) / 86400000) : null;
             return (
               <Card style={s.card}>
-                {item.isFeatured && <Badge label="⭐ مميز" color="gold" style={{ alignSelf: 'flex-end', marginBottom: spacing.xs }} />}
+                {item.isFeatured && <Badge label={t('opportunities.featured')} color="gold" style={{ alignSelf: 'flex-end', marginBottom: spacing.xs }} />}
                 <View style={s.cardHeader}>
                   <View style={[s.iconBox, { backgroundColor: color + '15' }]}>
                     <Feather name={icon} size={24} color={color} />
                   </View>
                   <View style={s.cardInfo}>
-                    <Text style={[s.cardTitle, { color: colors.foreground }]} numberOfLines={2}>{item.titleAr || item.title}</Text>
+                    <Text style={[s.cardTitle, { color: colors.foreground, textAlign: isRTL ? 'right' : 'left' }]} numberOfLines={2}>{item.titleAr || item.title}</Text>
                     <Text style={[s.cardCompany, { color: colors.mutedForeground }]}>{item.company}</Text>
                   </View>
-                  <Badge label={OPP_TYPE_AR[item.type] ?? item.type} color="primary" />
+                  <Badge label={t(`opportunityTypes.${item.type}`)} color="primary" />
                 </View>
                 {item.description && (
                   <Text style={[s.cardDesc, { color: colors.mutedForeground }]} numberOfLines={2}>
@@ -88,13 +86,13 @@ export default function OpportunitiesScreen() {
                   {item.location && <Text style={[s.meta, { color: colors.mutedForeground }]}>📍 {item.location}</Text>}
                   {dLeft !== null && (
                     <Text style={[s.meta, { color: dLeft <= 7 ? colors.destructive : colors.mutedForeground }]}>
-                      ⏰ {dLeft <= 0 ? 'انتهت' : `${dLeft} يوم متبقٍ`}
+                      ⏰ {dLeft <= 0 ? t('opportunities.expired') : t('opportunities.daysLeft', { n: dLeft })}
                     </Text>
                   )}
                 </View>
                 {item.applyUrl && item.applyUrl !== '#' && (
                   <Button
-                    label="تقدّم الآن"
+                    label={t('opportunities.apply')}
                     variant="primary"
                     size="sm"
                     onPress={() => Linking.openURL(item.applyUrl)}

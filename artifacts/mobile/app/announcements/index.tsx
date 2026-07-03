@@ -8,19 +8,21 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { spacing, fontSize, fontWeight } from '@/constants/theme';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
-function timeAgo(date: string) {
+function timeAgo(date: string, t: (key: string, vars?: Record<string, any>) => string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (diff < 3600) return `${Math.floor(diff / 60)}د`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}س`;
-  return `${Math.floor(diff / 86400)}ي`;
+  if (diff < 60) return t('time.now');
+  if (diff < 3600) return `${Math.floor(diff / 60)}${t('time.min')}`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}${t('time.hour')}`;
+  return `${Math.floor(diff / 86400)}${t('time.day')}`;
 }
 
-const PRIORITY_LABELS: Record<string, string> = { urgent: 'عاجل', high: 'مهم', important: 'مهم', medium: 'متوسط', low: 'عادي', normal: 'عادي' };
 const PRIORITY_COLOR: Record<string, 'danger' | 'warning' | 'muted'> = { urgent: 'danger', high: 'danger', important: 'warning', medium: 'warning', low: 'muted', normal: 'muted' };
 
 export default function AnnouncementsScreen() {
   const colors = useColors();
+  const { t } = usePreferences();
   const qc = useQueryClient();
   const { data, isLoading, refetch, isRefetching } = useListAnnouncements();
   const markRead = useMarkAnnouncementRead({
@@ -42,8 +44,8 @@ export default function AnnouncementsScreen() {
           ListEmptyComponent={
             <EmptyState
               icon="bell"
-              title="لا توجد إعلانات حاليًا"
-              body="ستظهر هنا إعلانات الجامعة والقسم والمواد."
+              title={t('announcements.empty')}
+              body={t('announcements.emptyBody')}
             />
           }
           renderItem={({ item }: { item: any }) => (
@@ -56,10 +58,10 @@ export default function AnnouncementsScreen() {
                 <View style={s.badgeRow}>
                   {!item.isRead && <View style={[s.dot, { backgroundColor: colors.navy }]} />}
                   {item.priority && item.priority !== 'normal' && (
-                    <Badge label={PRIORITY_LABELS[item.priority] ?? item.priority} color={PRIORITY_COLOR[item.priority] ?? 'muted'} />
+                    <Badge label={t(`priority.${item.priority}`)} color={PRIORITY_COLOR[item.priority] ?? 'muted'} />
                   )}
                 </View>
-                <Text style={[s.time, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt)}</Text>
+                <Text style={[s.time, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt, t)}</Text>
               </View>
               <Text style={[s.title, { color: colors.foreground }]} numberOfLines={3}>
                 {item.titleAr || item.title}

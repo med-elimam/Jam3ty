@@ -50,18 +50,18 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
-      {headerScreen('more', 'screens.more')}
+      {headerScreen('more/index', 'screens.more')}
       {headerScreen('course/[id]', 'screens.course')}
-      {headerScreen('files', 'screens.files')}
-      {headerScreen('announcements', 'screens.announcements')}
-      {headerScreen('assignments', 'screens.assignments')}
-      {headerScreen('exams', 'screens.exams')}
-      {headerScreen('events', 'screens.events')}
-      {headerScreen('clubs', 'screens.clubs')}
-      {headerScreen('opportunities', 'screens.opportunities')}
-      {headerScreen('ai', 'screens.ai')}
-      {headerScreen('subscription', 'screens.subscription')}
-      {headerScreen('notifications', 'screens.notifications')}
+      {headerScreen('files/index', 'screens.files')}
+      {headerScreen('announcements/index', 'screens.announcements')}
+      {headerScreen('assignments/index', 'screens.assignments')}
+      {headerScreen('exams/index', 'screens.exams')}
+      {headerScreen('events/index', 'screens.events')}
+      {headerScreen('clubs/index', 'screens.clubs')}
+      {headerScreen('opportunities/index', 'screens.opportunities')}
+      {headerScreen('ai/index', 'screens.ai')}
+      {headerScreen('subscription/index', 'screens.subscription')}
+      {headerScreen('notifications/index', 'screens.notifications')}
       <Stack.Screen name="settings" options={{ headerShown: false }} />
     </Stack>
   );

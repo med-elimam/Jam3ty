@@ -8,23 +8,17 @@ import { Feather } from '@expo/vector-icons';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
-const FILE_TYPES: { key: string; label: string }[] = [
-  { key: 'all', label: 'الكل' }, { key: 'lecture', label: 'محاضرة' }, { key: 'td', label: 'TD' },
-  { key: 'tp', label: 'TP' }, { key: 'summary', label: 'ملخص' }, { key: 'exam', label: 'امتحان' },
-  { key: 'correction', label: 'تصحيح' }, { key: 'book', label: 'كتاب' },
-];
+const FILE_TYPES: string[] = ['all', 'lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book'];
 const FILE_ICON: Record<string, React.ComponentProps<typeof Feather>['name']> = {
   lecture: 'book-open', td: 'edit-3', tp: 'tool', summary: 'align-left',
   exam: 'file-text', correction: 'check-square', book: 'book', other: 'file',
 };
-const FILE_TYPE_AR: Record<string, string> = {
-  lecture: 'محاضرة', td: 'TD', tp: 'TP', summary: 'ملخص',
-  exam: 'امتحان', correction: 'تصحيح', book: 'كتاب', other: 'أخرى',
-};
 
 export default function FilesScreen() {
   const colors = useColors();
+  const { t, isRTL } = usePreferences();
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [activeType, setActiveType] = useState('all');
@@ -45,23 +39,23 @@ export default function FilesScreen() {
         <Feather name="search" size={16} color={colors.mutedForeground} />
         <TextInput
           style={[s.searchInput, { color: colors.foreground }]}
-          placeholder="ابحث عن ملف…"
+          placeholder={t('files.searchPlaceholder')}
           placeholderTextColor={colors.mutedForeground}
           value={search}
           onChangeText={setSearch}
-          textAlign="right"
+          textAlign={isRTL ? 'right' : 'left'}
         />
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.typeRow}>
-        {FILE_TYPES.map((t) => (
+        {FILE_TYPES.map((key) => (
           <TouchableOpacity
-            key={t.key}
+            key={key}
             activeOpacity={0.75}
-            style={[s.typeChip, { backgroundColor: activeType === t.key ? colors.navy : colors.card, borderColor: activeType === t.key ? colors.navy : colors.border }]}
-            onPress={() => setActiveType(t.key)}
+            style={[s.typeChip, { backgroundColor: activeType === key ? colors.navy : colors.card, borderColor: activeType === key ? colors.navy : colors.border }]}
+            onPress={() => setActiveType(key)}
           >
-            <Text style={[s.typeLabel, { color: activeType === t.key ? '#fff' : colors.mutedForeground }]}>{t.label}</Text>
+            <Text style={[s.typeLabel, { color: activeType === key ? '#fff' : colors.mutedForeground }]}>{t(`fileTypes.${key}`)}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -75,7 +69,7 @@ export default function FilesScreen() {
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
-            <EmptyState icon="folder" title="لا توجد ملفات" body="ستظهر هنا الملفات المرفوعة للمواد." />
+            <EmptyState icon="folder" title={t('files.empty')} body={t('files.emptyBody')} />
           }
           renderItem={({ item }: { item: any }) => (
             <Card style={s.fileCard}>
@@ -85,7 +79,7 @@ export default function FilesScreen() {
               <View style={s.fileInfo}>
                 <Text style={[s.fileName, { color: colors.foreground }]} numberOfLines={2}>{item.title}</Text>
                 <Text style={[s.fileMeta, { color: colors.mutedForeground }]}>
-                  {item.uploaderName} · {FILE_TYPE_AR[item.fileType] ?? item.fileType}
+                  {item.uploaderName} · {t(`fileTypes.${item.fileType}`)}
                 </Text>
                 {item.courseName && <Text style={[s.fileCourse, { color: colors.navy }]}>{item.courseName}</Text>}
               </View>

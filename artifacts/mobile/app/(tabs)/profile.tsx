@@ -2,6 +2,7 @@ import React from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetProfile, useGetMySubscription } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
@@ -22,6 +23,7 @@ interface MenuItem {
 export default function ProfileScreen() {
   const colors = useColors();
   const router = useRouter();
+  const { t } = usePreferences();
   const { user, logout } = useAuth();
 
   const profileQuery = useGetProfile();
@@ -31,11 +33,11 @@ export default function ProfileScreen() {
   const sub = (subQuery.data as any)?.data;
 
   const menuItems: MenuItem[] = [
-    { icon: 'bell',     label: 'الإشعارات',      onPress: () => router.push('/notifications' as any) },
-    { icon: 'star',     label: 'الاشتراك',        onPress: () => router.push('/subscription' as any),
-      badge: sub ? undefined : 'بلس' },
-    { icon: 'grid',     label: 'المزيد',           onPress: () => router.push('/more' as any) },
-    { icon: 'settings', label: 'الإعدادات',       onPress: () => router.push('/settings' as any) },
+    { icon: 'bell',     label: t('screens.notifications'), onPress: () => router.push('/notifications' as any) },
+    { icon: 'star',     label: t('screens.subscription'),  onPress: () => router.push('/subscription' as any),
+      badge: sub ? undefined : t('profile.plusBadge') },
+    { icon: 'grid',     label: t('nav.more'),              onPress: () => router.push('/more' as any) },
+    { icon: 'settings', label: t('screens.settings'),      onPress: () => router.push('/settings' as any) },
   ];
 
   if (profileQuery.isLoading) {
@@ -46,7 +48,7 @@ export default function ProfileScreen() {
     );
   }
 
-  const fullName = profile?.fullName ?? user?.fullName ?? 'طالب';
+  const fullName = profile?.fullName ?? user?.fullName ?? t('profile.studentFallback');
   const email = profile?.email ?? user?.email ?? '';
   const department = profile?.profile?.department?.nameAr || profile?.profile?.department?.name;
   const level = profile?.profile?.level?.nameAr || profile?.profile?.level?.name;
@@ -86,7 +88,7 @@ export default function ProfileScreen() {
               <View>
                 <Text style={[s.subPlan, { color: colors.success }]}>{sub.planName}</Text>
                 <Text style={[s.subMeta, { color: colors.mutedForeground }]}>
-                  {sub.daysRemaining} يوم متبقٍ
+                  {t('profile.daysRemaining', { n: sub.daysRemaining })}
                 </Text>
               </View>
               <View style={[s.subIcon, { backgroundColor: colors.success + '15' }]}>
@@ -102,9 +104,9 @@ export default function ProfileScreen() {
             <Card style={[s.subCard, { borderColor: colors.gold + '50' }]}>
               <View style={s.subRow}>
                 <View>
-                  <Text style={[s.subPlan, { color: colors.gold }]}>الخطة المجانية</Text>
+                  <Text style={[s.subPlan, { color: colors.gold }]}>{t('profile.freePlan')}</Text>
                   <Text style={[s.subMeta, { color: colors.mutedForeground }]}>
-                    اضغط للترقية إلى جامعتي بلس
+                    {t('profile.upgradeTap')}
                   </Text>
                 </View>
                 <View style={[s.subIcon, { backgroundColor: colors.gold + '15' }]}>
@@ -143,7 +145,7 @@ export default function ProfileScreen() {
 
         {/* ── Sign out ── */}
         <Button
-          label="تسجيل الخروج"
+          label={t('settings.logout')}
           variant="danger"
           onPress={() => logout()}
           icon={<Feather name="log-out" size={16} color="#fff" />}

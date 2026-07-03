@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetDashboardHome } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
@@ -22,11 +23,11 @@ function formatTime(t: string) {
   return t?.slice(0, 5) ?? '';
 }
 
-function daysUntil(dateStr: string) {
+function daysUntil(dateStr: string, t: (key: string, vars?: Record<string, any>) => string) {
   const d = Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
-  if (d === 0) return 'اليوم';
-  if (d === 1) return 'غداً';
-  return `${d}ي`;
+  if (d === 0) return t('common.today');
+  if (d === 1) return t('common.tomorrow');
+  return `${d}${t('time.day')}`;
 }
 
 function SectionTitle({ label }: { label: string }) {
@@ -42,11 +43,12 @@ function SectionTitle({ label }: { label: string }) {
 export default function HomeScreen() {
   const colors = useColors();
   const router = useRouter();
+  const { t } = usePreferences();
   const { user } = useAuth();
   const { data, isLoading, refetch, isRefetching } = useGetDashboardHome();
 
   const d = (data as any)?.data;
-  const firstName = (user?.fullName ?? d?.student?.fullName ?? 'طالب').split(' ')[0];
+  const firstName = (user?.fullName ?? d?.student?.fullName ?? t('home.studentFallback')).split(' ')[0];
 
   if (isLoading) {
     return (
@@ -78,7 +80,7 @@ export default function HomeScreen() {
             )}
           </TouchableOpacity>
           <View style={s.heroText}>
-            <Text style={s.heroGreet}>مرحباً 👋</Text>
+            <Text style={s.heroGreet}>{t('home.greeting')} 👋</Text>
             <Text style={s.heroName}>{firstName}</Text>
           </View>
         </View>
@@ -88,7 +90,7 @@ export default function HomeScreen() {
           <View style={[s.subPill, { backgroundColor: colors.success + '25' }]}>
             <Feather name="check-circle" size={13} color={colors.success} />
             <Text style={[s.subPillText, { color: colors.success }]}>
-              {d.subscription.planName} · {d.subscription.daysRemaining} يوم متبقٍ
+              {d.subscription.planName} · {t('home.daysRemaining', { n: d.subscription.daysRemaining })}
             </Text>
           </View>
         ) : (
@@ -98,7 +100,7 @@ export default function HomeScreen() {
           >
             <Feather name="star" size={13} color={colors.gold} />
             <Text style={[s.subPillText, { color: colors.gold }]}>
-              ترقية إلى جامعتي بلس للوصول الكامل
+              {t('home.upgradeFull')}
             </Text>
             <Feather name="chevron-left" size={13} color={colors.gold} />
           </TouchableOpacity>
@@ -107,12 +109,12 @@ export default function HomeScreen() {
 
       {/* ── Today's Sessions ── */}
       <View style={s.section}>
-        <SectionTitle label="📅 محاضرات اليوم" />
+        <SectionTitle label={`📅 ${t('home.todayLectures')}`} />
         {(d?.todaysSessions ?? []).length === 0 ? (
           <EmptyState
             icon="calendar"
-            title="لا توجد محاضرات اليوم"
-            body="عندما يتم إضافة جدولك ستظهر محاضراتك هنا."
+            title={t('home.noLecturesToday')}
+            body={t('home.noLecturesTodayBody')}
           />
         ) : (
           (d?.todaysSessions ?? []).slice(0, 4).map((session: any) => (
@@ -128,7 +130,7 @@ export default function HomeScreen() {
                   </Text>
                   {session.room && (
                     <Text style={[s.sessionMeta, { color: colors.mutedForeground }]}>
-                      🏫 قاعة {session.room}
+                      🏫 {t('home.room')} {session.room}
                     </Text>
                   )}
                 </View>
@@ -140,12 +142,12 @@ export default function HomeScreen() {
 
       {/* ── Announcements ── */}
       <View style={s.section}>
-        <SectionTitle label="📢 الإعلانات" />
+        <SectionTitle label={`📢 ${t('home.announcements')}`} />
         {(d?.latestAnnouncements ?? []).length === 0 ? (
           <EmptyState
             icon="bell"
-            title="لا توجد إعلانات حاليًا"
-            body="ستظهر هنا إعلانات الجامعة والقسم والمواد."
+            title={t('home.noAnnouncements')}
+            body={t('home.noAnnouncementsBody')}
           />
         ) : (
           (d?.latestAnnouncements ?? []).slice(0, 3).map((a: any) => (
@@ -159,7 +161,7 @@ export default function HomeScreen() {
                 {!a.isRead && <View style={[s.unreadDot, { backgroundColor: colors.navy }]} />}
                 {a.priority && a.priority !== 'normal' && (
                   <Badge
-                    label={a.priority === 'urgent' ? 'عاجل' : 'مهم'}
+                    label={a.priority === 'urgent' ? t('priority.urgent') : t('priority.high')}
                     color={a.priority === 'urgent' ? 'danger' : 'warning'}
                   />
                 )}
@@ -178,7 +180,7 @@ export default function HomeScreen() {
       {/* ── Upcoming Assignments ── */}
       {(d?.upcomingAssignments ?? []).length > 0 && (
         <View style={s.section}>
-          <SectionTitle label="📝 الواجبات القادمة" />
+          <SectionTitle label={`📝 ${t('home.upcomingAssignments')}`} />
           {(d?.upcomingAssignments ?? []).slice(0, 3).map((a: any) => (
             <Card
               key={a.id}
@@ -186,7 +188,7 @@ export default function HomeScreen() {
               style={s.rowCard}
             >
               <View style={s.rowInner}>
-                <Badge label={daysUntil(a.deadline)} color="warning" />
+                <Badge label={daysUntil(a.deadline, t)} color="warning" />
                 <View style={s.rowBody}>
                   <Text style={[s.rowTitle, { color: colors.foreground }]} numberOfLines={1}>
                     {a.titleAr || a.title}
@@ -204,7 +206,7 @@ export default function HomeScreen() {
       {/* ── Upcoming Exams ── */}
       {(d?.upcomingExams ?? []).length > 0 && (
         <View style={s.section}>
-          <SectionTitle label="📊 الامتحانات القادمة" />
+          <SectionTitle label={`📊 ${t('home.upcomingExams')}`} />
           {(d?.upcomingExams ?? []).slice(0, 2).map((e: any) => (
             <Card
               key={e.id}
@@ -228,7 +230,7 @@ export default function HomeScreen() {
         onPress={() => router.push('/more' as any)}
       >
         <Feather name="grid" size={18} color={colors.navy} />
-        <Text style={[s.moreCtaText, { color: colors.navy }]}>جميع الأقسام</Text>
+        <Text style={[s.moreCtaText, { color: colors.navy }]}>{t('home.allModules')}</Text>
         <Feather name="chevron-left" size={18} color={colors.navy} />
       </TouchableOpacity>
     </ScrollView>

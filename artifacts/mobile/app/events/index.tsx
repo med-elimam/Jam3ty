@@ -8,29 +8,26 @@ import { Feather } from '@expo/vector-icons';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 const EVENT_ICON: Record<string, React.ComponentProps<typeof Feather>['name']> = {
   conference: 'mic', workshop: 'tool', competition: 'award', hackathon: 'code',
   seminar: 'book', career_fair: 'briefcase', cultural: 'music', sports: 'activity', other: 'calendar',
 };
-const EVENT_TYPE_AR: Record<string, string> = {
-  conference: 'مؤتمر', workshop: 'ورشة عمل', competition: 'مسابقة',
-  hackathon: 'هاكاثون', seminar: 'ندوة', career_fair: 'معرض وظائف',
-  cultural: 'ثقافي', sports: 'رياضي', other: 'فعالية',
-};
 
 export default function EventsScreen() {
   const colors = useColors();
+  const { t, isRTL } = usePreferences();
   const qc = useQueryClient();
   const { data, isLoading, refetch, isRefetching } = useListEvents();
   const register = useRegisterForEvent({
     mutation: {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListEventsQueryKey() });
-        Alert.alert('تم التسجيل!', 'تم تسجيلك في هذه الفعالية بنجاح.');
+        Alert.alert(t('events.registeredTitle'), t('events.registeredBody'));
       },
-      onError: () => Alert.alert('خطأ', 'تعذّر التسجيل في هذه الفعالية.'),
+      onError: () => Alert.alert(t('common.error'), t('events.registerError')),
     },
   });
   const events: any[] = (data as any)?.data ?? [];
@@ -46,7 +43,7 @@ export default function EventsScreen() {
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
-            <EmptyState icon="calendar" title="لا توجد فعاليات قادمة" body="ستظهر هنا الفعاليات الطلابية القادمة." />
+            <EmptyState icon="calendar" title={t('events.empty')} body={t('events.emptyBody')} />
           }
           renderItem={({ item }: { item: any }) => (
             <Card style={s.card}>
@@ -55,11 +52,11 @@ export default function EventsScreen() {
                   <Feather name={EVENT_ICON[item.type] ?? 'calendar'} size={22} color={colors.navy} />
                 </View>
                 <View style={s.cardInfo}>
-                  <Text style={[s.eventTitle, { color: colors.foreground }]} numberOfLines={2}>
+                  <Text style={[s.eventTitle, { color: colors.foreground, textAlign: isRTL ? 'right' : 'left' }]} numberOfLines={2}>
                     {item.titleAr || item.title}
                   </Text>
                   <Text style={[s.eventType, { color: colors.mutedForeground }]}>
-                    {EVENT_TYPE_AR[item.type] ?? item.type}
+                    {t(`eventTypes.${item.type}`)}
                   </Text>
                 </View>
                 {item.isRegistered && <Feather name="check-circle" size={20} color={colors.success} />}
@@ -75,7 +72,7 @@ export default function EventsScreen() {
               </View>
               {item.requiresRegistration && !item.isRegistered && (
                 <Button
-                  label="التسجيل في الفعالية"
+                  label={t('events.register')}
                   variant="primary"
                   size="sm"
                   onPress={() => register.mutate({ eventId: item.id })}

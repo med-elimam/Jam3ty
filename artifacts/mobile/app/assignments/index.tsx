@@ -6,31 +6,30 @@ import { Card } from '@/components/ui/Card';
 import { Badge, BadgeColor } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
-const STATUS_LABELS: Record<string, string> = {
-  submitted: 'مُسلَّم', late: 'متأخر', pending: 'معلّق', not_submitted: 'معلّق', reviewed: 'مراجَع',
-};
 const STATUS_COLOR: Record<string, BadgeColor> = {
   submitted: 'success', late: 'danger', pending: 'warning', not_submitted: 'warning', reviewed: 'muted',
 };
 
-function daysLeft(deadline: string) {
+function daysLeft(deadline: string, t: (key: string, vars?: Record<string, any>) => string) {
   const d = Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000);
-  if (d < 0) return 'انتهى الموعد';
-  if (d === 0) return 'اليوم';
-  if (d === 1) return 'غداً';
-  return `${d} أيام متبقية`;
+  if (d < 0) return t('assignments.deadlinePassed');
+  if (d === 0) return t('common.today');
+  if (d === 1) return t('common.tomorrow');
+  return t('assignments.daysLeft', { n: d });
 }
 
-const FILTERS: { label: string; value: ListAssignmentsStatus | undefined }[] = [
-  { label: 'الكل', value: undefined },
-  { label: 'معلّق', value: ListAssignmentsStatus.pending },
-  { label: 'مُسلَّم', value: ListAssignmentsStatus.submitted },
-  { label: 'متأخر', value: ListAssignmentsStatus.late },
+const FILTERS: { labelKey: string; value: ListAssignmentsStatus | undefined }[] = [
+  { labelKey: 'common.all', value: undefined },
+  { labelKey: 'assignmentStatus.pending', value: ListAssignmentsStatus.pending },
+  { labelKey: 'assignmentStatus.submitted', value: ListAssignmentsStatus.submitted },
+  { labelKey: 'assignmentStatus.late', value: ListAssignmentsStatus.late },
 ];
 
 export default function AssignmentsScreen() {
   const colors = useColors();
+  const { t } = usePreferences();
   const [filter, setFilter] = useState<ListAssignmentsStatus | undefined>(undefined);
   const { data, isLoading, refetch, isRefetching } = useListAssignments({ status: filter });
   const assignments: any[] = (data as any)?.data ?? [];
@@ -49,7 +48,7 @@ export default function AssignmentsScreen() {
             ]}
             onPress={() => setFilter(f.value)}
           >
-            <Text style={[s.filterLabel, { color: filter === f.value ? '#fff' : colors.mutedForeground }]}>{f.label}</Text>
+            <Text style={[s.filterLabel, { color: filter === f.value ? '#fff' : colors.mutedForeground }]}>{t(f.labelKey)}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -63,12 +62,12 @@ export default function AssignmentsScreen() {
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
-            <EmptyState icon="clipboard" title="لا توجد واجبات" body="ستظهر هنا الواجبات المطلوبة منك." />
+            <EmptyState icon="clipboard" title={t('assignments.empty')} body={t('assignments.emptyBody')} />
           }
           renderItem={({ item }: { item: any }) => (
             <Card style={s.card}>
               <View style={s.cardTop}>
-                <Badge label={STATUS_LABELS[item.submissionStatus] ?? 'معلّق'} color={STATUS_COLOR[item.submissionStatus] ?? 'muted'} />
+                <Badge label={item.submissionStatus ? t(`assignmentStatus.${item.submissionStatus}`) : t('assignmentStatus.pending')} color={STATUS_COLOR[item.submissionStatus] ?? 'muted'} />
                 <View style={s.cardInfo}>
                   <Text style={[s.cardTitle, { color: colors.foreground }]} numberOfLines={2}>
                     {item.titleAr || item.title}
@@ -77,8 +76,8 @@ export default function AssignmentsScreen() {
                 </View>
               </View>
               <View style={s.cardBottom}>
-                <Text style={[s.daysLeft, { color: colors.mutedForeground }]}>{daysLeft(item.deadline)}</Text>
-                {item.maxScore && <Text style={[s.score, { color: colors.navy }]}>{item.maxScore} نقطة</Text>}
+                <Text style={[s.daysLeft, { color: colors.mutedForeground }]}>{daysLeft(item.deadline, t)}</Text>
+                {item.maxScore && <Text style={[s.score, { color: colors.navy }]}>{t('assignments.points', { n: item.maxScore })}</Text>}
               </View>
             </Card>
           )}

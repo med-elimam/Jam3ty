@@ -8,19 +8,21 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 export default function ClubsScreen() {
   const colors = useColors();
+  const { t } = usePreferences();
   const qc = useQueryClient();
   const { data, isLoading, refetch, isRefetching } = useListClubs();
   const join = useJoinClub({
     mutation: {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListClubsQueryKey() });
-        Alert.alert('تم إرسال الطلب!', 'تم إرسال طلب الانضمام بنجاح.');
+        Alert.alert(t('clubs.requestSent'), t('clubs.requestSentBody'));
       },
-      onError: () => Alert.alert('خطأ', 'تعذّر إرسال طلب الانضمام.'),
+      onError: () => Alert.alert(t('common.error'), t('clubs.requestError')),
     },
   });
   const clubs: any[] = (data as any)?.data ?? [];
@@ -36,7 +38,7 @@ export default function ClubsScreen() {
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
-            <EmptyState icon="users" title="لا توجد نوادٍ متاحة" body="ستظهر هنا النوادي الطلابية المتاحة في جامعتك." />
+            <EmptyState icon="users" title={t('clubs.empty')} body={t('clubs.emptyBody')} />
           }
           renderItem={({ item }: { item: any }) => (
             <Card style={s.card}>
@@ -49,10 +51,10 @@ export default function ClubsScreen() {
                   {item.category && <Text style={[s.clubCat, { color: colors.mutedForeground }]}>{item.category}</Text>}
                 </View>
                 {item.isMember ? (
-                  <Badge label="عضو" color="success" />
+                  <Badge label={t('clubs.member')} color="success" />
                 ) : (
                   <Button
-                    label="انضم"
+                    label={t('clubs.join')}
                     variant="primary"
                     size="sm"
                     fullWidth={false}
@@ -66,7 +68,7 @@ export default function ClubsScreen() {
                 </Text>
               )}
               {item.memberCount > 0 && (
-                <Text style={[s.meta, { color: colors.mutedForeground }]}>{item.memberCount} عضو</Text>
+                <Text style={[s.meta, { color: colors.mutedForeground }]}>{t('clubs.memberCount', { n: item.memberCount })}</Text>
               )}
             </Card>
           )}

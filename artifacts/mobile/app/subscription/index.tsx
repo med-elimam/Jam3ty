@@ -4,17 +4,19 @@ import { useColors } from '@/hooks/useColors';
 import { useListPlans, useGetMySubscription, useRedeemActivationCode, useSubmitPaymentProof } from '@workspace/api-client-react';
 import { getGetMySubscriptionQueryKey, getListPlansQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { Feather } from '@expo/vector-icons';
 
-const PAYMENT_METHODS = [
+const PAYMENT_METHODS: { id: string; label?: string; labelKey?: string; icon: string }[] = [
   { id: 'bankily', label: 'Bankily', icon: '🏦' },
   { id: 'masrvi', label: 'Masrvi', icon: '📱' },
   { id: 'sedad', label: 'Sedad', icon: '💳' },
-  { id: 'cash_agent', label: 'وكيل نقدي', icon: '💵' },
+  { id: 'cash_agent', labelKey: 'subscription.cashAgent', icon: '💵' },
 ];
 
 export default function SubscriptionScreen() {
   const colors = useColors();
+  const { t, isRTL, language } = usePreferences();
   const qc = useQueryClient();
   const [redeemCode, setRedeemCode] = useState('');
   const [showPayment, setShowPayment] = useState(false);
@@ -31,10 +33,10 @@ export default function SubscriptionScreen() {
     mutation: {
       onSuccess: (data: any) => {
         qc.invalidateQueries({ queryKey: getGetMySubscriptionQueryKey() });
-        Alert.alert('🎉 تم التفعيل!', `تم تفعيل ${data?.data?.planName} لمدة ${data?.data?.daysRemaining} يوماً!`);
+        Alert.alert(t('subscription.activatedTitle'), t('subscription.activatedBody', { plan: data?.data?.planName, days: data?.data?.daysRemaining }));
         setRedeemCode('');
       },
-      onError: (err: any) => Alert.alert('خطأ', err?.data?.error?.message ?? 'رمز غير صالح.'),
+      onError: (err: any) => Alert.alert(t('common.error'), err?.data?.error?.message ?? t('subscription.invalidCode')),
     },
   });
 
@@ -42,13 +44,16 @@ export default function SubscriptionScreen() {
     mutation: {
       onSuccess: () => {
         setShowPayment(false);
-        Alert.alert('تم إرسال الدفع', 'تم إرسال إثبات الدفع وهو قيد المراجعة. ستُعلَم فور الموافقة.');
+        Alert.alert(t('subscription.paymentSentTitle'), t('subscription.paymentSentBody'));
       },
-      onError: () => Alert.alert('خطأ', 'تعذّر إرسال الدفع.'),
+      onError: () => Alert.alert(t('common.error'), t('subscription.paymentError')),
     },
   });
 
   const s = styles(colors);
+
+  const methodLabel = (m: { label?: string; labelKey?: string }) => m.labelKey ? t(m.labelKey) : (m.label ?? '');
+  const planName = (plan: any) => language === 'fr' ? (plan?.nameFr || plan?.name) : (plan?.nameAr || plan?.name);
 
   return (
     <ScrollView style={s.root} contentContainerStyle={{ paddingBottom: 100 }}>
@@ -58,28 +63,28 @@ export default function SubscriptionScreen() {
           <Feather name="check-circle" size={28} color={colors.success} />
           <View>
             <Text style={s.currentPlan}>{sub.planName}</Text>
-            <Text style={s.currentDays}>{sub.daysRemaining} يوم متبقٍ</Text>
+            <Text style={s.currentDays}>{t('subscription.daysRemaining', { n: sub.daysRemaining })}</Text>
           </View>
         </View>
       ) : (
         <View style={s.freeBanner}>
-          <Text style={s.freeBannerTitle}>الخطة المجانية</Text>
-          <Text style={s.freeBannerSub}>ترقِّ للحصول على الوصول الكامل لجميع الميزات</Text>
+          <Text style={s.freeBannerTitle}>{t('subscription.freePlan')}</Text>
+          <Text style={s.freeBannerSub}>{t('subscription.freeUpgrade')}</Text>
         </View>
       )}
 
       {/* Redeem code */}
       <View style={s.section}>
-        <Text style={s.sectionTitle}>🎟 استرداد رمز التفعيل</Text>
+        <Text style={s.sectionTitle}>{`🎟 ${t('subscription.redeemTitle')}`}</Text>
         <View style={s.redeemRow}>
           <TextInput
             style={s.codeInput}
-            placeholder="أدخل رمزك (مثال: JMT-XXXX)"
+            placeholder={t('subscription.redeemPlaceholder')}
             placeholderTextColor={colors.mutedForeground}
             value={redeemCode}
             onChangeText={setRedeemCode}
             autoCapitalize="characters"
-            textAlign="right"
+            textAlign={isRTL ? 'right' : 'left'}
           />
           <TouchableOpacity
             style={[s.redeemBtn, (!redeemCode.trim() || redeemMutation.isPending) && s.btnDisabled]}
@@ -88,23 +93,23 @@ export default function SubscriptionScreen() {
           >
             {redeemMutation.isPending
               ? <ActivityIndicator size="small" color="#fff" />
-              : <Text style={s.redeemBtnText}>استرداد</Text>}
+              : <Text style={s.redeemBtnText}>{t('subscription.redeem')}</Text>}
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Plans */}
       <View style={s.section}>
-        <Text style={s.sectionTitle}>💎 خطط الاشتراك</Text>
+        <Text style={s.sectionTitle}>{`💎 ${t('subscription.plansTitle')}`}</Text>
         {plansQuery.isLoading ? <ActivityIndicator color={colors.navy} /> : (
           plans.filter((p) => p.priceMru > 0).map((plan) => (
             <View key={plan.id} style={[s.planCard, plan.isFeatured && s.planFeatured]}>
-              {plan.isFeatured && <View style={s.featuredTag}><Text style={s.featuredTagText}>⭐ الأكثر طلباً</Text></View>}
-              <Text style={s.planName}>{plan.nameAr || plan.name}</Text>
-              <Text style={s.planPrice}>{plan.priceMru} أوقية / {plan.durationDays} يوم</Text>
+              {plan.isFeatured && <View style={s.featuredTag}><Text style={s.featuredTagText}>{t('subscription.featured')}</Text></View>}
+              <Text style={s.planName}>{planName(plan)}</Text>
+              <Text style={s.planPrice}>{t('subscription.perDays', { price: plan.priceMru, days: plan.durationDays })}</Text>
               <Text style={s.planDesc}>{plan.descriptionAr || plan.description}</Text>
               <TouchableOpacity style={s.buyBtn} onPress={() => { setSelectedPlan(plan); setShowPayment(true); }}>
-                <Text style={s.buyBtnText}>اشترك الآن — {plan.priceMru} أوقية</Text>
+                <Text style={s.buyBtnText}>{t('subscription.subscribeNow', { price: plan.priceMru })}</Text>
               </TouchableOpacity>
             </View>
           ))
@@ -116,26 +121,26 @@ export default function SubscriptionScreen() {
         <View style={s.modal}>
           <View style={s.modalHeader}>
             <TouchableOpacity onPress={() => setShowPayment(false)}>
-              <Text style={s.cancelText}>إلغاء</Text>
+              <Text style={s.cancelText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
-            <Text style={s.modalTitle}>تفاصيل الدفع</Text>
+            <Text style={s.modalTitle}>{t('subscription.paymentDetails')}</Text>
             <View style={{ width: 60 }} />
           </View>
           <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
-            <Text style={s.payInfo}>الخطة: <Text style={{ fontWeight: '700', color: colors.navy }}>{selectedPlan?.nameAr || selectedPlan?.name}</Text></Text>
-            <Text style={s.payInfo}>المبلغ: <Text style={{ fontWeight: '700', color: colors.navy }}>{selectedPlan?.priceMru} أوقية</Text></Text>
+            <Text style={s.payInfo}>{`${t('subscription.plan')}: `}<Text style={{ fontWeight: '700', color: colors.navy }}>{planName(selectedPlan)}</Text></Text>
+            <Text style={s.payInfo}>{`${t('subscription.amount')}: `}<Text style={{ fontWeight: '700', color: colors.navy }}>{`${selectedPlan?.priceMru} ${t('subscription.currency')}`}</Text></Text>
 
-            <Text style={s.payLabel}>طريقة الدفع</Text>
+            <Text style={s.payLabel}>{t('subscription.payMethod')}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {PAYMENT_METHODS.map((m) => (
                 <TouchableOpacity key={m.id} style={[s.methodBtn, payMethod === m.id && s.methodBtnActive]} onPress={() => setPayMethod(m.id)}>
                   <Text style={s.methodIcon}>{m.icon}</Text>
-                  <Text style={[s.methodLabel, payMethod === m.id && s.methodLabelActive]}>{m.label}</Text>
+                  <Text style={[s.methodLabel, payMethod === m.id && s.methodLabelActive]}>{methodLabel(m)}</Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            <Text style={s.payLabel}>رقم هاتفك</Text>
+            <Text style={s.payLabel}>{t('subscription.yourPhone')}</Text>
             <TextInput
               style={s.payInput}
               placeholder="+222 XXXX XXXX"
@@ -143,14 +148,14 @@ export default function SubscriptionScreen() {
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
-              textAlign="right"
+              textAlign={isRTL ? 'right' : 'left'}
             />
 
             <View style={s.instructBox}>
-              <Text style={s.instructTitle}>📋 تعليمات الدفع</Text>
-              <Text style={s.instructText}>١. أرسل {selectedPlan?.priceMru} أوقية عبر {PAYMENT_METHODS.find((m) => m.id === payMethod)?.label}</Text>
-              <Text style={s.instructText}>٢. استخدم رقم هاتفك كمرجع</Text>
-              <Text style={s.instructText}>٣. أرسل هذا النموذج — سيُفعَّل حسابك خلال 24 ساعة</Text>
+              <Text style={s.instructTitle}>{`📋 ${t('subscription.payInstructions')}`}</Text>
+              <Text style={s.instructText}>{t('subscription.payStep1', { amount: selectedPlan?.priceMru, method: methodLabel(PAYMENT_METHODS.find((m) => m.id === payMethod) ?? {}) })}</Text>
+              <Text style={s.instructText}>{t('subscription.payStep2')}</Text>
+              <Text style={s.instructText}>{t('subscription.payStep3')}</Text>
             </View>
 
             <TouchableOpacity
@@ -160,7 +165,7 @@ export default function SubscriptionScreen() {
             >
               {paymentMutation.isPending
                 ? <ActivityIndicator color="#fff" />
-                : <Text style={s.submitBtnText}>إرسال إثبات الدفع</Text>}
+                : <Text style={s.submitBtnText}>{t('subscription.submitProof')}</Text>}
             </TouchableOpacity>
           </ScrollView>
         </View>

@@ -1,0 +1,298 @@
+STOP EVERYTHING.
+
+PHASE 3B ONLY — Fix the 3 critical UX failures: Arabic tab order, full French localization, and broken top layout/safe-area on secondary screens.
+
+Do not work on backend.
+Do not work on seed.
+Do not work on payments.
+Do not work on admin dashboard.
+Do not add features.
+Do not redesign unrelated components.
+Do not claim completion with “TypeScript passes” only.
+The fix is accepted only if it is visually correct in Expo Go on iPhone.
+
+Current failures from screenshots:
+
+1. Arabic bottom tabs are still wrong.
+2. French mode is incomplete; many Arabic strings remain after selecting French.
+3. Secondary/module screens start too high and content collides with the status bar/top edge.
+
+Fix only these three problems.
+
+============================================================
+1. Arabic tab order — reverse the current Arabic tabs
+============================================================
+
+The current Arabic tab order is wrong.
+
+Do not explain RTL theory.
+Do not guess right/left.
+Do this exact instruction:
+
+In Arabic mode, take the tab order that is currently rendered and REVERSE IT.
+
+The final Arabic visual order must be:
+
+Far RIGHT:
+- الرئيسية
+
+Then moving left:
+- المواد
+- الجدول
+- المجتمع
+
+Far LEFT:
+- الملف
+
+So the user looking at the phone must see:
+
+[الملف] [المجتمع] [الجدول] [المواد] [الرئيسية]
+
+from left to right.
+
+This means الرئيسية must be on the far RIGHT side of the bottom tab bar.
+
+In French mode, do NOT reverse.
+French/LTR visual order must be:
+
+Far LEFT:
+- Accueil
+- Cours
+- Emploi
+- Communauté
+- Profil
+
+So the user looking at the phone must see:
+
+[Accueil] [Cours] [Emploi] [Communauté] [Profil]
+
+from left to right.
+
+Implementation requirement:
+- Find the tab layout file, likely app/(tabs)/_layout.tsx or equivalent.
+- Create one canonical LTR tab array:
+  - home/index
+  - courses
+  - timetable
+  - community
+  - profile
+- If current language is Arabic, render a reversed copy of that array.
+- If current language is French, render the normal array.
+- Do not break the route mapping.
+- Do not only change labels.
+- The actual visual order must reverse in Arabic.
+- The active tab indicator must stay under the correct tab.
+- Test by switching Arabic/French in Expo Go.
+
+Acceptance:
+- Arabic: الرئيسية is visually far right.
+- French: Accueil is visually far left.
+
+============================================================
+2. French mode must be 100% French, not mixed Arabic/French
+============================================================
+
+French language selection currently does not fully apply.
+
+When user selects French, every core app label must become French.
+
+No Arabic should remain in French mode for core UI labels.
+
+Fix translation coverage for all visible strings.
+
+French translations required:
+
+Bottom tabs:
+- الرئيسية = Accueil
+- المواد = Cours
+- الجدول = Emploi
+- المجتمع = Communauté
+- الملف = Profil
+
+Main screens:
+- الخطة المجانية = Formule gratuite
+- اضغط للترقية = Appuyez pour passer à Plus
+- ترقية إلى جامعتي بلس للوصول الكامل = Passez à Jamiati Plus pour un accès complet
+- محاضرات اليوم = Cours du jour
+- الإعلانات = Annonces
+- الواجبات القادمة = Devoirs à venir
+- الامتحانات القادمة = Examens à venir
+- لا توجد مواد بعد = Aucun cours pour le moment
+- ستظهر هنا موادك بعد اختيار الجامعة والقسم والسنة = Vos cours apparaîtront ici après avoir choisi votre université, département et niveau.
+- لا توجد محاضرات = Aucun cours
+- لا توجد محاضرات مجدولة لهذا اليوم = Aucun cours prévu aujourd’hui.
+- لا توجد إعلانات حاليًا = Aucune annonce pour le moment
+- ستظهر هنا إعلانات الجامعة والقسم والمواد = Les annonces de l’université, du département et des cours apparaîtront ici.
+- لا توجد واجبات = Aucun devoir
+- ستظهر هنا الواجبات المطلوبة منك = Vos devoirs apparaîtront ici.
+- لا توجد امتحانات قادمة = Aucun examen à venir
+- ستظهر هنا امتحاناتك القادمة = Vos prochains examens apparaîtront ici.
+- لا توجد فعاليات قادمة = Aucun événement à venir
+- ستظهر هنا الفعاليات الطلابية القادمة = Les prochains événements étudiants apparaîtront ici.
+- لا توجد نوادٍ متاحة = Aucun club disponible
+- ستظهر هنا النوادي الطلابية المتاحة في جامعتك = Les clubs étudiants disponibles dans votre université apparaîtront ici.
+- لا توجد فرص متاحة = Aucune opportunité disponible
+- ستظهر هنا الفرص الوظيفية والتدريبية والمنح = Les stages, emplois et bourses apparaîtront ici.
+- لا توجد ملفات = Aucun fichier
+- ستظهر هنا الملفات المرفوعة للمواد = Les fichiers de cours apparaîtront ici.
+- ابحث عن مادة = Rechercher un cours
+- ابحث عن ملف = Rechercher un fichier
+- جميع الأقسام = Tous les modules
+- الملفات = Fichiers
+- الواجبات = Devoirs
+- الامتحانات = Examens
+- الفعاليات = Événements
+- النوادي = Clubs
+- الفرص = Opportunités
+- المساعد الذكي = Assistant IA
+- الاشتراك = Abonnement
+- الإعدادات = Paramètres
+- الإشعارات = Notifications
+- تغيير كلمة المرور = Changer le mot de passe
+- الخصوصية = Confidentialité
+- حذف الحساب = Supprimer le compte
+- تسجيل الخروج = Déconnexion
+
+Subscription:
+- استرداد رمز التفعيل = Utiliser un code d’activation
+- أدخل رمزك = Entrez votre code
+- استرداد = Valider
+- خطط الاشتراك = Formules d’abonnement
+- جامعتي بلس — شهري = Jamiati Plus — Mensuel
+- جامعتي بلس — سداسي = Jamiati Plus — Semestriel
+- جامعتي بلس — سنوي = Jamiati Plus — Annuel
+- اشترك الآن = S’abonner maintenant
+- أوقية = MRU
+- يوم = jours
+
+Settings:
+- اللغة = Langue
+- المظهر = Apparence
+- النظام = Système
+- فاتح = Clair
+- داكن = Sombre
+- الإشعارات = Notifications
+- مفعلة = Activées
+- غير مفعلة = Désactivées
+- الخصوصية = Confidentialité
+
+Rules:
+- Search the entire mobile app for hardcoded Arabic strings.
+- Any user-facing string must use the translation system.
+- Do not leave Arabic strings hardcoded in components.
+- Do not leave English strings hardcoded either.
+- If content is seeded Arabic-only, that is acceptable only for demo content, but core UI labels must be French in French mode.
+- “Jamiati” can remain Latin in French.
+- “جامعتي” should appear only where it is the Arabic brand, not as a French UI label unless intentionally branded.
+
+Acceptance:
+- Select French in settings.
+- Restart/reload app.
+- Open Home, Courses, Timetable, Community, Profile, More Modules, Subscription, Settings.
+- No Arabic UI labels should remain in these core screens.
+- If Arabic appears, the phase is not done.
+
+============================================================
+3. Fix broken top layout / safe area on all secondary screens
+============================================================
+
+Many screens are visually broken because content begins too high and overlaps the iPhone status bar/top area.
+
+Screens affected:
+- Tous les modules / جميع الأقسام
+- Subscription / الاشتراك
+- AI Assistant / المساعد الذكي
+- Files / الملفات
+- Announcements / الإعلانات
+- Assignments / الواجبات
+- Exams / الامتحانات
+- Events / الفعاليات
+- Clubs / النوادي
+- Opportunities / الفرص
+- Notifications / الإشعارات
+- Settings / الإعدادات
+- Privacy / الخصوصية
+- Appearance / المظهر
+- Language selector / اللغة
+
+Fix this globally, not screen by screen with random margins.
+
+Implementation requirement:
+Create or fix a shared screen wrapper component, for example:
+- components/layout/Screen.tsx
+or use the existing one if it exists.
+
+The wrapper must:
+- use safe area insets from react-native-safe-area-context
+- apply top padding correctly:
+  - paddingTop = insets.top + 16 or a consistent header offset
+- apply bottom padding correctly:
+  - paddingBottom = insets.bottom + tabBarHeight/extra spacing where needed
+- support scrollable screens
+- support non-scrollable screens
+- support Arabic RTL and French LTR
+- have consistent contentHorizontalPadding
+- avoid content under status bar
+- avoid content hidden behind bottom tab bar
+
+Required layout rule:
+Every secondary screen must start clearly below the status bar, with a visible title/header area and normal spacing.
+
+The title must never appear behind:
+- iPhone time
+- battery
+- notch/status bar
+- navigation top edge
+
+Specific visual targets:
+- “Tous les modules” must start below the status bar with proper top margin.
+- “جميع الأقسام” must start below the status bar with proper top margin.
+- Subscription page header must not be hidden behind the status bar.
+- AI assistant must not have the first message under the status bar.
+- Filter chips must not touch the status bar.
+- Empty states must be centered in the usable content area, not pushed under the top edge.
+
+Do not use huge arbitrary marginTop values.
+Do not manually patch each screen with random padding.
+Use the shared wrapper and consistent layout tokens.
+
+Acceptance:
+- Open every secondary screen in Expo Go.
+- Content starts in a sane visible position.
+- No title or filter chip is under the status bar.
+- No section is “too high”.
+- The screen looks like a real mobile app, not content pasted at y=0.
+
+============================================================
+Hard stop conditions
+============================================================
+
+Do not mark this done unless all 3 are fixed:
+
+1. Arabic tabs are literally reversed from the current wrong Arabic order and الرئيسية is far right.
+2. French mode is fully French for core UI labels.
+3. Secondary/module screens have proper safe-area top spacing.
+
+Do not send a generic report.
+Send proof in your final report:
+
+- File that controls bottom tabs
+- Exact code logic used to reverse Arabic tab order
+- Translation files updated
+- List of screens converted to translation keys
+- Shared Screen/SafeArea wrapper file updated
+- List of secondary screens using the wrapper
+- Expo Go test result:
+  - Arabic tab order checked
+  - French tab order checked
+  - French Home checked
+  - French More Modules checked
+  - French Subscription checked
+  - Arabic secondary screens top spacing checked
+  - French secondary screens top spacing checked
+
+Run:
+- TypeScript check
+- Expo Go manual test
+
+Do not continue any other phase until this passes.

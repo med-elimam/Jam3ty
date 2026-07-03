@@ -1,16 +1,27 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAiChat, useGetAiUsage } from '@workspace/api-client-react';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { Feather } from '@expo/vector-icons';
 
 interface Message { id: string; role: 'user' | 'assistant'; content: string; ts: Date; }
 
 export default function AIScreen() {
   const colors = useColors();
+  const { t, isRTL, language } = usePreferences();
   const [messages, setMessages] = useState<Message[]>([
-    { id: '0', role: 'assistant', content: 'مرحباً! أنا مساعدك الذكي في جامعتي. كيف يمكنني مساعدتك اليوم؟ 🎓', ts: new Date() },
+    { id: '0', role: 'assistant', content: t('ai.welcome'), ts: new Date() },
   ]);
+
+  useEffect(() => {
+    setMessages((prev) =>
+      prev.length === 1 && prev[0].id === '0'
+        ? [{ ...prev[0], content: t('ai.welcome') }]
+        : prev,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList>(null);
 
@@ -20,12 +31,12 @@ export default function AIScreen() {
   const chatMutation = useAiChat({
     mutation: {
       onSuccess: (data: any) => {
-        const reply = data?.data?.reply ?? 'عذراً، تعذّر معالجة طلبك.';
+        const reply = data?.data?.reply ?? t('ai.errorReply');
         setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'assistant', content: reply, ts: new Date() }]);
         setTimeout(() => listRef.current?.scrollToEnd(), 100);
       },
       onError: (err: any) => {
-        const msg = err?.data?.error?.message ?? 'تعذّر الاتصال بالمساعد الذكي. يرجى المحاولة مجدداً.';
+        const msg = err?.data?.error?.message ?? t('ai.connectError');
         setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'assistant', content: msg, ts: new Date() }]);
       },
     },
@@ -48,7 +59,7 @@ export default function AIScreen() {
       {usage && (
         <View style={s.usageBanner}>
           <Feather name="zap" size={14} color={colors.gold} />
-          <Text style={s.usageText}>{usage.used}/{usage.limit} طلب اليوم · {usage.plan}</Text>
+          <Text style={s.usageText}>{t('ai.usage', { used: usage.used, limit: usage.limit, plan: usage.plan })}</Text>
         </View>
       )}
 
@@ -73,7 +84,7 @@ export default function AIScreen() {
       {chatMutation.isPending && (
         <View style={s.thinking}>
           <ActivityIndicator size="small" color={colors.navy} />
-          <Text style={s.thinkingText}>جارٍ التفكير…</Text>
+          <Text style={s.thinkingText}>{t('ai.thinking')}</Text>
         </View>
       )}
 
@@ -82,8 +93,9 @@ export default function AIScreen() {
           style={s.input}
           value={input}
           onChangeText={setInput}
-          placeholder="اسألني أي شيء…"
+          placeholder={t('ai.inputPlaceholder')}
           placeholderTextColor={colors.mutedForeground}
+          textAlign={isRTL ? 'right' : 'left'}
           multiline
           maxLength={500}
           onSubmitEditing={sendMessage}
