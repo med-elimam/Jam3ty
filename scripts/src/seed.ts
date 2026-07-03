@@ -1,5 +1,5 @@
 /**
- * Talib MR — Seed script
+ * Jamiati — جامعتي · Seed script
  * Run: pnpm --filter @workspace/scripts run seed
  *
  * Creates initial data: universities, faculties, departments, levels, groups,
@@ -122,7 +122,7 @@ async function main() {
     .insert(usersTable)
     .values({
       fullName: "Super Admin",
-      email: "admin@talibmr.com",
+      email: "admin@jamiati.mr",
       passwordHash: adminHash,
       role: "super_admin",
       emailVerified: true,
@@ -140,7 +140,7 @@ async function main() {
     .insert(usersTable)
     .values({
       fullName: "أحمد ولد محمد",
-      email: "student@talibmr.com",
+      email: "student@jamiati.mr",
       passwordHash: studentHash,
       role: "student",
       emailVerified: true,
@@ -166,7 +166,7 @@ async function main() {
     .insert(usersTable)
     .values({
       fullName: "Dr. Mohamed Lemine",
-      email: "prof@talibmr.com",
+      email: "prof@jamiati.mr",
       passwordHash: profHash,
       role: "professor",
       emailVerified: true,
@@ -195,7 +195,7 @@ async function main() {
   // ─── Announcements ────────────────────────────────────────────────────────
   console.log("  Announcements...");
   await db.insert(announcementsTable).values([
-    { title: "Welcome to Talib MR!", content: "We're excited to launch Talib MR — the first comprehensive platform for Mauritanian university students. Explore all features!", scope: "global", priority: "urgent", createdBy: adminRow.id },
+    { title: "أهلاً بك في جامعتي!", content: "يسعدنا إطلاق جامعتي — التطبيق الشامل لطلاب الجامعات الموريتانية. جامعتك في جيبك. اكتشف كل الميزات!", scope: "global", priority: "urgent", createdBy: adminRow.id },
     { title: "Upload your course files", content: "Students can now share their course materials — lectures, summaries, past exams — with fellow students.", scope: "global", priority: "important", createdBy: adminRow.id },
   ]).onConflictDoNothing();
 

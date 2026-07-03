@@ -67,7 +67,7 @@ export default function SettingsScreen() {
         <Text style={s.sectionHeader}>About</Text>
         <View style={s.card}>
           <SettingRow icon="info" label="App Version" value="1.0.0" />
-          <SettingRow icon="help-circle" label="Help & Support" onPress={() => Alert.alert('Support', 'Email: support@talibmr.com')} />
+          <SettingRow icon="help-circle" label="Help & Support" onPress={() => Alert.alert('Support', 'Email: support@jamiati.mr')} />
           <SettingRow icon="file-text" label="Terms of Service" onPress={() => {}} />
           <SettingRow icon="shield" label="Privacy Policy" onPress={() => {}} />
         </View>
@@ -78,7 +78,7 @@ export default function SettingsScreen() {
         <Text style={s.logoutText}>Sign Out</Text>
       </TouchableOpacity>
 
-      <Text style={s.footer}>Talib MR · طالب موريتانيا · Made with ❤️ for Mauritanian students</Text>
+      <Text style={s.footer}>جامعتي · جامعتك في جيبك · Made with ❤️ for Mauritanian students</Text>
     </ScrollView>
   );
 }

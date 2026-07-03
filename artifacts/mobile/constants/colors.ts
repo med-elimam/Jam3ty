@@ -1,5 +1,5 @@
 /**
- * Talib MR design tokens — navy + gold palette
+ * Jamiati — جامعتي design tokens — navy + gold palette
  */
 
 const colors = {

@@ -96,10 +96,10 @@ export default function LoginScreen() {
         {/* Header */}
         <View style={s.header}>
           <View style={s.logoBox}>
-            <Text style={s.logoText}>ط</Text>
+            <Text style={s.logoText}>ج</Text>
           </View>
-          <Text style={s.title}>Talib MR</Text>
-          <Text style={s.subtitle}>طالب موريتانيا</Text>
+          <Text style={s.title}>جامعتي</Text>
+          <Text style={s.subtitle}>جامعتك في جيبك.</Text>
         </View>
 
         {/* ── DEBUG PANEL ─────────────────────────────────────────── */}

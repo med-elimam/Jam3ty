@@ -17,8 +17,8 @@ const API_BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').replace(/\/+$/
 setBaseUrl(API_BASE_URL || null);
 
 // ─── Secure store keys ───────────────────────────────────────────────────────
-const ACCESS_KEY = 'talibmr_access_token';
-const REFRESH_KEY = 'talibmr_refresh_token';
+const ACCESS_KEY = 'jamiati_access_token';
+const REFRESH_KEY = 'jamiati_refresh_token';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export interface AuthUser {
@@ -94,7 +94,7 @@ async function refreshAccessToken(): Promise<{ accessToken: string; refreshToken
 const GUEST_USER: AuthUser = {
   id: 'guest',
   fullName: 'Guest / زائر',
-  email: 'guest@talibmr.com',
+  email: 'guest@jamiati.mr',
   role: 'student',
   profile: { language: 'ar', onboardingComplete: true },
 };

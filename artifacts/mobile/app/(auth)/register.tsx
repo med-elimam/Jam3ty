@@ -103,8 +103,8 @@ export default function RegisterScreen() {
           <TouchableOpacity onPress={() => router.back()} style={s.back}>
             <Text style={s.backText}>← Back</Text>
           </TouchableOpacity>
-          <Text style={s.title}>Create Account</Text>
-          <Text style={s.subtitle}>إنشاء حساب جديد</Text>
+          <Text style={s.title}>إنشاء حساب</Text>
+          <Text style={s.subtitle}>انضم إلى جامعتي</Text>
         </View>
 
         {/* ── DEBUG PANEL ─────────────────────────────────────────── */}
