@@ -23,7 +23,7 @@ const LOGIN_ENDPOINT = `${BAKED_BASE_URL.replace(/\/+$/, '')}/api/auth/login`;
 export default function LoginScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, loginAsGuest } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -172,6 +172,10 @@ export default function LoginScreen() {
               Don't have an account? <Text style={s.linkBold}>Register</Text>
             </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={s.skipBtn} onPress={loginAsGuest}>
+            <Text style={s.skipText}>تخطي / Skip for now</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -221,4 +225,6 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     link: { alignItems: 'center', paddingVertical: 16 },
     linkText: { color: colors.mutedForeground, fontSize: 14 },
     linkBold: { color: colors.navy, fontWeight: '600' },
+    skipBtn: { alignItems: 'center', paddingVertical: 12 },
+    skipText: { color: colors.mutedForeground, fontSize: 13, opacity: 0.7 },
   });

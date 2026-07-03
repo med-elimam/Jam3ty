@@ -45,6 +45,7 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
   login: (user: AuthUser, accessToken: string, refreshToken: string) => Promise<void>;
+  loginAsGuest: () => void;
   logout: () => Promise<void>;
   updateUser: (user: Partial<AuthUser>) => void;
 }
@@ -90,12 +91,21 @@ async function refreshAccessToken(): Promise<{ accessToken: string; refreshToken
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────
+const GUEST_USER: AuthUser = {
+  id: 'guest',
+  fullName: 'Guest / زائر',
+  email: 'guest@talibmr.com',
+  role: 'student',
+  profile: { language: 'ar', onboardingComplete: true },
+};
+
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   accessToken: null,
   isLoading: true,
   isAuthenticated: false,
   login: async () => {},
+  loginAsGuest: () => {},
   logout: async () => {},
   updateUser: () => {},
 });
@@ -216,6 +226,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ user, accessToken, isLoading: false, isAuthenticated: true });
   }, []);
 
+  const loginAsGuest = useCallback(() => {
+    accessTokenRef.current = 'guest';
+    setState({ user: GUEST_USER, accessToken: 'guest', isLoading: false, isAuthenticated: true });
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       const token = await SecureStore.getItemAsync(ACCESS_KEY);
@@ -241,8 +256,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ ...state, login, logout, updateUser }),
-    [state, login, logout, updateUser],
+    () => ({ ...state, login, loginAsGuest, logout, updateUser }),
+    [state, login, loginAsGuest, logout, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
