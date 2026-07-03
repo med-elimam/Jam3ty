@@ -2,3 +2,4 @@
 - [API URL double-prefix bug](api-url-prefix.md) — EXPO_PUBLIC_API_BASE_URL must be root domain; generated client already includes /api
 - [Expo Router index routes](expo-router-index-routes.md) — use /route not /route/index for navigation and Stack.Screen names
 - [Jamiati Arabic pass patterns](jamiati-arabic-pass.md) — enum display maps, filter type casting, orval hook option typing patterns used in Phase 1
+- [Jamiati Phase 2 design system](jamiati-phase2-design.md) — UI component locations, onboarding cascade-reset pattern, Card/Badge/Button style prop types

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useGetTimetable } from '@workspace/api-client-react';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
 const DAYS = [
   { short: 'أح', label: 'الأحد' },
@@ -14,6 +16,7 @@ const DAYS = [
 ];
 
 const SESSION_COLORS = ['#1E3A5F', '#2B5480', '#D4A853', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444'];
+const SESSION_TYPE_AR: Record<string, string> = { lecture: 'محاضرة', td: 'TD', tp: 'TP', other: 'أخرى' };
 
 const TODAY_DOW = new Date().getDay();
 
@@ -22,61 +25,92 @@ export default function CalendarScreen() {
   const [selectedDay, setSelectedDay] = useState(TODAY_DOW);
   const { data, isLoading } = useGetTimetable();
 
-  const sessions: any[] = ((data as any)?.data ?? []);
-  const daySessionsMap = DAYS.reduce((acc, _, i) => {
+  const sessions: any[] = (data as any)?.data ?? [];
+  const dayMap = DAYS.reduce((acc, _, i) => {
     acc[i] = sessions.filter((s) => s.dayOfWeek === i).sort((a, b) => a.startTime.localeCompare(b.startTime));
     return acc;
   }, {} as Record<number, any[]>);
 
-  const currentSessions = daySessionsMap[selectedDay] ?? [];
-  const s = styles(colors);
+  const todaySessions = dayMap[selectedDay] ?? [];
 
   return (
-    <View style={s.root}>
-      {/* Day selector */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.dayRow}>
-        {DAYS.map((day, i) => (
-          <TouchableOpacity
-            key={i}
-            style={[s.dayPill, selectedDay === i && s.dayPillActive, i === TODAY_DOW && s.dayPillToday]}
-            onPress={() => setSelectedDay(i)}
-          >
-            <Text style={[s.dayPillShort, selectedDay === i && s.dayPillTextActive]}>{day.short}</Text>
-            {daySessionsMap[i]?.length > 0 && <View style={[s.dot, selectedDay === i && s.dotActive]} />}
-          </TouchableOpacity>
-        ))}
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Day pills */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={s.dayRow}
+      >
+        {DAYS.map((day, i) => {
+          const isActive = selectedDay === i;
+          const isToday = i === TODAY_DOW;
+          return (
+            <TouchableOpacity
+              key={i}
+              activeOpacity={0.75}
+              style={[
+                s.dayPill,
+                {
+                  backgroundColor: isActive ? colors.navy : colors.card,
+                  borderColor: isToday && !isActive ? colors.gold : isActive ? colors.navy : colors.border,
+                },
+              ]}
+              onPress={() => setSelectedDay(i)}
+            >
+              <Text style={[s.dayShort, { color: isActive ? '#fff' : colors.foreground }]}>{day.short}</Text>
+              {dayMap[i]?.length > 0 && (
+                <View style={[s.daydot, { backgroundColor: isActive ? 'rgba(255,255,255,0.6)' : colors.navy + '50' }]} />
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
-      <Text style={s.dayTitle}>{DAYS[selectedDay]?.label}</Text>
+      <Text style={[s.dayTitle, { color: colors.foreground }]}>{DAYS[selectedDay]?.label}</Text>
 
       {isLoading ? (
         <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
-          {currentSessions.length === 0 ? (
-            <View style={s.empty}>
-              <Text style={s.emptyIcon}>📅</Text>
-              <Text style={s.emptyText}>لا توجد محاضرات</Text>
-            </View>
+        <ScrollView contentContainerStyle={s.list}>
+          {todaySessions.length === 0 ? (
+            <EmptyState
+              icon="calendar"
+              title="لا توجد محاضرات"
+              body="لا توجد محاضرات مجدولة لهذا اليوم."
+            />
           ) : (
-            currentSessions.map((session: any, idx: number) => (
-              <View key={session.id} style={[s.sessionCard, { borderLeftColor: SESSION_COLORS[idx % SESSION_COLORS.length] }]}>
-                <View style={s.sessionLeft}>
-                  <Text style={s.timeText}>{session.startTime?.slice(0, 5)}</Text>
-                  <View style={[s.timeLine, { backgroundColor: SESSION_COLORS[idx % SESSION_COLORS.length] + '40' }]} />
-                  <Text style={s.timeTextEnd}>{session.endTime?.slice(0, 5)}</Text>
-                </View>
-                <View style={s.sessionBody}>
-                  <Text style={s.sessionName}>{session.courseName}</Text>
-                  {session.professorName && <Text style={s.sessionMeta}>د. {session.professorName}</Text>}
-                  <View style={s.sessionRow}>
-                    {session.room && <Text style={s.sessionTag}>🏫 {session.room}</Text>}
-                    {session.sessionType && <Text style={s.sessionTag}>{{ lecture: 'محاضرة', td: 'TD', tp: 'TP', other: 'أخرى' }[session.sessionType as string] ?? session.sessionType}</Text>}
-                    {session.groupName && <Text style={s.sessionTag}>👥 {session.groupName}</Text>}
+            todaySessions.map((session: any, idx: number) => {
+              const accentColor = SESSION_COLORS[idx % SESSION_COLORS.length];
+              return (
+                <View key={session.id} style={[s.sessionCard, shadow.sm, { backgroundColor: colors.card, borderColor: colors.border, borderLeftColor: accentColor }]}>
+                  <View style={[s.timeCol, { backgroundColor: accentColor + '12' }]}>
+                    <Text style={[s.timeStart, { color: accentColor }]}>{session.startTime?.slice(0, 5)}</Text>
+                    <View style={[s.timeLine, { backgroundColor: accentColor + '40' }]} />
+                    <Text style={[s.timeEnd, { color: colors.mutedForeground }]}>{session.endTime?.slice(0, 5)}</Text>
+                  </View>
+                  <View style={s.sessionBody}>
+                    <Text style={[s.sessionName, { color: colors.foreground }]}>{session.courseName}</Text>
+                    {session.professorName && (
+                      <Text style={[s.sessionMeta, { color: colors.mutedForeground }]}>د. {session.professorName}</Text>
+                    )}
+                    <View style={s.sessionTags}>
+                      {session.room && (
+                        <View style={[s.tag, { backgroundColor: colors.navy + '10' }]}>
+                          <Text style={[s.tagText, { color: colors.navy }]}>🏫 {session.room}</Text>
+                        </View>
+                      )}
+                      {session.sessionType && (
+                        <View style={[s.tag, { backgroundColor: colors.navy + '10' }]}>
+                          <Text style={[s.tagText, { color: colors.navy }]}>
+                            {SESSION_TYPE_AR[session.sessionType] ?? session.sessionType}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
                 </View>
-              </View>
-            ))
+              );
+            })
           )}
         </ScrollView>
       )}
@@ -84,37 +118,29 @@ export default function CalendarScreen() {
   );
 }
 
-const styles = (colors: ReturnType<typeof useColors>) =>
-  StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.background },
-    dayRow: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-    dayPill: {
-      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-      backgroundColor: colors.card, borderWidth: 1.5, borderColor: colors.border,
-      alignItems: 'center', minWidth: 46,
-    },
-    dayPillActive: { backgroundColor: colors.navy, borderColor: colors.navy },
-    dayPillToday: { borderColor: colors.gold },
-    dayPillShort: { fontSize: 13, fontWeight: '700', color: colors.foreground },
-    dayPillTextActive: { color: '#fff' },
-    dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.mutedForeground, marginTop: 3 },
-    dotActive: { backgroundColor: colors.gold },
-    dayTitle: { fontSize: 16, fontWeight: '700', color: colors.foreground, paddingHorizontal: 16, marginBottom: 8, textAlign: 'right' },
-    sessionCard: {
-      flexDirection: 'row', backgroundColor: colors.card, borderRadius: 12,
-      marginBottom: 10, borderLeftWidth: 4, overflow: 'hidden',
-      shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
-    },
-    sessionLeft: { width: 56, padding: 12, alignItems: 'center', gap: 4 },
-    timeText: { fontSize: 11, fontWeight: '700', color: colors.navy },
-    timeTextEnd: { fontSize: 11, color: colors.mutedForeground },
-    timeLine: { width: 2, flex: 1, borderRadius: 1 },
-    sessionBody: { flex: 1, padding: 12 },
-    sessionName: { fontSize: 15, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
-    sessionMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textAlign: 'right' },
-    sessionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6, justifyContent: 'flex-end' },
-    sessionTag: { fontSize: 11, color: colors.navy, backgroundColor: colors.secondary, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
-    empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
-    emptyIcon: { fontSize: 48 },
-    emptyText: { fontSize: 16, color: colors.mutedForeground },
-  });
+const s = StyleSheet.create({
+  dayRow: { paddingHorizontal: spacing.base, paddingVertical: spacing.md, gap: spacing.sm },
+  dayPill: {
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
+    borderRadius: radius.full, borderWidth: 1.5,
+    alignItems: 'center', minWidth: 44,
+  },
+  dayShort: { fontSize: fontSize.sm, fontWeight: fontWeight.bold },
+  daydot: { width: 4, height: 4, borderRadius: 2, marginTop: 3 },
+  dayTitle: { fontSize: fontSize.md, fontWeight: fontWeight.bold, paddingHorizontal: spacing.base, marginBottom: spacing.sm, textAlign: 'right' },
+  list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
+  sessionCard: {
+    flexDirection: 'row', borderRadius: radius.lg,
+    borderWidth: 1, borderLeftWidth: 4, overflow: 'hidden',
+  },
+  timeCol: { width: 60, padding: spacing.sm, alignItems: 'center', justifyContent: 'center', gap: 4 },
+  timeStart: { fontSize: fontSize.xs, fontWeight: fontWeight.bold },
+  timeLine: { width: 2, flex: 1, borderRadius: 1, minHeight: 12 },
+  timeEnd: { fontSize: 10 },
+  sessionBody: { flex: 1, padding: spacing.md },
+  sessionName: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, textAlign: 'right' },
+  sessionMeta: { fontSize: fontSize.sm, marginTop: 2, textAlign: 'right' },
+  sessionTags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.sm, justifyContent: 'flex-end' },
+  tag: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radius.sm },
+  tagText: { fontSize: fontSize.xs, fontWeight: fontWeight.semibold },
+});

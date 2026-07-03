@@ -13,6 +13,10 @@ import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetDashboardHome } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 function formatTime(t: string) {
   return t?.slice(0, 5) ?? '';
@@ -25,6 +29,16 @@ function daysUntil(dateStr: string) {
   return `${d}ي`;
 }
 
+function SectionTitle({ label }: { label: string }) {
+  const colors = useColors();
+  return (
+    <View style={s.sectionRow}>
+      <View style={[s.sectionAccent, { backgroundColor: colors.navy }]} />
+      <Text style={[s.sectionTitle, { color: colors.foreground }]}>{label}</Text>
+    </View>
+  );
+}
+
 export default function HomeScreen() {
   const colors = useColors();
   const router = useRouter();
@@ -32,199 +46,271 @@ export default function HomeScreen() {
   const { data, isLoading, refetch, isRefetching } = useGetDashboardHome();
 
   const d = (data as any)?.data;
-  const s = styles(colors);
-
   const firstName = (user?.fullName ?? d?.student?.fullName ?? 'طالب').split(' ')[0];
 
   if (isLoading) {
     return (
-      <View style={[s.root, { alignItems: 'center', justifyContent: 'center' }]}>
+      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator color={colors.navy} size="large" />
-        <Text style={{ color: colors.mutedForeground, marginTop: 12 }}>جارٍ التحميل…</Text>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={s.root}
+      style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={s.content}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
     >
-      {/* Greeting */}
-      <View style={s.greeting}>
-        <View>
-          <Text style={s.greetSub}>مرحباً بك 👋</Text>
-          <Text style={s.greetName}>{firstName}</Text>
+      {/* ── Hero ── */}
+      <View style={[s.hero, { backgroundColor: colors.navy }]}>
+        <View style={s.heroInner}>
+          <TouchableOpacity
+            onPress={() => router.push('/notifications' as any)}
+            style={s.notifBtn}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Feather name="bell" size={22} color="rgba(255,255,255,0.9)" />
+            {(d?.unreadNotificationsCount ?? 0) > 0 && (
+              <View style={[s.notifBadge, { backgroundColor: colors.gold }]}>
+                <Text style={s.notifBadgeText}>{d.unreadNotificationsCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <View style={s.heroText}>
+            <Text style={s.heroGreet}>مرحباً 👋</Text>
+            <Text style={s.heroName}>{firstName}</Text>
+          </View>
         </View>
-        <TouchableOpacity onPress={() => router.push('/notifications' as any)} style={s.notifBtn}>
-          <Feather name="bell" size={22} color={colors.primaryForeground} />
-          {(d?.unreadNotificationsCount ?? 0) > 0 && (
-            <View style={s.badge}>
-              <Text style={s.badgeText}>{d.unreadNotificationsCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+
+        {/* Subscription banner inside hero */}
+        {d?.subscription ? (
+          <View style={[s.subPill, { backgroundColor: colors.success + '25' }]}>
+            <Feather name="check-circle" size={13} color={colors.success} />
+            <Text style={[s.subPillText, { color: colors.success }]}>
+              {d.subscription.planName} · {d.subscription.daysRemaining} يوم متبقٍ
+            </Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[s.subPill, { backgroundColor: colors.gold + '22' }]}
+            onPress={() => router.push('/subscription' as any)}
+          >
+            <Feather name="star" size={13} color={colors.gold} />
+            <Text style={[s.subPillText, { color: colors.gold }]}>
+              ترقية إلى جامعتي بلس للوصول الكامل
+            </Text>
+            <Feather name="chevron-left" size={13} color={colors.gold} />
+          </TouchableOpacity>
+        )}
       </View>
 
-      {/* Subscription banner */}
-      {!d?.subscription && (
-        <TouchableOpacity style={s.subBanner} onPress={() => router.push('/subscription' as any)}>
-          <Feather name="star" size={16} color={colors.gold} />
-          <Text style={s.subBannerText}>ترقية إلى جامعتي بلس للوصول الكامل</Text>
-          <Feather name="chevron-left" size={16} color={colors.gold} />
-        </TouchableOpacity>
-      )}
-      {d?.subscription && (
-        <View style={[s.subBanner, { backgroundColor: colors.success + '20' }]}>
-          <Feather name="check-circle" size={16} color={colors.success} />
-          <Text style={[s.subBannerText, { color: colors.success }]}>
-            {d.subscription.planName} — {d.subscription.daysRemaining} يوم متبقٍ
-          </Text>
+      {/* ── Today's Sessions ── */}
+      <View style={s.section}>
+        <SectionTitle label="📅 محاضرات اليوم" />
+        {(d?.todaysSessions ?? []).length === 0 ? (
+          <EmptyState
+            icon="calendar"
+            title="لا توجد محاضرات اليوم"
+            body="عندما يتم إضافة جدولك ستظهر محاضراتك هنا."
+          />
+        ) : (
+          (d?.todaysSessions ?? []).slice(0, 4).map((session: any) => (
+            <Card key={session.id} accent={colors.navy} style={s.sessionCard}>
+              <View style={s.sessionInner}>
+                <View style={[s.timePill, { backgroundColor: colors.navy + '10' }]}>
+                  <Text style={[s.timeText, { color: colors.navy }]}>{formatTime(session.startTime)}</Text>
+                  <Text style={[s.timeEnd, { color: colors.mutedForeground }]}>{formatTime(session.endTime)}</Text>
+                </View>
+                <View style={s.sessionBody}>
+                  <Text style={[s.sessionName, { color: colors.foreground }]} numberOfLines={2}>
+                    {session.courseName}
+                  </Text>
+                  {session.room && (
+                    <Text style={[s.sessionMeta, { color: colors.mutedForeground }]}>
+                      🏫 قاعة {session.room}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </Card>
+          ))
+        )}
+      </View>
+
+      {/* ── Announcements ── */}
+      <View style={s.section}>
+        <SectionTitle label="📢 الإعلانات" />
+        {(d?.latestAnnouncements ?? []).length === 0 ? (
+          <EmptyState
+            icon="bell"
+            title="لا توجد إعلانات حاليًا"
+            body="ستظهر هنا إعلانات الجامعة والقسم والمواد."
+          />
+        ) : (
+          (d?.latestAnnouncements ?? []).slice(0, 3).map((a: any) => (
+            <Card
+              key={a.id}
+              onPress={() => router.push('/announcements' as any)}
+              style={s.annoCard}
+              accent={!a.isRead ? colors.navy : undefined}
+            >
+              <View style={s.annoTop}>
+                {!a.isRead && <View style={[s.unreadDot, { backgroundColor: colors.navy }]} />}
+                {a.priority && a.priority !== 'normal' && (
+                  <Badge
+                    label={a.priority === 'urgent' ? 'عاجل' : 'مهم'}
+                    color={a.priority === 'urgent' ? 'danger' : 'warning'}
+                  />
+                )}
+                <Text style={[s.annoTime, { color: colors.mutedForeground }]}>
+                  {a.createdByName}
+                </Text>
+              </View>
+              <Text style={[s.annoTitle, { color: colors.foreground }]} numberOfLines={2}>
+                {a.title}
+              </Text>
+            </Card>
+          ))
+        )}
+      </View>
+
+      {/* ── Upcoming Assignments ── */}
+      {(d?.upcomingAssignments ?? []).length > 0 && (
+        <View style={s.section}>
+          <SectionTitle label="📝 الواجبات القادمة" />
+          {(d?.upcomingAssignments ?? []).slice(0, 3).map((a: any) => (
+            <Card
+              key={a.id}
+              onPress={() => router.push('/assignments' as any)}
+              style={s.rowCard}
+            >
+              <View style={s.rowInner}>
+                <Badge label={daysUntil(a.deadline)} color="warning" />
+                <View style={s.rowBody}>
+                  <Text style={[s.rowTitle, { color: colors.foreground }]} numberOfLines={1}>
+                    {a.titleAr || a.title}
+                  </Text>
+                  <Text style={[s.rowMeta, { color: colors.mutedForeground }]}>
+                    {a.courseName}
+                  </Text>
+                </View>
+              </View>
+            </Card>
+          ))}
         </View>
       )}
 
-      {/* Today's sessions */}
-      <Text style={s.sectionTitle}>📅 محاضرات اليوم</Text>
-      {(d?.todaysSessions ?? []).length === 0 ? (
-        <View style={s.emptyCard}><Text style={s.emptyText}>لا توجد محاضرات اليوم</Text></View>
-      ) : (
-        (d?.todaysSessions ?? []).slice(0, 4).map((s2: any) => (
-          <View key={s2.id} style={[s.sessionCard, { borderLeftColor: colors.navy }]}>
-            <View style={s.sessionTime}>
-              <Text style={s.sessionTimeText}>{formatTime(s2.startTime)}</Text>
-              <Text style={s.sessionTimeSub}>{formatTime(s2.endTime)}</Text>
-            </View>
-            <View style={s.sessionInfo}>
-              <Text style={s.sessionCourse}>{s2.courseName}</Text>
-              <Text style={s.sessionMeta}>{s2.room ? `قاعة ${s2.room}` : (s2.type ?? s2.sessionType ?? '')}</Text>
-            </View>
-          </View>
-        ))
-      )}
-
-      {/* Announcements */}
-      <Text style={s.sectionTitle}>📢 الإعلانات</Text>
-      {(d?.latestAnnouncements ?? []).length === 0 ? (
-        <View style={s.emptyCard}><Text style={s.emptyText}>لا توجد إعلانات حاليًا</Text></View>
-      ) : (
-        (d?.latestAnnouncements ?? []).slice(0, 3).map((a: any) => (
-          <TouchableOpacity key={a.id} style={[s.card, !a.isRead && s.cardUnread]} onPress={() => router.push('/announcements' as any)}>
-            <View style={s.cardHeader}>
-              {!a.isRead && <View style={s.unreadDot} />}
-              {(a.priority === 'urgent' || a.priority === 'important') && (
-                <View style={[s.priorityBadge, { backgroundColor: colors.destructive + '20' }]}>
-                  <Text style={[s.priorityText, { color: colors.destructive }]}>
-                    {a.priority === 'urgent' ? 'عاجل' : 'مهم'}
-                  </Text>
-                </View>
-              )}
-            </View>
-            <Text style={s.cardTitle} numberOfLines={2}>{a.title}</Text>
-            <Text style={s.cardMeta}>{a.createdByName}</Text>
-          </TouchableOpacity>
-        ))
-      )}
-
-      {/* Due soon assignments */}
-      {(d?.upcomingAssignments ?? []).length > 0 && (
-        <>
-          <Text style={s.sectionTitle}>📝 الواجبات القادمة</Text>
-          {(d?.upcomingAssignments ?? []).slice(0, 3).map((a: any) => (
-            <TouchableOpacity key={a.id} style={s.card} onPress={() => router.push('/assignments' as any)}>
-              <View style={s.cardRow}>
-                <Text style={s.cardTitle} numberOfLines={1}>{a.titleAr || a.title}</Text>
-                <View style={[s.chip, { backgroundColor: statusColor(a.submissionStatus, colors) + '20' }]}>
-                  <Text style={[s.chipText, { color: statusColor(a.submissionStatus, colors) }]}>{daysUntil(a.deadline)}</Text>
-                </View>
-              </View>
-              <Text style={s.cardMeta}>{a.courseName}</Text>
-            </TouchableOpacity>
-          ))}
-        </>
-      )}
-
-      {/* Upcoming exams */}
+      {/* ── Upcoming Exams ── */}
       {(d?.upcomingExams ?? []).length > 0 && (
-        <>
-          <Text style={s.sectionTitle}>📊 الامتحانات القادمة</Text>
+        <View style={s.section}>
+          <SectionTitle label="📊 الامتحانات القادمة" />
           {(d?.upcomingExams ?? []).slice(0, 2).map((e: any) => (
-            <TouchableOpacity key={e.id} style={[s.card, { borderLeftColor: colors.gold, borderLeftWidth: 4 }]} onPress={() => router.push('/exams' as any)}>
-              <Text style={s.cardTitle}>{e.titleAr || e.title}</Text>
-              <Text style={s.cardMeta}>{e.courseName} · {e.date}</Text>
-            </TouchableOpacity>
+            <Card
+              key={e.id}
+              onPress={() => router.push('/exams' as any)}
+              accent={colors.gold}
+              style={s.rowCard}
+            >
+              <Text style={[s.rowTitle, { color: colors.foreground }]}>{e.titleAr || e.title}</Text>
+              <Text style={[s.rowMeta, { color: colors.mutedForeground }]}>
+                {e.courseName} · {e.date}
+              </Text>
+            </Card>
           ))}
-        </>
+        </View>
       )}
 
-      {/* More modules */}
-      <TouchableOpacity style={s.moreBtn} onPress={() => router.push('/more' as any)}>
-        <Text style={s.moreBtnText}>المزيد</Text>
+      {/* ── More CTA ── */}
+      <TouchableOpacity
+        style={[s.moreCta, { borderColor: colors.navy }]}
+        activeOpacity={0.75}
+        onPress={() => router.push('/more' as any)}
+      >
         <Feather name="grid" size={18} color={colors.navy} />
+        <Text style={[s.moreCtaText, { color: colors.navy }]}>جميع الأقسام</Text>
+        <Feather name="chevron-left" size={18} color={colors.navy} />
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
-function statusColor(status: string, colors: ReturnType<typeof useColors>) {
-  if (status === 'submitted') return colors.success;
-  if (status === 'late') return colors.destructive;
-  return colors.warning;
-}
+const s = StyleSheet.create({
+  content: { paddingBottom: 110 },
 
-const styles = (colors: ReturnType<typeof useColors>) =>
-  StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.background },
-    content: { paddingBottom: 100 },
-    greeting: {
-      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      backgroundColor: colors.navy, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20,
-    },
-    greetSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)' },
-    greetName: { fontSize: 22, fontWeight: '700', color: '#fff', marginTop: 2 },
-    notifBtn: { position: 'relative', padding: 8 },
-    badge: {
-      position: 'absolute', top: 4, right: 4, backgroundColor: colors.gold,
-      borderRadius: 8, minWidth: 16, height: 16, alignItems: 'center', justifyContent: 'center',
-    },
-    badgeText: { fontSize: 10, fontWeight: '700', color: '#000' },
-    subBanner: {
-      flexDirection: 'row', alignItems: 'center', gap: 8,
-      backgroundColor: colors.gold + '20', margin: 16, padding: 12, borderRadius: 12,
-    },
-    subBannerText: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.gold, textAlign: 'right' },
-    sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.foreground, marginHorizontal: 16, marginTop: 16, marginBottom: 8, textAlign: 'right' },
-    sessionCard: {
-      flexDirection: 'row', backgroundColor: colors.card, marginHorizontal: 16,
-      marginBottom: 8, borderRadius: 12, overflow: 'hidden', borderLeftWidth: 4,
-      shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 2,
-    },
-    sessionTime: { backgroundColor: colors.navy + '10', padding: 12, alignItems: 'center', justifyContent: 'center', minWidth: 60 },
-    sessionTimeText: { fontSize: 13, fontWeight: '700', color: colors.navy },
-    sessionTimeSub: { fontSize: 11, color: colors.mutedForeground },
-    sessionInfo: { flex: 1, padding: 12 },
-    sessionCourse: { fontSize: 14, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
-    sessionMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textAlign: 'right' },
-    card: {
-      backgroundColor: colors.card, borderRadius: 12, padding: 14,
-      marginHorizontal: 16, marginBottom: 8,
-      shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 2,
-    },
-    cardUnread: { borderLeftWidth: 3, borderLeftColor: colors.navy },
-    cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-    unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.navy },
-    priorityBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-    priorityText: { fontSize: 10, fontWeight: '700' },
-    cardTitle: { fontSize: 15, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
-    cardMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 4, textAlign: 'right' },
-    cardRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    chip: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-    chipText: { fontSize: 11, fontWeight: '600' },
-    emptyCard: { backgroundColor: colors.card, borderRadius: 12, padding: 16, marginHorizontal: 16, alignItems: 'center' },
-    emptyText: { color: colors.mutedForeground, fontSize: 14 },
-    moreBtn: {
-      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-      margin: 16, borderWidth: 1.5, borderColor: colors.navy, borderRadius: 12, padding: 14,
-    },
-    moreBtnText: { fontSize: 15, fontWeight: '600', color: colors.navy },
-  });
+  // Hero
+  hero: { paddingBottom: spacing.base },
+  heroInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
+    paddingBottom: spacing.md,
+  },
+  heroText: { alignItems: 'flex-end' },
+  heroGreet: { fontSize: fontSize.base, color: 'rgba(255,255,255,0.7)', fontWeight: fontWeight.medium },
+  heroName: { fontSize: fontSize['2xl'], color: '#fff', fontWeight: fontWeight.bold },
+  notifBtn: { position: 'relative', padding: 4 },
+  notifBadge: {
+    position: 'absolute', top: 0, right: 0,
+    width: 16, height: 16, borderRadius: 8,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  notifBadgeText: { fontSize: 9, fontWeight: fontWeight.bold, color: '#000' },
+  subPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginHorizontal: spacing.base,
+    marginBottom: spacing.base,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+  },
+  subPillText: { flex: 1, fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
+
+  // Sections
+  section: { paddingHorizontal: spacing.base, marginTop: spacing.lg, gap: spacing.sm },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.xs },
+  sectionAccent: { width: 3, height: 18, borderRadius: 2 },
+  sectionTitle: { fontSize: fontSize.lg, fontWeight: fontWeight.bold },
+
+  // Session card
+  sessionCard: { marginBottom: 0 },
+  sessionInner: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  timePill: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm, borderRadius: radius.md, alignItems: 'center', minWidth: 52 },
+  timeText: { fontSize: fontSize.sm, fontWeight: fontWeight.bold },
+  timeEnd: { fontSize: 10 },
+  sessionBody: { flex: 1 },
+  sessionName: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, textAlign: 'right' },
+  sessionMeta: { fontSize: fontSize.sm, marginTop: 2, textAlign: 'right' },
+
+  // Announcement card
+  annoCard: { gap: spacing.xs },
+  annoTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  unreadDot: { width: 7, height: 7, borderRadius: 4 },
+  annoTime: { fontSize: fontSize.xs, marginLeft: 'auto' },
+  annoTitle: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, textAlign: 'right' },
+
+  // Row card (assignments / exams)
+  rowCard: {},
+  rowInner: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  rowBody: { flex: 1 },
+  rowTitle: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, textAlign: 'right' },
+  rowMeta: { fontSize: fontSize.sm, marginTop: 2, textAlign: 'right' },
+
+  // More CTA
+  moreCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    margin: spacing.base,
+    marginTop: spacing.xl,
+    borderWidth: 1.5,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.base,
+  },
+  moreCtaText: { fontSize: fontSize.md, fontWeight: fontWeight.bold },
+});

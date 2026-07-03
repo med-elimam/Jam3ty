@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,6 +13,9 @@ import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
 import type { AuthUser } from '@/contexts/AuthContext';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').replace(/\/+$/, '');
 const LOGIN_ENDPOINT = `${BASE_URL}/api/auth/login`;
@@ -39,10 +40,7 @@ export default function LoginScreen() {
       const response = await fetch(LOGIN_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          password,
-        }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
 
       const rawText = await response.text();
@@ -65,73 +63,74 @@ export default function LoginScreen() {
         Alert.alert('خطأ', 'استجابة غير متوقعة من الخادم. يرجى المحاولة مجدداً.');
       }
     } catch (err: any) {
-      const msg = err?.message ?? String(err);
-      Alert.alert('خطأ في الاتصال', msg);
+      Alert.alert('خطأ في الاتصال', err?.message ?? String(err));
     } finally {
       setLoading(false);
     }
   };
 
-  const s = styles(colors);
-
   return (
-    <KeyboardAvoidingView style={s.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
-        {/* Header */}
-        <View style={s.header}>
-          <View style={s.logoBox}>
-            <Text style={s.logoText}>ج</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={s.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Logo */}
+        <View style={s.logoSection}>
+          <View style={[s.logoBox, { backgroundColor: colors.navy }]}>
+            <Text style={[s.logoLetter, { color: colors.gold }]}>ج</Text>
           </View>
-          <Text style={s.title}>جامعتي</Text>
-          <Text style={s.subtitle}>جامعتك في جيبك.</Text>
+          <Text style={[s.appName, { color: colors.navy }]}>جامعتي</Text>
+          <Text style={[s.tagline, { color: colors.mutedForeground }]}>جامعتك في جيبك.</Text>
         </View>
 
         {/* Form */}
         <View style={s.form}>
-          <Text style={s.label}>البريد الإلكتروني</Text>
-          <TextInput
-            style={s.input}
+          <Input
+            label="البريد الإلكتروني"
             value={email}
             onChangeText={setEmail}
             placeholder="example@email.com"
-            placeholderTextColor={colors.mutedForeground}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
-            textAlign="right"
+            containerStyle={s.field}
           />
 
-          <Text style={s.label}>كلمة المرور</Text>
-          <TextInput
-            style={s.input}
+          <Input
+            label="كلمة المرور"
             value={password}
             onChangeText={setPassword}
             placeholder="••••••••"
-            placeholderTextColor={colors.mutedForeground}
-            secureTextEntry
-            textAlign="right"
+            isPassword
+            containerStyle={s.field}
           />
 
-          <TouchableOpacity
-            style={[s.btn, loading && s.btnDisabled]}
+          <Button
+            label="تسجيل الدخول"
+            variant="primary"
+            size="lg"
+            loading={loading}
             onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={s.btnText}>تسجيل الدخول</Text>
-            )}
-          </TouchableOpacity>
+          />
+        </View>
 
-          <TouchableOpacity style={s.link} onPress={() => router.push('/(auth)/register')}>
-            <Text style={s.linkText}>
-              ليس لديك حساب؟ <Text style={s.linkBold}>إنشاء حساب</Text>
+        {/* Links */}
+        <View style={s.links}>
+          <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={s.linkRow}>
+            <Text style={[s.linkText, { color: colors.mutedForeground }]}>
+              ليس لديك حساب؟{' '}
+              <Text style={{ color: colors.navy, fontWeight: fontWeight.semibold }}>إنشاء حساب</Text>
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={s.skipBtn} onPress={loginAsGuest}>
-            <Text style={s.skipText}>تخطي في الوقت الحالي</Text>
+          <TouchableOpacity onPress={loginAsGuest} style={s.linkRow}>
+            <Text style={[s.skipText, { color: colors.mutedForeground }]}>
+              تخطي في الوقت الحالي
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -139,35 +138,30 @@ export default function LoginScreen() {
   );
 }
 
-const styles = (colors: ReturnType<typeof useColors>) =>
-  StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.background },
-    scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-    header: { alignItems: 'center', marginBottom: 32 },
-    logoBox: {
-      width: 80, height: 80, borderRadius: 24,
-      backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center',
-      marginBottom: 12, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 12, elevation: 6,
-    },
-    logoText: { fontSize: 40, color: colors.gold, fontWeight: '700' },
-    title: { fontSize: 28, fontWeight: '700', color: colors.navy, letterSpacing: 0.5 },
-    subtitle: { fontSize: 16, color: colors.mutedForeground, marginTop: 4 },
-    form: { gap: 8 },
-    label: { fontSize: 14, fontWeight: '600', color: colors.foreground, marginBottom: 4, textAlign: 'right' },
-    input: {
-      borderWidth: 1.5, borderColor: colors.border, borderRadius: 12,
-      paddingHorizontal: 16, paddingVertical: 14, fontSize: 16,
-      color: colors.foreground, backgroundColor: colors.card, marginBottom: 12,
-    },
-    btn: {
-      backgroundColor: colors.navy, borderRadius: 12,
-      paddingVertical: 16, alignItems: 'center', marginTop: 8,
-    },
-    btnDisabled: { opacity: 0.6 },
-    btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-    link: { alignItems: 'center', paddingVertical: 16 },
-    linkText: { color: colors.mutedForeground, fontSize: 14 },
-    linkBold: { color: colors.navy, fontWeight: '600' },
-    skipBtn: { alignItems: 'center', paddingVertical: 12 },
-    skipText: { color: colors.mutedForeground, fontSize: 13, opacity: 0.7 },
-  });
+const s = StyleSheet.create({
+  scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl, gap: spacing.xl },
+  logoSection: { alignItems: 'center', gap: spacing.sm },
+  logoBox: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  logoLetter: { fontSize: 44, fontWeight: fontWeight.bold },
+  appName: { fontSize: fontSize['3xl'], fontWeight: fontWeight.bold, letterSpacing: 0.5 },
+  tagline: { fontSize: fontSize.md },
+
+  form: { gap: spacing.md },
+  field: { gap: spacing.xs },
+
+  links: { alignItems: 'center', gap: spacing.base },
+  linkRow: { paddingVertical: spacing.xs },
+  linkText: { fontSize: fontSize.base, textAlign: 'center' },
+  skipText: { fontSize: fontSize.sm, opacity: 0.7 },
+});

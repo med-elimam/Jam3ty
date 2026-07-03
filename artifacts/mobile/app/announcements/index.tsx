@@ -1,10 +1,13 @@
 import React from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useListAnnouncements, useMarkAnnouncementRead } from '@workspace/api-client-react';
 import { getListAnnouncementsQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Feather } from '@expo/vector-icons';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { spacing, fontSize, fontWeight } from '@/constants/theme';
 
 function timeAgo(date: string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
@@ -13,46 +16,59 @@ function timeAgo(date: string) {
   return `${Math.floor(diff / 86400)}ي`;
 }
 
-const PRIORITY_COLORS: Record<string, string> = { urgent: '#EF4444', high: '#EF4444', important: '#F59E0B', medium: '#F59E0B', low: '#10B981', normal: '#6B7280' };
 const PRIORITY_LABELS: Record<string, string> = { urgent: 'عاجل', high: 'مهم', important: 'مهم', medium: 'متوسط', low: 'عادي', normal: 'عادي' };
+const PRIORITY_COLOR: Record<string, 'danger' | 'warning' | 'muted'> = { urgent: 'danger', high: 'danger', important: 'warning', medium: 'warning', low: 'muted', normal: 'muted' };
 
 export default function AnnouncementsScreen() {
   const colors = useColors();
   const qc = useQueryClient();
   const { data, isLoading, refetch, isRefetching } = useListAnnouncements();
-  const markRead = useMarkAnnouncementRead({ mutation: { onSuccess: () => qc.invalidateQueries({ queryKey: getListAnnouncementsQueryKey() }) } });
+  const markRead = useMarkAnnouncementRead({
+    mutation: { onSuccess: () => qc.invalidateQueries({ queryKey: getListAnnouncementsQueryKey() }) },
+  });
 
   const announcements: any[] = (data as any)?.data ?? [];
-  const s = styles(colors);
 
   return (
-    <View style={s.root}>
-      {isLoading ? <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} /> : (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {isLoading ? (
+        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+      ) : (
         <FlatList
           data={announcements}
           keyExtractor={(a: any) => a.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-          ListEmptyComponent={<View style={s.empty}><Feather name="bell-off" size={48} color={colors.border} /><Text style={s.emptyText}>لا توجد إعلانات حاليًا</Text></View>}
+          contentContainerStyle={s.list}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          ListEmptyComponent={
+            <EmptyState
+              icon="bell"
+              title="لا توجد إعلانات حاليًا"
+              body="ستظهر هنا إعلانات الجامعة والقسم والمواد."
+            />
+          }
           renderItem={({ item }: { item: any }) => (
-            <TouchableOpacity style={[s.card, !item.isRead && s.cardUnread]} onPress={() => !item.isRead && markRead.mutate({ announcementId: item.id })}>
+            <Card
+              onPress={() => !item.isRead && markRead.mutate({ announcementId: item.id })}
+              accent={!item.isRead ? colors.navy : undefined}
+              style={s.card}
+            >
               <View style={s.cardTop}>
-                <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-                  {!item.isRead && <View style={s.dot} />}
+                <View style={s.badgeRow}>
+                  {!item.isRead && <View style={[s.dot, { backgroundColor: colors.navy }]} />}
                   {item.priority && item.priority !== 'normal' && (
-                    <View style={[s.priority, { backgroundColor: (PRIORITY_COLORS[item.priority] ?? '#6B7280') + '20' }]}>
-                      <Text style={[s.priorityText, { color: PRIORITY_COLORS[item.priority] ?? '#6B7280' }]}>
-                        {PRIORITY_LABELS[item.priority] ?? item.priority}
-                      </Text>
-                    </View>
+                    <Badge label={PRIORITY_LABELS[item.priority] ?? item.priority} color={PRIORITY_COLOR[item.priority] ?? 'muted'} />
                   )}
                 </View>
-                <Text style={s.time}>{timeAgo(item.createdAt)}</Text>
+                <Text style={[s.time, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt)}</Text>
               </View>
-              <Text style={s.title} numberOfLines={3}>{item.titleAr || item.title}</Text>
-              <Text style={s.content} numberOfLines={3}>{item.contentAr || item.content}</Text>
-              <Text style={s.author}>{item.createdByName}</Text>
-            </TouchableOpacity>
+              <Text style={[s.title, { color: colors.foreground }]} numberOfLines={3}>
+                {item.titleAr || item.title}
+              </Text>
+              <Text style={[s.body, { color: colors.mutedForeground }]} numberOfLines={3}>
+                {item.contentAr || item.content}
+              </Text>
+              <Text style={[s.author, { color: colors.mutedForeground }]}>{item.createdByName}</Text>
+            </Card>
           )}
         />
       )}
@@ -60,19 +76,14 @@ export default function AnnouncementsScreen() {
   );
 }
 
-const styles = (colors: ReturnType<typeof useColors>) =>
-  StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.background },
-    card: { backgroundColor: colors.card, borderRadius: 12, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
-    cardUnread: { borderLeftWidth: 3, borderLeftColor: colors.navy },
-    cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.navy },
-    priority: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-    priorityText: { fontSize: 9, fontWeight: '700' },
-    time: { fontSize: 11, color: colors.mutedForeground },
-    title: { fontSize: 15, fontWeight: '700', color: colors.foreground, marginBottom: 6, textAlign: 'right' },
-    content: { fontSize: 13, color: colors.mutedForeground, lineHeight: 20, textAlign: 'right' },
-    author: { fontSize: 11, color: colors.mutedForeground, marginTop: 8, textAlign: 'right' },
-    empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
-    emptyText: { fontSize: 15, color: colors.mutedForeground },
-  });
+const s = StyleSheet.create({
+  list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
+  card: { gap: spacing.sm },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  dot: { width: 7, height: 7, borderRadius: 4 },
+  time: { fontSize: fontSize.xs },
+  title: { fontSize: fontSize.md, fontWeight: fontWeight.bold, textAlign: 'right' },
+  body: { fontSize: fontSize.sm, lineHeight: fontSize.sm * 1.6, textAlign: 'right' },
+  author: { fontSize: fontSize.xs, textAlign: 'right' },
+});

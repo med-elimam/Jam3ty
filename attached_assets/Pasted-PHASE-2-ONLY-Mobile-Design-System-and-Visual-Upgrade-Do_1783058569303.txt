@@ -1,0 +1,262 @@
+PHASE 2 ONLY — Mobile Design System and Visual Upgrade.
+
+Do not work on backend.
+Do not change database schema.
+Do not change auth logic.
+Do not change API client logic.
+Do not add new modules.
+Do not work on admin dashboard.
+Do not touch payments yet.
+Do not rename technical package IDs.
+Do not break navigation or working registration/login.
+
+Current state:
+Phase 1 Arabic language cleanup is done.
+The app works, but the visual design is still weak and does not feel like a commercial product.
+
+Goal:
+Create a clean, modern, premium mobile design system for the Jamiati app.
+
+Brand:
+- Arabic app name: جامعتي
+- Latin: Jamiati
+- Subscription: جامعتي بلس / Jamiati Plus
+- Tagline: جامعتك في جيبك
+
+Design direction:
+- Professional university student app
+- Modern, clean, premium
+- Not childish
+- Not generic
+- Not overloaded
+- Arabic-first
+- Mobile-first
+- Suitable for Mauritanian university students
+- Must feel like a real commercial product, not a hackathon prototype
+
+Main visual improvements required:
+
+1. Create a centralized theme system
+Create or clean a shared theme file containing:
+- colors
+- spacing
+- radius
+- typography
+- shadows/elevation
+- card styles
+- button styles
+- input styles
+- header styles
+- badge styles
+
+Do not hardcode random colors in every screen.
+
+Suggested palette:
+- Primary: deep academic blue
+- Secondary: lighter blue
+- Background: very dark navy or clean off-white depending on current theme
+- Card background: slightly elevated navy card
+- Accent/Plus: warm gold
+- Danger: red
+- Success: green
+- Text primary: high contrast
+- Text secondary: muted but readable
+- Border: subtle blue/gray
+
+2. Improve typography
+- Use consistent font sizes.
+- Fix oversized or awkward titles.
+- Arabic text must be readable.
+- Section titles must be strong but not huge.
+- Body text must not look faded.
+- Empty state text must be readable.
+
+3. Improve headers
+All major screens should have clean headers:
+- الرئيسية
+- المواد
+- الجدول
+- المجتمع
+- الملف الشخصي
+- المزيد
+- الإعدادات
+- الاشتراك
+
+Headers should look consistent.
+Avoid huge empty top spaces.
+Respect iPhone safe area.
+
+4. Improve bottom navigation
+Make bottom tabs feel polished:
+- Clear active state
+- Consistent icon sizes
+- Arabic labels
+- Better spacing
+- No cramped layout
+- No visual clutter
+
+Tabs:
+- الرئيسية
+- المواد
+- الجدول
+- المجتمع
+- الملف الشخصي
+
+5. Improve cards
+Create reusable card styling:
+- Rounded corners
+- Consistent padding
+- Subtle borders
+- Good contrast
+- Pressed state if practical
+
+Apply to:
+- Home sections
+- Profile sections
+- More module cards
+- Subscription card
+- Settings rows
+- Course cards
+- Empty state cards
+
+6. Improve buttons
+Create consistent button variants:
+- primary
+- secondary
+- outline
+- ghost
+- danger
+- plus/gold
+
+Fix:
+- disabled button appearance
+- large button padding
+- text alignment
+- loading state if already present
+
+7. Improve forms
+Apply polished form styling to:
+- login
+- register
+- onboarding
+- settings inputs if any
+
+Inputs should have:
+- readable placeholder
+- proper RTL text alignment for Arabic
+- good borders
+- focus state if practical
+- error text style
+
+8. Improve empty states
+Current empty screens feel dead.
+Create attractive empty states with:
+- icon
+- Arabic title
+- short helpful text
+- optional action button where useful
+
+Examples:
+Courses:
+Title: لا توجد مواد بعد
+Text: ستظهر هنا موادك بعد اختيار الجامعة والقسم والسنة.
+
+Timetable:
+Title: لا توجد محاضرات اليوم
+Text: عندما يتم إضافة جدولك ستظهر محاضراتك هنا.
+
+Community:
+Title: لا توجد منشورات بعد
+Text: كن أول من يطرح سؤالًا أو يشارك معلومة مع زملائك.
+
+Announcements:
+Title: لا توجد إعلانات حاليًا
+Text: ستظهر هنا إعلانات الجامعة والقسم والمواد.
+
+9. Improve More Modules screen
+The current grid has text wrapping issues.
+Fix:
+- No broken words
+- Arabic labels centered correctly
+- Card sizes consistent
+- Icons clear
+- Spacing balanced
+- Screen title not hidden behind status bar
+- Use 2-column grid if 3-column causes cramped Arabic text
+
+Modules:
+- الملفات
+- الإعلانات
+- الواجبات
+- الامتحانات
+- الفعاليات
+- النوادي
+- الفرص
+- المساعد الذكي
+- الاشتراك
+
+10. Improve Profile screen
+Profile must look commercial:
+- Better profile header
+- Better avatar
+- Clear student info
+- Subscription card
+- Better menu rows
+- Better sign out button
+- No awkward spacing
+- No low-contrast text
+
+11. Improve Home screen
+Home should feel like the product center:
+- Better greeting
+- Better Plus upgrade card
+- Better Today classes card
+- Better Announcements card
+- Better More Modules CTA
+- Better spacing and hierarchy
+
+Do not add new data requirements.
+Just improve presentation of existing data.
+
+12. Improve onboarding visual style
+Onboarding screens must look polished:
+- Better progress indicator
+- Better selection cards
+- Better Arabic titles
+- Better Next button
+- Better scroll behavior
+- No duplicated-looking broken layout
+- Selected state clear
+
+Do not fix seed duplicates in this phase unless there is a simple UI dedupe without schema changes.
+Data cleanup will be Phase 3.
+
+13. Consistency
+All screens must share the same visual language.
+No screen should look like it came from a different app.
+
+14. Technical rules
+- Prefer reusable components.
+- Do not duplicate style blocks everywhere if avoidable.
+- Keep TypeScript clean.
+- Run typecheck after changes.
+- Do not introduce new dependencies unless truly necessary.
+- Do not break Expo Go.
+
+15. Done criteria
+After this phase:
+- App looks visually cleaner and more premium.
+- No broken English word wrapping in Arabic screens.
+- More Modules screen is clean.
+- Home/Profile/Settings/Onboarding look coherent.
+- Empty states look intentional.
+- TypeScript check passes.
+- Expo Go still runs.
+- Registration/login still work.
+
+When finished, report:
+- Files changed
+- Reusable components created/updated
+- Theme changes
+- Screens visually improved
+- Any remaining visual issues

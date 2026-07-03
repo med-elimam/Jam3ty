@@ -19,8 +19,11 @@ import {
   useListGroups,
   useCompleteOnboarding,
 } from '@workspace/api-client-react';
+import { Button } from '@/components/ui/Button';
+import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
 const STEPS = ['University', 'Faculty', 'Department', 'Level', 'Language'] as const;
+const STEP_TITLES = ['اختر جامعتك', 'اختر الكلية أو المعهد', 'اختر القسم', 'اختر السنة الدراسية', 'اختر لغة التطبيق'];
 
 const LANGUAGES = [
   { code: 'ar', label: 'العربية', flag: '🇲🇷' },
@@ -29,14 +32,10 @@ const LANGUAGES = [
 ];
 
 interface Selection {
-  universityId: string;
-  universityName: string;
-  facultyId: string;
-  facultyName: string;
-  departmentId: string;
-  departmentName: string;
-  levelId: string;
-  levelName: string;
+  universityId?: string;
+  facultyId?: string;
+  departmentId?: string;
+  levelId?: string;
   groupId?: string;
   language: 'ar' | 'fr' | 'en';
 }
@@ -46,7 +45,7 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const { updateUser } = useAuth();
   const [step, setStep] = useState(0);
-  const [sel, setSel] = useState<Partial<Selection>>({ language: 'ar' });
+  const [sel, setSel] = useState<Selection>({ language: 'ar' });
 
   const universities = useListUniversities();
   const faculties = useListFaculties(sel.universityId ?? '', { query: { enabled: !!sel.universityId } } as any);
@@ -65,14 +64,12 @@ export default function OnboardingScreen() {
   });
 
   const canNext = () => {
-    switch (step) {
-      case 0: return !!sel.universityId;
-      case 1: return !!sel.facultyId;
-      case 2: return !!sel.departmentId;
-      case 3: return !!sel.levelId;
-      case 4: return !!sel.language;
-      default: return false;
-    }
+    if (step === 0) return !!sel.universityId;
+    if (step === 1) return !!sel.facultyId;
+    if (step === 2) return !!sel.departmentId;
+    if (step === 3) return !!sel.levelId;
+    if (step === 4) return !!sel.language;
+    return false;
   };
 
   const handleFinish = () => {
@@ -84,148 +81,234 @@ export default function OnboardingScreen() {
         departmentId: sel.departmentId,
         levelId: sel.levelId,
         groupId: sel.groupId,
-        language: sel.language ?? 'ar',
+        language: sel.language,
       },
     });
   };
 
-  const getStepData = () => {
+  type StepData = {
+    items: any[];
+    isLoading: boolean;
+    field: keyof Selection | 'language';
+    getId: (i: any) => string;
+    getLabel: (i: any) => string;
+  };
+
+  const getStepData = (): StepData => {
     switch (step) {
-      case 0: return { items: universities.data?.data ?? [], isLoading: universities.isLoading, field: 'universityId', getLabel: (i: any) => `${i.nameAr || i.name}` };
-      case 1: return { items: faculties.data?.data ?? [], isLoading: faculties.isLoading, field: 'facultyId', getLabel: (i: any) => `${i.nameAr || i.name}` };
-      case 2: return { items: departments.data?.data ?? [], isLoading: departments.isLoading, field: 'departmentId', getLabel: (i: any) => `${i.nameAr || i.name}` };
-      case 3: return { items: [...(levels.data?.data ?? []), ...(groups.data?.data ?? [])], isLoading: levels.isLoading, field: 'levelId', getLabel: (i: any) => `${i.nameAr || i.name}` };
-      case 4: return { items: LANGUAGES, isLoading: false, field: 'language', getLabel: (i: any) => `${i.flag} ${i.label}` };
-      default: return { items: [], isLoading: false, field: '', getLabel: (_: any) => '' };
+      case 0: return { items: (universities.data as any)?.data ?? [], isLoading: universities.isLoading, field: 'universityId', getId: (i) => i.id, getLabel: (i) => i.nameAr || i.name };
+      case 1: return { items: (faculties.data as any)?.data ?? [], isLoading: faculties.isLoading, field: 'facultyId', getId: (i) => i.id, getLabel: (i) => i.nameAr || i.name };
+      case 2: return { items: (departments.data as any)?.data ?? [], isLoading: departments.isLoading, field: 'departmentId', getId: (i) => i.id, getLabel: (i) => i.nameAr || i.name };
+      case 3: return { items: (levels.data as any)?.data ?? [], isLoading: levels.isLoading, field: 'levelId', getId: (i) => i.id, getLabel: (i) => i.nameAr || i.name };
+      case 4: return { items: LANGUAGES, isLoading: false, field: 'language', getId: (i) => i.code, getLabel: (i) => `${i.flag}  ${i.label}` };
+      default: return { items: [], isLoading: false, field: 'universityId', getId: () => '', getLabel: () => '' };
     }
   };
 
-  const { items, isLoading, field, getLabel } = getStepData();
+  const { items, isLoading, field, getId, getLabel } = getStepData();
 
-  const s = styles(colors);
+  const getSelected = (): string | undefined => (sel as any)[field];
+
+  /** When a higher-level field changes, clear all dependent downstream fields. */
+  const selectField = (f: keyof Selection, value: string) => {
+    setSel((prev) => {
+      const next: Selection = { ...prev, [f]: value };
+      if (f === 'universityId') {
+        next.facultyId = undefined;
+        next.departmentId = undefined;
+        next.levelId = undefined;
+        next.groupId = undefined;
+      } else if (f === 'facultyId') {
+        next.departmentId = undefined;
+        next.levelId = undefined;
+        next.groupId = undefined;
+      } else if (f === 'departmentId') {
+        next.levelId = undefined;
+        next.groupId = undefined;
+      } else if (f === 'levelId') {
+        next.groupId = undefined;
+      }
+      return next;
+    });
+  };
+
+  const progressPct = ((step + 1) / STEPS.length) * 100;
 
   return (
-    <View style={s.root}>
-      {/* Progress */}
-      <View style={s.progress}>
-        {STEPS.map((_, i) => (
-          <View key={i} style={[s.dot, i <= step && s.dotActive]} />
-        ))}
+    <View style={[s.root, { backgroundColor: colors.background }]}>
+      {/* Progress bar */}
+      <View style={[s.progressTrack, { backgroundColor: colors.border }]}>
+        <View
+          style={[
+            s.progressFill,
+            { backgroundColor: colors.navy, width: `${progressPct}%` as any },
+          ]}
+        />
       </View>
 
-      <Text style={s.title}>{stepTitle(step)}</Text>
+      {/* Step info */}
+      <View style={s.stepInfo}>
+        <Text style={[s.stepCount, { color: colors.mutedForeground }]}>
+          {step + 1} / {STEPS.length}
+        </Text>
+        <Text style={[s.stepTitle, { color: colors.navy }]}>{STEP_TITLES[step]}</Text>
+      </View>
 
+      {/* Options list */}
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <View style={s.loader}>
+          <ActivityIndicator color={colors.navy} size="large" />
+        </View>
       ) : (
         <FlatList
-          data={step === 3 ? levels.data?.data ?? [] : items}
-          keyExtractor={(item: any) => item.id ?? item.code}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
-          renderItem={({ item }: { item: any }) => {
-            const isSelected = field === 'language'
-              ? sel.language === item.code
-              : (sel as any)[field] === item.id;
+          data={items}
+          keyExtractor={(item) => getId(item)}
+          contentContainerStyle={s.list}
+          ListEmptyComponent={
+            <Text style={[s.emptyText, { color: colors.mutedForeground }]}>
+              لا توجد خيارات متاحة
+            </Text>
+          }
+          renderItem={({ item }) => {
+            const id = getId(item);
+            const isSelected = getSelected() === id;
             return (
               <TouchableOpacity
-                style={[s.option, isSelected && s.optionSelected]}
-                onPress={() => {
-                  if (field === 'language') {
-                    setSel((p) => ({ ...p, language: item.code }));
-                  } else {
-                    setSel((p) => ({ ...p, [field]: item.id }));
-                  }
-                }}
+                activeOpacity={0.75}
+                style={[
+                  s.option,
+                  shadow.sm,
+                  {
+                    backgroundColor: isSelected ? colors.navy : colors.card,
+                    borderColor: isSelected ? colors.navy : colors.border,
+                    borderRadius: radius.lg,
+                  },
+                ]}
+                onPress={() => selectField(field as keyof Selection, id)}
               >
-                <Text style={[s.optionText, isSelected && s.optionTextSelected]}>
+                <Text
+                  style={[
+                    s.optionLabel,
+                    { color: isSelected ? '#fff' : colors.foreground },
+                  ]}
+                  numberOfLines={2}
+                >
                   {getLabel(item)}
                 </Text>
-                {isSelected && <Text style={s.check}>✓</Text>}
+                <View
+                  style={[
+                    s.radio,
+                    {
+                      borderColor: isSelected ? '#fff' : colors.border,
+                      backgroundColor: isSelected ? '#fff' : 'transparent',
+                    },
+                  ]}
+                >
+                  {isSelected && (
+                    <View style={[s.radioDot, { backgroundColor: colors.navy }]} />
+                  )}
+                </View>
               </TouchableOpacity>
             );
           }}
-          ListEmptyComponent={<Text style={s.empty}>لا توجد خيارات متاحة</Text>}
         />
       )}
 
-      {/* Groups on step 3 */}
-      {step === 3 && sel.levelId && (groups.data?.data ?? []).length > 0 && (
-        <View style={{ paddingHorizontal: 24, marginTop: 8 }}>
-          <Text style={s.groupLabel}>المجموعة (اختياري)</Text>
-          {(groups.data?.data ?? []).map((g: any) => (
-            <TouchableOpacity
-              key={g.id}
-              style={[s.option, sel.groupId === g.id && s.optionSelected]}
-              onPress={() => setSel((p) => ({ ...p, groupId: g.id }))}
-            >
-              <Text style={[s.optionText, sel.groupId === g.id && s.optionTextSelected]}>
-                {g.nameAr || g.name}
-              </Text>
-              {sel.groupId === g.id && <Text style={s.check}>✓</Text>}
-            </TouchableOpacity>
-          ))}
+      {/* Optional group selector on step 3 */}
+      {step === 3 && sel.levelId && (groups.data as any)?.data?.length > 0 && (
+        <View style={[s.groupSection, { borderTopColor: colors.border }]}>
+          <Text style={[s.groupTitle, { color: colors.mutedForeground }]}>المجموعة (اختياري)</Text>
+          <View style={s.groupRow}>
+            {((groups.data as any)?.data ?? []).map((g: any) => (
+              <TouchableOpacity
+                key={g.id}
+                style={[
+                  s.groupChip,
+                  {
+                    backgroundColor: sel.groupId === g.id ? colors.navy : colors.secondary,
+                    borderRadius: radius.full,
+                  },
+                ]}
+                onPress={() => setSel((p) => ({ ...p, groupId: g.id }))}
+              >
+                <Text style={{ color: sel.groupId === g.id ? '#fff' : colors.navy, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}>
+                  {g.nameAr || g.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       )}
 
       {/* Bottom actions */}
-      <View style={s.bottom}>
+      <View style={[s.bottom, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
         {step > 0 && (
-          <TouchableOpacity style={s.backBtn} onPress={() => setStep((p) => p - 1)}>
-            <Text style={s.backBtnText}>رجوع</Text>
-          </TouchableOpacity>
+          <Button
+            label="رجوع"
+            variant="outline"
+            size="md"
+            onPress={() => setStep((p) => p - 1)}
+            style={s.backBtn}
+          />
         )}
-        <TouchableOpacity
-          style={[s.nextBtn, (!canNext() || completeMutation.isPending) && s.btnDisabled]}
-          disabled={!canNext() || completeMutation.isPending}
+        <Button
+          label={step === STEPS.length - 1 ? 'إنهاء' : 'التالي'}
+          variant="primary"
+          size="lg"
+          disabled={!canNext()}
+          loading={completeMutation.isPending}
           onPress={() => {
             if (step < STEPS.length - 1) setStep((p) => p + 1);
             else handleFinish();
           }}
-        >
-          {completeMutation.isPending ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={s.nextBtnText}>{step === STEPS.length - 1 ? 'إنهاء' : 'التالي'}</Text>
-          )}
-        </TouchableOpacity>
+          style={s.nextBtn}
+        />
       </View>
     </View>
   );
 }
 
-function stepTitle(step: number) {
-  switch (step) {
-    case 0: return 'اختر جامعتك';
-    case 1: return 'اختر الكلية أو المعهد';
-    case 2: return 'اختر القسم';
-    case 3: return 'اختر السنة الدراسية';
-    case 4: return 'اختر لغة التطبيق';
-    default: return '';
-  }
-}
+const s = StyleSheet.create({
+  root: { flex: 1 },
 
-const styles = (colors: ReturnType<typeof useColors>) =>
-  StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.background, paddingTop: 60 },
-    progress: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },
-    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
-    dotActive: { backgroundColor: colors.navy, width: 24 },
-    title: { fontSize: 24, fontWeight: '700', color: colors.navy, textAlign: 'center', marginBottom: 24 },
-    option: {
-      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      backgroundColor: colors.card, borderRadius: 12, padding: 16, marginBottom: 8,
-      borderWidth: 1.5, borderColor: colors.border,
-    },
-    optionSelected: { borderColor: colors.navy, backgroundColor: colors.secondary },
-    optionText: { fontSize: 16, color: colors.foreground, flex: 1, textAlign: 'right' },
-    optionTextSelected: { color: colors.navy, fontWeight: '600' },
-    check: { fontSize: 18, color: colors.navy },
-    empty: { textAlign: 'center', color: colors.mutedForeground, marginTop: 40 },
-    groupLabel: { fontSize: 14, fontWeight: '600', color: colors.mutedForeground, marginBottom: 8, textAlign: 'right' },
-    bottom: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 24, flexDirection: 'row', gap: 12, backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },
-    backBtn: { flex: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
-    backBtnText: { fontSize: 16, fontWeight: '600', color: colors.foreground },
-    nextBtn: { flex: 2, backgroundColor: colors.navy, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
-    nextBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
-    btnDisabled: { opacity: 0.5 },
-  });
+  progressTrack: { height: 4, marginHorizontal: spacing.base, marginTop: spacing.xl, borderRadius: radius.full, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: radius.full },
+
+  stepInfo: { paddingHorizontal: spacing.base, paddingTop: spacing.lg, paddingBottom: spacing.sm, gap: spacing.xs },
+  stepCount: { fontSize: fontSize.xs, fontWeight: fontWeight.semibold, textAlign: 'right' },
+  stepTitle: { fontSize: fontSize.xl, fontWeight: fontWeight.bold, textAlign: 'right' },
+
+  loader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+
+  list: { paddingHorizontal: spacing.base, paddingBottom: 160, gap: spacing.sm },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.base,
+    borderWidth: 1.5,
+  },
+  optionLabel: { flex: 1, fontSize: fontSize.md, fontWeight: fontWeight.medium, textAlign: 'right' },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center', marginLeft: spacing.md },
+  radioDot: { width: 10, height: 10, borderRadius: 5 },
+
+  emptyText: { textAlign: 'center', marginTop: spacing['3xl'], fontSize: fontSize.md },
+
+  groupSection: { paddingHorizontal: spacing.base, paddingVertical: spacing.md, borderTopWidth: 1, gap: spacing.sm },
+  groupTitle: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold, textAlign: 'right' },
+  groupRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'flex-end' },
+  groupChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+
+  bottom: {
+    position: 'absolute',
+    bottom: 0, left: 0, right: 0,
+    padding: spacing.base,
+    paddingBottom: spacing.xl,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    borderTopWidth: 1,
+  },
+  backBtn: { flex: 1 },
+  nextBtn: { flex: 2 },
+});

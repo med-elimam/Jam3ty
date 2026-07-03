@@ -5,6 +5,19 @@ import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetProfile, useGetMySubscription } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
+import { Avatar } from '@/components/ui/Avatar';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
+
+type FeatherName = React.ComponentProps<typeof Feather>['name'];
+
+interface MenuItem {
+  icon: FeatherName;
+  label: string;
+  onPress: () => void;
+  badge?: string;
+}
 
 export default function ProfileScreen() {
   const colors = useColors();
@@ -17,110 +30,184 @@ export default function ProfileScreen() {
   const profile = (profileQuery.data as any)?.data;
   const sub = (subQuery.data as any)?.data;
 
-  const initials = (user?.fullName ?? 'U').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
-  const s = styles(colors);
-
-  const menuItems = [
-    { icon: 'bell', label: 'الإشعارات', onPress: () => router.push('/notifications' as any) },
-    { icon: 'star', label: 'الاشتراك', onPress: () => router.push('/subscription' as any), badge: sub ? undefined : 'ترقية' },
-    { icon: 'grid', label: 'المزيد', onPress: () => router.push('/more' as any) },
-    { icon: 'settings', label: 'الإعدادات', onPress: () => router.push('/settings' as any) },
+  const menuItems: MenuItem[] = [
+    { icon: 'bell',     label: 'الإشعارات',      onPress: () => router.push('/notifications' as any) },
+    { icon: 'star',     label: 'الاشتراك',        onPress: () => router.push('/subscription' as any),
+      badge: sub ? undefined : 'بلس' },
+    { icon: 'grid',     label: 'المزيد',           onPress: () => router.push('/more' as any) },
+    { icon: 'settings', label: 'الإعدادات',       onPress: () => router.push('/settings' as any) },
   ];
 
   if (profileQuery.isLoading) {
-    return <View style={[s.root, { alignItems: 'center', justifyContent: 'center' }]}><ActivityIndicator color={colors.navy} /></View>;
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color={colors.navy} />
+      </View>
+    );
   }
 
+  const fullName = profile?.fullName ?? user?.fullName ?? 'طالب';
+  const email = profile?.email ?? user?.email ?? '';
+  const department = profile?.profile?.department?.nameAr || profile?.profile?.department?.name;
+  const level = profile?.profile?.level?.nameAr || profile?.profile?.level?.name;
+  const university = profile?.profile?.university?.nameAr || profile?.profile?.university?.name;
+
   return (
-    <ScrollView style={s.root} contentContainerStyle={s.content}>
-      {/* Hero */}
-      <View style={s.hero}>
-        <View style={s.avatar}>
-          <Text style={s.avatarText}>{initials}</Text>
-        </View>
-        <Text style={s.name}>{profile?.fullName ?? user?.fullName}</Text>
-        <Text style={s.email}>{profile?.email ?? user?.email}</Text>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={s.content}
+    >
+      {/* ── Hero ── */}
+      <View style={[s.hero, { backgroundColor: colors.navy }]}>
+        <Avatar
+          name={fullName}
+          size={88}
+          bg={colors.gold + '22'}
+          fg={colors.gold}
+          style={[s.avatar, { borderColor: colors.gold }]}
+        />
+        <Text style={s.heroName}>{fullName}</Text>
+        <Text style={s.heroEmail}>{email}</Text>
 
-        {/* Academic info */}
-        {profile?.profile?.department && (
+        {(department || level) && (
           <View style={s.acadRow}>
-            <Text style={s.acadText}>{profile.profile.department?.nameAr || profile.profile.department?.name}</Text>
-            {profile.profile.level && <Text style={s.acadDot}>·</Text>}
-            {profile.profile.level && <Text style={s.acadText}>{profile.profile.level?.nameAr || profile.profile.level?.name}</Text>}
+            {department && <Text style={s.acadChip}>{department}</Text>}
+            {level && <Text style={s.acadChip}>{level}</Text>}
           </View>
         )}
-        {profile?.profile?.university && (
-          <Text style={s.university}>{profile.profile.university?.nameAr || profile.profile.university?.name}</Text>
-        )}
+        {university && <Text style={s.heroUniv}>{university}</Text>}
       </View>
 
-      {/* Subscription card */}
-      {sub ? (
-        <View style={[s.subCard, { backgroundColor: colors.success + '15', borderColor: colors.success + '30' }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Feather name="check-circle" size={18} color={colors.success} />
-            <Text style={[s.subPlan, { color: colors.success }]}>{sub.planName}</Text>
-          </View>
-          <Text style={s.subMeta}>{sub.daysRemaining} يوم متبقٍ</Text>
-        </View>
-      ) : (
-        <TouchableOpacity style={[s.subCard, { backgroundColor: colors.gold + '15', borderColor: colors.gold + '40' }]} onPress={() => router.push('/subscription' as any)}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Feather name="star" size={18} color={colors.gold} />
-            <Text style={[s.subPlan, { color: colors.gold }]}>الخطة المجانية</Text>
-          </View>
-          <Text style={[s.subMeta, { color: colors.gold }]}>اضغط للترقية</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Menu */}
-      <View style={s.menuCard}>
-        {menuItems.map((item, idx) => (
-          <TouchableOpacity key={item.label} style={[s.menuItem, idx < menuItems.length - 1 && s.menuItemBorder]} onPress={item.onPress}>
-            <View style={s.menuLeft}>
-              <Feather name={item.icon as any} size={20} color={colors.navy} />
-              <Text style={s.menuLabel}>{item.label}</Text>
+      <View style={s.body}>
+        {/* ── Subscription card ── */}
+        {sub ? (
+          <Card style={[s.subCard, { borderColor: colors.success + '40' }]}>
+            <View style={s.subRow}>
+              <View>
+                <Text style={[s.subPlan, { color: colors.success }]}>{sub.planName}</Text>
+                <Text style={[s.subMeta, { color: colors.mutedForeground }]}>
+                  {sub.daysRemaining} يوم متبقٍ
+                </Text>
+              </View>
+              <View style={[s.subIcon, { backgroundColor: colors.success + '15' }]}>
+                <Feather name="check-circle" size={22} color={colors.success} />
+              </View>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              {item.badge && <View style={s.badgeChip}><Text style={s.badgeChipText}>{item.badge}</Text></View>}
-              <Feather name="chevron-left" size={18} color={colors.mutedForeground} />
-            </View>
+          </Card>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push('/subscription' as any)}
+          >
+            <Card style={[s.subCard, { borderColor: colors.gold + '50' }]}>
+              <View style={s.subRow}>
+                <View>
+                  <Text style={[s.subPlan, { color: colors.gold }]}>الخطة المجانية</Text>
+                  <Text style={[s.subMeta, { color: colors.mutedForeground }]}>
+                    اضغط للترقية إلى جامعتي بلس
+                  </Text>
+                </View>
+                <View style={[s.subIcon, { backgroundColor: colors.gold + '15' }]}>
+                  <Feather name="star" size={22} color={colors.gold} />
+                </View>
+              </View>
+            </Card>
           </TouchableOpacity>
-        ))}
-      </View>
+        )}
 
-      {/* Logout */}
-      <TouchableOpacity style={s.logoutBtn} onPress={() => logout()}>
-        <Feather name="log-out" size={18} color={colors.destructive} />
-        <Text style={s.logoutText}>تسجيل الخروج</Text>
-      </TouchableOpacity>
+        {/* ── Menu ── */}
+        <Card style={s.menuCard}>
+          {menuItems.map((item, idx) => (
+            <TouchableOpacity
+              key={item.label}
+              activeOpacity={0.7}
+              style={[
+                s.menuRow,
+                idx < menuItems.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border },
+              ]}
+              onPress={item.onPress}
+            >
+              <Feather name="chevron-left" size={18} color={colors.mutedForeground} />
+              {item.badge && (
+                <View style={[s.menuBadge, { backgroundColor: colors.gold }]}>
+                  <Text style={s.menuBadgeText}>{item.badge}</Text>
+                </View>
+              )}
+              <Text style={[s.menuLabel, { color: colors.foreground }]}>{item.label}</Text>
+              <View style={[s.menuIconBox, { backgroundColor: colors.navy + '10' }]}>
+                <Feather name={item.icon} size={18} color={colors.navy} />
+              </View>
+            </TouchableOpacity>
+          ))}
+        </Card>
+
+        {/* ── Sign out ── */}
+        <Button
+          label="تسجيل الخروج"
+          variant="danger"
+          onPress={() => logout()}
+          icon={<Feather name="log-out" size={16} color="#fff" />}
+        />
+      </View>
     </ScrollView>
   );
 }
 
-const styles = (colors: ReturnType<typeof useColors>) =>
-  StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.background },
-    content: { paddingBottom: 120 },
-    hero: { backgroundColor: colors.navy, paddingTop: 32, paddingBottom: 28, alignItems: 'center', gap: 6 },
-    avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.gold + '30', alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: colors.gold, marginBottom: 6 },
-    avatarText: { fontSize: 28, fontWeight: '700', color: colors.gold },
-    name: { fontSize: 22, fontWeight: '700', color: '#fff' },
-    email: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
-    acadRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
-    acadDot: { color: 'rgba(255,255,255,0.5)' },
-    acadText: { fontSize: 13, color: 'rgba(255,255,255,0.85)' },
-    university: { fontSize: 12, color: 'rgba(255,255,255,0.6)' },
-    subCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', margin: 16, borderRadius: 12, padding: 14, borderWidth: 1 },
-    subPlan: { fontSize: 15, fontWeight: '700' },
-    subMeta: { fontSize: 13, color: colors.mutedForeground },
-    menuCard: { backgroundColor: colors.card, borderRadius: 12, marginHorizontal: 16, marginBottom: 12, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
-    menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
-    menuItemBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-    menuLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    menuLabel: { fontSize: 15, color: colors.foreground, fontWeight: '500' },
-    badgeChip: { backgroundColor: colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
-    badgeChipText: { fontSize: 11, fontWeight: '700', color: '#fff' },
-    logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginHorizontal: 16, padding: 16, borderRadius: 12, borderWidth: 1.5, borderColor: colors.destructive + '50' },
-    logoutText: { fontSize: 15, fontWeight: '600', color: colors.destructive },
-  });
+const s = StyleSheet.create({
+  content: { paddingBottom: 120 },
+
+  // Hero
+  hero: {
+    paddingTop: spacing.xl,
+    paddingBottom: spacing['2xl'],
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  avatar: { borderWidth: 3, marginBottom: spacing.sm },
+  heroName: { fontSize: fontSize.xl, fontWeight: fontWeight.bold, color: '#fff' },
+  heroEmail: { fontSize: fontSize.sm, color: 'rgba(255,255,255,0.65)' },
+  acadRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs, flexWrap: 'wrap', justifyContent: 'center' },
+  acadChip: {
+    fontSize: fontSize.xs,
+    color: 'rgba(255,255,255,0.85)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radius.full,
+  },
+  heroUniv: { fontSize: fontSize.xs, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
+
+  // Body
+  body: { padding: spacing.base, gap: spacing.md },
+
+  // Subscription card
+  subCard: { borderWidth: 1.5 },
+  subRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  subPlan: { fontSize: fontSize.lg, fontWeight: fontWeight.bold },
+  subMeta: { fontSize: fontSize.sm, marginTop: 2 },
+  subIcon: { width: 44, height: 44, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
+
+  // Menu
+  menuCard: { padding: 0, overflow: 'hidden' },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.base,
+  },
+  menuIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuLabel: { flex: 1, fontSize: fontSize.md, fontWeight: fontWeight.medium, textAlign: 'right' },
+  menuBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+  },
+  menuBadgeText: { fontSize: fontSize.xs, fontWeight: fontWeight.bold, color: '#fff' },
+});

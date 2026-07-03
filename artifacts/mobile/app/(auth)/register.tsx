@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,6 +13,9 @@ import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
 import type { AuthUser } from '@/contexts/AuthContext';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').replace(/\/+$/, '');
 const REGISTER_ENDPOINT = `${BASE_URL}/api/auth/register`;
@@ -71,108 +72,87 @@ export default function RegisterScreen() {
         Alert.alert('خطأ', 'استجابة غير متوقعة من الخادم. يرجى المحاولة مجدداً.');
       }
     } catch (err: any) {
-      const msg = err?.message ?? String(err);
-      Alert.alert('خطأ في الاتصال', msg);
+      Alert.alert('خطأ في الاتصال', err?.message ?? String(err));
     } finally {
       setLoading(false);
     }
   };
 
-  const s = styles(colors);
-
   return (
-    <KeyboardAvoidingView style={s.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={s.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Header */}
         <View style={s.header}>
-          <TouchableOpacity onPress={() => router.back()} style={s.back}>
-            <Text style={s.backText}>رجوع →</Text>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={[s.back, { color: colors.navy }]}>→ رجوع</Text>
           </TouchableOpacity>
-          <Text style={s.title}>إنشاء حساب</Text>
-          <Text style={s.subtitle}>انضم إلى جامعتي</Text>
+          <Text style={[s.title, { color: colors.navy }]}>إنشاء حساب</Text>
+          <Text style={[s.subtitle, { color: colors.mutedForeground }]}>انضم إلى جامعتي</Text>
         </View>
 
+        {/* Form */}
         <View style={s.form}>
-          <Text style={s.label}>الاسم الكامل</Text>
-          <TextInput
-            style={s.input}
+          <Input
+            label="الاسم الكامل"
             value={fullName}
             onChangeText={setFullName}
             placeholder="أحمد ولد محمد"
-            placeholderTextColor={colors.mutedForeground}
             autoCapitalize="words"
-            textAlign="right"
           />
 
-          <Text style={s.label}>البريد الإلكتروني</Text>
-          <TextInput
-            style={s.input}
+          <Input
+            label="البريد الإلكتروني"
             value={email}
             onChangeText={setEmail}
             placeholder="example@email.com"
-            placeholderTextColor={colors.mutedForeground}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
-            textAlign="right"
           />
 
-          <Text style={s.label}>كلمة المرور</Text>
-          <TextInput
-            style={s.input}
+          <Input
+            label="كلمة المرور"
             value={password}
             onChangeText={setPassword}
             placeholder="على الأقل 8 أحرف"
-            placeholderTextColor={colors.mutedForeground}
-            secureTextEntry
-            textAlign="right"
+            isPassword
           />
 
-          <TouchableOpacity
-            style={[s.btn, loading && s.btnDisabled]}
+          <Button
+            label="إنشاء الحساب"
+            variant="primary"
+            size="lg"
+            loading={loading}
             onPress={handleRegister}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={s.btnText}>إنشاء الحساب</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity style={s.link} onPress={() => router.back()}>
-            <Text style={s.linkText}>
-              لديك حساب؟ <Text style={s.linkBold}>تسجيل الدخول</Text>
-            </Text>
-          </TouchableOpacity>
+            style={{ marginTop: spacing.sm }}
+          />
         </View>
+
+        {/* Link */}
+        <TouchableOpacity onPress={() => router.back()} style={s.linkRow}>
+          <Text style={[s.linkText, { color: colors.mutedForeground }]}>
+            لديك حساب؟{' '}
+            <Text style={{ color: colors.navy, fontWeight: fontWeight.semibold }}>تسجيل الدخول</Text>
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = (colors: ReturnType<typeof useColors>) =>
-  StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.background },
-    scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-    header: { marginBottom: 24 },
-    back: { marginBottom: 16 },
-    backText: { color: colors.navy, fontSize: 16, fontWeight: '600' },
-    title: { fontSize: 28, fontWeight: '700', color: colors.navy, textAlign: 'right' },
-    subtitle: { fontSize: 16, color: colors.mutedForeground, marginTop: 4, textAlign: 'right' },
-    form: { gap: 4 },
-    label: { fontSize: 14, fontWeight: '600', color: colors.foreground, marginBottom: 4, textAlign: 'right' },
-    input: {
-      borderWidth: 1.5, borderColor: colors.border, borderRadius: 12,
-      paddingHorizontal: 16, paddingVertical: 14, fontSize: 16,
-      color: colors.foreground, backgroundColor: colors.card, marginBottom: 12,
-    },
-    btn: {
-      backgroundColor: colors.navy, borderRadius: 12,
-      paddingVertical: 16, alignItems: 'center', marginTop: 8,
-    },
-    btnDisabled: { opacity: 0.6 },
-    btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-    link: { alignItems: 'center', paddingVertical: 16 },
-    linkText: { color: colors.mutedForeground, fontSize: 14 },
-    linkBold: { color: colors.navy, fontWeight: '600' },
-  });
+const s = StyleSheet.create({
+  scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl, gap: spacing.xl },
+  header: { gap: spacing.sm },
+  back: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, textAlign: 'right' },
+  title: { fontSize: fontSize['3xl'], fontWeight: fontWeight.bold, textAlign: 'right' },
+  subtitle: { fontSize: fontSize.md, textAlign: 'right' },
+  form: { gap: spacing.md },
+  linkRow: { alignItems: 'center', paddingVertical: spacing.xs },
+  linkText: { fontSize: fontSize.base, textAlign: 'center' },
+});

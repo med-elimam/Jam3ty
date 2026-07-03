@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useListAssignments, ListAssignmentsStatus } from '@workspace/api-client-react';
-import { Feather } from '@expo/vector-icons';
+import { Card } from '@/components/ui/Card';
+import { Badge, BadgeColor } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
-const STATUS_COLORS: Record<string, string> = { submitted: '#10B981', late: '#EF4444', pending: '#F59E0B', not_submitted: '#F59E0B', reviewed: '#6B7280' };
-const STATUS_LABELS: Record<string, string> = { submitted: 'مُسلَّم', late: 'متأخر', pending: 'معلّق', not_submitted: 'معلّق', reviewed: 'مراجَع' };
+const STATUS_LABELS: Record<string, string> = {
+  submitted: 'مُسلَّم', late: 'متأخر', pending: 'معلّق', not_submitted: 'معلّق', reviewed: 'مراجَع',
+};
+const STATUS_COLOR: Record<string, BadgeColor> = {
+  submitted: 'success', late: 'danger', pending: 'warning', not_submitted: 'warning', reviewed: 'muted',
+};
 
 function daysLeft(deadline: string) {
   const d = Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000);
@@ -16,85 +22,83 @@ function daysLeft(deadline: string) {
   return `${d} أيام متبقية`;
 }
 
+const FILTERS: { label: string; value: ListAssignmentsStatus | undefined }[] = [
+  { label: 'الكل', value: undefined },
+  { label: 'معلّق', value: ListAssignmentsStatus.pending },
+  { label: 'مُسلَّم', value: ListAssignmentsStatus.submitted },
+  { label: 'متأخر', value: ListAssignmentsStatus.late },
+];
+
 export default function AssignmentsScreen() {
   const colors = useColors();
-  const router = useRouter();
   const [filter, setFilter] = useState<ListAssignmentsStatus | undefined>(undefined);
   const { data, isLoading, refetch, isRefetching } = useListAssignments({ status: filter });
-
   const assignments: any[] = (data as any)?.data ?? [];
-  const s = styles(colors);
-
-  const filters: { label: string; value: ListAssignmentsStatus | undefined }[] = [
-    { label: 'الكل', value: undefined },
-    { label: 'معلّق', value: ListAssignmentsStatus.pending },
-    { label: 'مُسلَّم', value: ListAssignmentsStatus.submitted },
-    { label: 'متأخر', value: ListAssignmentsStatus.late },
-  ];
 
   return (
-    <View style={s.root}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Filter row */}
       <View style={s.filterRow}>
-        {filters.map((f) => (
-          <TouchableOpacity key={String(f.value)} style={[s.filter, filter === f.value && s.filterActive]} onPress={() => setFilter(f.value)}>
-            <Text style={[s.filterText, filter === f.value && s.filterTextActive]}>{f.label}</Text>
+        {FILTERS.map((f) => (
+          <TouchableOpacity
+            key={String(f.value ?? 'all')}
+            activeOpacity={0.75}
+            style={[
+              s.filterChip,
+              { backgroundColor: filter === f.value ? colors.navy : colors.card, borderColor: filter === f.value ? colors.navy : colors.border },
+            ]}
+            onPress={() => setFilter(f.value)}
+          >
+            <Text style={[s.filterLabel, { color: filter === f.value ? '#fff' : colors.mutedForeground }]}>{f.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
-      {isLoading ? <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} /> : (
+
+      {isLoading ? (
+        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+      ) : (
         <FlatList
           data={assignments}
           keyExtractor={(a: any) => a.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-          ListEmptyComponent={<View style={s.empty}><Feather name="clipboard" size={48} color={colors.border} /><Text style={s.emptyText}>لا توجد واجبات</Text></View>}
-          renderItem={({ item }: { item: any }) => {
-            const color = STATUS_COLORS[item.submissionStatus] ?? colors.mutedForeground;
-            return (
-              <View style={s.card}>
-                <View style={s.cardTop}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.cardTitle} numberOfLines={2}>{item.titleAr || item.title}</Text>
-                    <Text style={s.cardCourse}>{item.courseName}</Text>
-                  </View>
-                  <View style={[s.statusBadge, { backgroundColor: color + '20' }]}>
-                    <Text style={[s.statusText, { color }]}>{STATUS_LABELS[item.submissionStatus] ?? 'معلّق'}</Text>
-                  </View>
-                </View>
-                <View style={s.cardBottom}>
-                  <View style={s.deadlineRow}>
-                    <Feather name="clock" size={12} color={colors.mutedForeground} />
-                    <Text style={s.deadline}>{daysLeft(item.deadline)} · {new Date(item.deadline).toLocaleDateString('ar')}</Text>
-                  </View>
-                  {item.maxScore && <Text style={s.score}>{item.maxScore} نقطة</Text>}
+          contentContainerStyle={s.list}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          ListEmptyComponent={
+            <EmptyState icon="clipboard" title="لا توجد واجبات" body="ستظهر هنا الواجبات المطلوبة منك." />
+          }
+          renderItem={({ item }: { item: any }) => (
+            <Card style={s.card}>
+              <View style={s.cardTop}>
+                <Badge label={STATUS_LABELS[item.submissionStatus] ?? 'معلّق'} color={STATUS_COLOR[item.submissionStatus] ?? 'muted'} />
+                <View style={s.cardInfo}>
+                  <Text style={[s.cardTitle, { color: colors.foreground }]} numberOfLines={2}>
+                    {item.titleAr || item.title}
+                  </Text>
+                  <Text style={[s.cardCourse, { color: colors.mutedForeground }]}>{item.courseName}</Text>
                 </View>
               </View>
-            );
-          }}
+              <View style={s.cardBottom}>
+                <Text style={[s.daysLeft, { color: colors.mutedForeground }]}>{daysLeft(item.deadline)}</Text>
+                {item.maxScore && <Text style={[s.score, { color: colors.navy }]}>{item.maxScore} نقطة</Text>}
+              </View>
+            </Card>
+          )}
         />
       )}
     </View>
   );
 }
 
-const styles = (colors: ReturnType<typeof useColors>) =>
-  StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.background },
-    filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
-    filter: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
-    filterActive: { backgroundColor: colors.navy, borderColor: colors.navy },
-    filterText: { fontSize: 13, fontWeight: '600', color: colors.mutedForeground },
-    filterTextActive: { color: '#fff' },
-    card: { backgroundColor: colors.card, borderRadius: 12, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
-    cardTop: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-    cardTitle: { fontSize: 15, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
-    cardCourse: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textAlign: 'right' },
-    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, alignSelf: 'flex-start' },
-    statusText: { fontSize: 11, fontWeight: '700' },
-    cardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    deadlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    deadline: { fontSize: 12, color: colors.mutedForeground },
-    score: { fontSize: 12, fontWeight: '600', color: colors.navy },
-    empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
-    emptyText: { fontSize: 15, color: colors.mutedForeground },
-  });
+const s = StyleSheet.create({
+  filterRow: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.base, paddingVertical: spacing.md },
+  filterChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.full, borderWidth: 1.5 },
+  filterLabel: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
+  list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
+  card: { gap: spacing.sm },
+  cardTop: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  cardInfo: { flex: 1 },
+  cardTitle: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, textAlign: 'right' },
+  cardCourse: { fontSize: fontSize.sm, marginTop: 2, textAlign: 'right' },
+  cardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  daysLeft: { fontSize: fontSize.sm },
+  score: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
+});
