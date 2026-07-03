@@ -65,7 +65,11 @@ if (process.env.NODE_ENV === "production") {
   if (fs.existsSync(adminPath)) {
     app.use("/admin", express.static(adminPath));
     // SPA fallback for admin - use regex instead of wildcard
-    app.get(/^\/admin\/.+/, (req, res) => {
+    app.get(/^\/admin($|\/.*)/, (req, res) => {
+      // If it's a request for a file (has extension), let it fall through to static or 404
+      if (req.path.includes('.') && !req.path.endsWith('.html')) {
+        return res.status(404).end();
+      }
       res.sendFile(path.join(adminPath, "index.html"));
     });
     logger.info("Admin dashboard served at /admin");
