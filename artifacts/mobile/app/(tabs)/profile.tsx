@@ -21,10 +21,10 @@ export default function ProfileScreen() {
   const s = styles(colors);
 
   const menuItems = [
-    { icon: 'bell', label: 'Notifications', onPress: () => router.push('/notifications' as any) },
-    { icon: 'star', label: 'Subscription', onPress: () => router.push('/subscription' as any), badge: sub ? undefined : 'Upgrade' },
-    { icon: 'grid', label: 'More Modules', onPress: () => router.push('/more' as any) },
-    { icon: 'settings', label: 'Settings', onPress: () => router.push('/settings' as any) },
+    { icon: 'bell', label: 'الإشعارات', onPress: () => router.push('/notifications' as any) },
+    { icon: 'star', label: 'الاشتراك', onPress: () => router.push('/subscription' as any), badge: sub ? undefined : 'ترقية' },
+    { icon: 'grid', label: 'المزيد', onPress: () => router.push('/more' as any) },
+    { icon: 'settings', label: 'الإعدادات', onPress: () => router.push('/settings' as any) },
   ];
 
   if (profileQuery.isLoading) {
@@ -61,15 +61,15 @@ export default function ProfileScreen() {
             <Feather name="check-circle" size={18} color={colors.success} />
             <Text style={[s.subPlan, { color: colors.success }]}>{sub.planName}</Text>
           </View>
-          <Text style={s.subMeta}>{sub.daysRemaining} days remaining</Text>
+          <Text style={s.subMeta}>{sub.daysRemaining} يوم متبقٍ</Text>
         </View>
       ) : (
         <TouchableOpacity style={[s.subCard, { backgroundColor: colors.gold + '15', borderColor: colors.gold + '40' }]} onPress={() => router.push('/subscription' as any)}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Feather name="star" size={18} color={colors.gold} />
-            <Text style={[s.subPlan, { color: colors.gold }]}>Free Plan</Text>
+            <Text style={[s.subPlan, { color: colors.gold }]}>الخطة المجانية</Text>
           </View>
-          <Text style={[s.subMeta, { color: colors.gold }]}>Tap to upgrade →</Text>
+          <Text style={[s.subMeta, { color: colors.gold }]}>اضغط للترقية</Text>
         </TouchableOpacity>
       )}
 
@@ -83,7 +83,7 @@ export default function ProfileScreen() {
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               {item.badge && <View style={s.badgeChip}><Text style={s.badgeChipText}>{item.badge}</Text></View>}
-              <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+              <Feather name="chevron-left" size={18} color={colors.mutedForeground} />
             </View>
           </TouchableOpacity>
         ))}
@@ -92,7 +92,7 @@ export default function ProfileScreen() {
       {/* Logout */}
       <TouchableOpacity style={s.logoutBtn} onPress={() => logout()}>
         <Feather name="log-out" size={18} color={colors.destructive} />
-        <Text style={s.logoutText}>Sign Out</Text>
+        <Text style={s.logoutText}>تسجيل الخروج</Text>
       </TouchableOpacity>
     </ScrollView>
   );

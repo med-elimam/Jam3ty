@@ -8,12 +8,13 @@ import { Feather } from '@expo/vector-icons';
 
 function timeAgo(date: string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}د`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}س`;
+  return `${Math.floor(diff / 86400)}ي`;
 }
 
-const PRIORITY_COLORS: Record<string, string> = { high: '#EF4444', medium: '#F59E0B', low: '#10B981', normal: '#6B7280' };
+const PRIORITY_COLORS: Record<string, string> = { urgent: '#EF4444', high: '#EF4444', important: '#F59E0B', medium: '#F59E0B', low: '#10B981', normal: '#6B7280' };
+const PRIORITY_LABELS: Record<string, string> = { urgent: 'عاجل', high: 'مهم', important: 'مهم', medium: 'متوسط', low: 'عادي', normal: 'عادي' };
 
 export default function AnnouncementsScreen() {
   const colors = useColors();
@@ -32,18 +33,19 @@ export default function AnnouncementsScreen() {
           keyExtractor={(a: any) => a.id}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-          ListEmptyComponent={<View style={s.empty}><Feather name="bell-off" size={48} color={colors.border} /><Text style={s.emptyText}>No announcements</Text></View>}
+          ListEmptyComponent={<View style={s.empty}><Feather name="bell-off" size={48} color={colors.border} /><Text style={s.emptyText}>لا توجد إعلانات حاليًا</Text></View>}
           renderItem={({ item }: { item: any }) => (
             <TouchableOpacity style={[s.card, !item.isRead && s.cardUnread]} onPress={() => !item.isRead && markRead.mutate({ announcementId: item.id })}>
               <View style={s.cardTop}>
                 <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
                   {!item.isRead && <View style={s.dot} />}
                   {item.priority && item.priority !== 'normal' && (
-                    <View style={[s.priority, { backgroundColor: PRIORITY_COLORS[item.priority] + '20' }]}>
-                      <Text style={[s.priorityText, { color: PRIORITY_COLORS[item.priority] }]}>{item.priority.toUpperCase()}</Text>
+                    <View style={[s.priority, { backgroundColor: (PRIORITY_COLORS[item.priority] ?? '#6B7280') + '20' }]}>
+                      <Text style={[s.priorityText, { color: PRIORITY_COLORS[item.priority] ?? '#6B7280' }]}>
+                        {PRIORITY_LABELS[item.priority] ?? item.priority}
+                      </Text>
                     </View>
                   )}
-                  <Text style={s.scope}>{item.scope}</Text>
                 </View>
                 <Text style={s.time}>{timeAgo(item.createdAt)}</Text>
               </View>
@@ -67,11 +69,10 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.navy },
     priority: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
     priorityText: { fontSize: 9, fontWeight: '700' },
-    scope: { fontSize: 11, color: colors.mutedForeground, textTransform: 'capitalize' },
     time: { fontSize: 11, color: colors.mutedForeground },
-    title: { fontSize: 15, fontWeight: '700', color: colors.foreground, marginBottom: 6 },
-    content: { fontSize: 13, color: colors.mutedForeground, lineHeight: 20 },
-    author: { fontSize: 11, color: colors.mutedForeground, marginTop: 8 },
+    title: { fontSize: 15, fontWeight: '700', color: colors.foreground, marginBottom: 6, textAlign: 'right' },
+    content: { fontSize: 13, color: colors.mutedForeground, lineHeight: 20, textAlign: 'right' },
+    author: { fontSize: 11, color: colors.mutedForeground, marginTop: 8, textAlign: 'right' },
     empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
     emptyText: { fontSize: 15, color: colors.mutedForeground },
   });

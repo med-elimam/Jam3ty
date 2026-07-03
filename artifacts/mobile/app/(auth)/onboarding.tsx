@@ -49,10 +49,10 @@ export default function OnboardingScreen() {
   const [sel, setSel] = useState<Partial<Selection>>({ language: 'ar' });
 
   const universities = useListUniversities();
-  const faculties = useListFaculties(sel.universityId!, { query: { enabled: !!sel.universityId } });
-  const departments = useListDepartments(sel.facultyId!, { query: { enabled: !!sel.facultyId } });
-  const levels = useListLevels(sel.departmentId!, { query: { enabled: !!sel.departmentId } });
-  const groups = useListGroups(sel.levelId!, { query: { enabled: !!sel.levelId } });
+  const faculties = useListFaculties(sel.universityId ?? '', { query: { enabled: !!sel.universityId } } as any);
+  const departments = useListDepartments(sel.facultyId ?? '', { query: { enabled: !!sel.facultyId } } as any);
+  const levels = useListLevels(sel.departmentId ?? '', { query: { enabled: !!sel.departmentId } } as any);
+  const groups = useListGroups(sel.levelId ?? '', { query: { enabled: !!sel.levelId } } as any);
 
   const completeMutation = useCompleteOnboarding({
     mutation: {
@@ -60,7 +60,7 @@ export default function OnboardingScreen() {
         updateUser({ profile: { onboardingComplete: true } });
         router.replace('/(tabs)');
       },
-      onError: () => Alert.alert('Error', 'Could not save your profile. Please try again.'),
+      onError: () => Alert.alert('خطأ', 'تعذّر حفظ بياناتك. يرجى المحاولة مجدداً.'),
     },
   });
 
@@ -91,12 +91,12 @@ export default function OnboardingScreen() {
 
   const getStepData = () => {
     switch (step) {
-      case 0: return { items: universities.data?.data ?? [], isLoading: universities.isLoading, field: 'universityId', nameField: 'universityName', getLabel: (i: any) => `${i.nameAr || i.name}` };
-      case 1: return { items: faculties.data?.data ?? [], isLoading: faculties.isLoading, field: 'facultyId', nameField: 'facultyName', getLabel: (i: any) => `${i.nameAr || i.name}` };
-      case 2: return { items: departments.data?.data ?? [], isLoading: departments.isLoading, field: 'departmentId', nameField: 'departmentName', getLabel: (i: any) => `${i.nameAr || i.name}` };
-      case 3: return { items: [...(levels.data?.data ?? []), ...(groups.data?.data ?? [])], isLoading: levels.isLoading, field: 'levelId', nameField: 'levelName', getLabel: (i: any) => `${i.nameAr || i.name}` };
-      case 4: return { items: LANGUAGES, isLoading: false, field: 'language', nameField: '', getLabel: (i: any) => `${i.flag} ${i.label}` };
-      default: return { items: [], isLoading: false, field: '', nameField: '', getLabel: (_: any) => '' };
+      case 0: return { items: universities.data?.data ?? [], isLoading: universities.isLoading, field: 'universityId', getLabel: (i: any) => `${i.nameAr || i.name}` };
+      case 1: return { items: faculties.data?.data ?? [], isLoading: faculties.isLoading, field: 'facultyId', getLabel: (i: any) => `${i.nameAr || i.name}` };
+      case 2: return { items: departments.data?.data ?? [], isLoading: departments.isLoading, field: 'departmentId', getLabel: (i: any) => `${i.nameAr || i.name}` };
+      case 3: return { items: [...(levels.data?.data ?? []), ...(groups.data?.data ?? [])], isLoading: levels.isLoading, field: 'levelId', getLabel: (i: any) => `${i.nameAr || i.name}` };
+      case 4: return { items: LANGUAGES, isLoading: false, field: 'language', getLabel: (i: any) => `${i.flag} ${i.label}` };
+      default: return { items: [], isLoading: false, field: '', getLabel: (_: any) => '' };
     }
   };
 
@@ -114,7 +114,6 @@ export default function OnboardingScreen() {
       </View>
 
       <Text style={s.title}>{stepTitle(step)}</Text>
-      <Text style={s.subtitle}>{stepSubtitle(step)}</Text>
 
       {isLoading ? (
         <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
@@ -145,14 +144,14 @@ export default function OnboardingScreen() {
               </TouchableOpacity>
             );
           }}
-          ListEmptyComponent={<Text style={s.empty}>No options available</Text>}
+          ListEmptyComponent={<Text style={s.empty}>لا توجد خيارات متاحة</Text>}
         />
       )}
 
-      {/* Also show groups on step 3 if a level is selected */}
+      {/* Groups on step 3 */}
       {step === 3 && sel.levelId && (groups.data?.data ?? []).length > 0 && (
         <View style={{ paddingHorizontal: 24, marginTop: 8 }}>
-          <Text style={s.groupLabel}>Group (Optional)</Text>
+          <Text style={s.groupLabel}>المجموعة (اختياري)</Text>
           {(groups.data?.data ?? []).map((g: any) => (
             <TouchableOpacity
               key={g.id}
@@ -172,7 +171,7 @@ export default function OnboardingScreen() {
       <View style={s.bottom}>
         {step > 0 && (
           <TouchableOpacity style={s.backBtn} onPress={() => setStep((p) => p - 1)}>
-            <Text style={s.backBtnText}>Back</Text>
+            <Text style={s.backBtnText}>رجوع</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity
@@ -186,7 +185,7 @@ export default function OnboardingScreen() {
           {completeMutation.isPending ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={s.nextBtnText}>{step === STEPS.length - 1 ? 'Finish' : 'Next'}</Text>
+            <Text style={s.nextBtnText}>{step === STEPS.length - 1 ? 'إنهاء' : 'التالي'}</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -196,21 +195,10 @@ export default function OnboardingScreen() {
 
 function stepTitle(step: number) {
   switch (step) {
-    case 0: return 'Select University';
-    case 1: return 'Select Faculty';
-    case 2: return 'Select Department';
-    case 3: return 'Select Level';
-    case 4: return 'Choose Language';
-    default: return '';
-  }
-}
-
-function stepSubtitle(step: number) {
-  switch (step) {
     case 0: return 'اختر جامعتك';
-    case 1: return 'اختر كليتك';
-    case 2: return 'اختر قسمك';
-    case 3: return 'اختر مستواك الدراسي';
+    case 1: return 'اختر الكلية أو المعهد';
+    case 2: return 'اختر القسم';
+    case 3: return 'اختر السنة الدراسية';
     case 4: return 'اختر لغة التطبيق';
     default: return '';
   }
@@ -222,19 +210,18 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     progress: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
     dotActive: { backgroundColor: colors.navy, width: 24 },
-    title: { fontSize: 24, fontWeight: '700', color: colors.navy, textAlign: 'center', marginBottom: 4 },
-    subtitle: { fontSize: 16, color: colors.mutedForeground, textAlign: 'center', marginBottom: 24 },
+    title: { fontSize: 24, fontWeight: '700', color: colors.navy, textAlign: 'center', marginBottom: 24 },
     option: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
       backgroundColor: colors.card, borderRadius: 12, padding: 16, marginBottom: 8,
       borderWidth: 1.5, borderColor: colors.border,
     },
     optionSelected: { borderColor: colors.navy, backgroundColor: colors.secondary },
-    optionText: { fontSize: 16, color: colors.foreground },
+    optionText: { fontSize: 16, color: colors.foreground, flex: 1, textAlign: 'right' },
     optionTextSelected: { color: colors.navy, fontWeight: '600' },
     check: { fontSize: 18, color: colors.navy },
     empty: { textAlign: 'center', color: colors.mutedForeground, marginTop: 40 },
-    groupLabel: { fontSize: 14, fontWeight: '600', color: colors.mutedForeground, marginBottom: 8 },
+    groupLabel: { fontSize: 14, fontWeight: '600', color: colors.mutedForeground, marginBottom: 8, textAlign: 'right' },
     bottom: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 24, flexDirection: 'row', gap: 12, backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },
     backBtn: { flex: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
     backBtnText: { fontSize: 16, fontWeight: '600', color: colors.foreground },

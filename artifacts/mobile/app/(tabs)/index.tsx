@@ -14,17 +14,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGetDashboardHome } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 function formatTime(t: string) {
   return t?.slice(0, 5) ?? '';
 }
 
 function daysUntil(dateStr: string) {
   const d = Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
-  if (d === 0) return 'Today';
-  if (d === 1) return 'Tomorrow';
-  return `${d}d`;
+  if (d === 0) return 'اليوم';
+  if (d === 1) return 'غداً';
+  return `${d}ي`;
 }
 
 export default function HomeScreen() {
@@ -36,13 +34,13 @@ export default function HomeScreen() {
   const d = (data as any)?.data;
   const s = styles(colors);
 
-  const firstName = (user?.fullName ?? d?.student?.fullName ?? 'Student').split(' ')[0];
+  const firstName = (user?.fullName ?? d?.student?.fullName ?? 'طالب').split(' ')[0];
 
   if (isLoading) {
     return (
       <View style={[s.root, { alignItems: 'center', justifyContent: 'center' }]}>
         <ActivityIndicator color={colors.navy} size="large" />
-        <Text style={{ color: colors.mutedForeground, marginTop: 12 }}>Loading…</Text>
+        <Text style={{ color: colors.mutedForeground, marginTop: 12 }}>جارٍ التحميل…</Text>
       </View>
     );
   }
@@ -73,23 +71,23 @@ export default function HomeScreen() {
       {!d?.subscription && (
         <TouchableOpacity style={s.subBanner} onPress={() => router.push('/subscription' as any)}>
           <Feather name="star" size={16} color={colors.gold} />
-          <Text style={s.subBannerText}>Upgrade to Plus for full access</Text>
-          <Feather name="chevron-right" size={16} color={colors.gold} />
+          <Text style={s.subBannerText}>ترقية إلى جامعتي بلس للوصول الكامل</Text>
+          <Feather name="chevron-left" size={16} color={colors.gold} />
         </TouchableOpacity>
       )}
       {d?.subscription && (
         <View style={[s.subBanner, { backgroundColor: colors.success + '20' }]}>
           <Feather name="check-circle" size={16} color={colors.success} />
           <Text style={[s.subBannerText, { color: colors.success }]}>
-            {d.subscription.planName} — {d.subscription.daysRemaining}d remaining
+            {d.subscription.planName} — {d.subscription.daysRemaining} يوم متبقٍ
           </Text>
         </View>
       )}
 
       {/* Today's sessions */}
-      <Text style={s.sectionTitle}>📅 Today's Classes</Text>
+      <Text style={s.sectionTitle}>📅 محاضرات اليوم</Text>
       {(d?.todaysSessions ?? []).length === 0 ? (
-        <View style={s.emptyCard}><Text style={s.emptyText}>No classes today</Text></View>
+        <View style={s.emptyCard}><Text style={s.emptyText}>لا توجد محاضرات اليوم</Text></View>
       ) : (
         (d?.todaysSessions ?? []).slice(0, 4).map((s2: any) => (
           <View key={s2.id} style={[s.sessionCard, { borderLeftColor: colors.navy }]}>
@@ -99,22 +97,28 @@ export default function HomeScreen() {
             </View>
             <View style={s.sessionInfo}>
               <Text style={s.sessionCourse}>{s2.courseName}</Text>
-              <Text style={s.sessionMeta}>{s2.room ? `Room ${s2.room}` : (s2.type ?? s2.sessionType ?? '')}</Text>
+              <Text style={s.sessionMeta}>{s2.room ? `قاعة ${s2.room}` : (s2.type ?? s2.sessionType ?? '')}</Text>
             </View>
           </View>
         ))
       )}
 
       {/* Announcements */}
-      <Text style={s.sectionTitle}>📢 Announcements</Text>
+      <Text style={s.sectionTitle}>📢 الإعلانات</Text>
       {(d?.latestAnnouncements ?? []).length === 0 ? (
-        <View style={s.emptyCard}><Text style={s.emptyText}>No announcements</Text></View>
+        <View style={s.emptyCard}><Text style={s.emptyText}>لا توجد إعلانات حاليًا</Text></View>
       ) : (
         (d?.latestAnnouncements ?? []).slice(0, 3).map((a: any) => (
           <TouchableOpacity key={a.id} style={[s.card, !a.isRead && s.cardUnread]} onPress={() => router.push('/announcements' as any)}>
             <View style={s.cardHeader}>
               {!a.isRead && <View style={s.unreadDot} />}
-              {(a.priority === 'urgent' || a.priority === 'important') && <View style={[s.priorityBadge, { backgroundColor: colors.destructive + '20' }]}><Text style={[s.priorityText, { color: colors.destructive }]}>{a.priority === 'urgent' ? 'Urgent' : 'Important'}</Text></View>}
+              {(a.priority === 'urgent' || a.priority === 'important') && (
+                <View style={[s.priorityBadge, { backgroundColor: colors.destructive + '20' }]}>
+                  <Text style={[s.priorityText, { color: colors.destructive }]}>
+                    {a.priority === 'urgent' ? 'عاجل' : 'مهم'}
+                  </Text>
+                </View>
+              )}
             </View>
             <Text style={s.cardTitle} numberOfLines={2}>{a.title}</Text>
             <Text style={s.cardMeta}>{a.createdByName}</Text>
@@ -125,7 +129,7 @@ export default function HomeScreen() {
       {/* Due soon assignments */}
       {(d?.upcomingAssignments ?? []).length > 0 && (
         <>
-          <Text style={s.sectionTitle}>📝 Assignments Due</Text>
+          <Text style={s.sectionTitle}>📝 الواجبات القادمة</Text>
           {(d?.upcomingAssignments ?? []).slice(0, 3).map((a: any) => (
             <TouchableOpacity key={a.id} style={s.card} onPress={() => router.push('/assignments' as any)}>
               <View style={s.cardRow}>
@@ -143,7 +147,7 @@ export default function HomeScreen() {
       {/* Upcoming exams */}
       {(d?.upcomingExams ?? []).length > 0 && (
         <>
-          <Text style={s.sectionTitle}>📊 Upcoming Exams</Text>
+          <Text style={s.sectionTitle}>📊 الامتحانات القادمة</Text>
           {(d?.upcomingExams ?? []).slice(0, 2).map((e: any) => (
             <TouchableOpacity key={e.id} style={[s.card, { borderLeftColor: colors.gold, borderLeftWidth: 4 }]} onPress={() => router.push('/exams' as any)}>
               <Text style={s.cardTitle}>{e.titleAr || e.title}</Text>
@@ -155,7 +159,7 @@ export default function HomeScreen() {
 
       {/* More modules */}
       <TouchableOpacity style={s.moreBtn} onPress={() => router.push('/more' as any)}>
-        <Text style={s.moreBtnText}>More Modules</Text>
+        <Text style={s.moreBtnText}>المزيد</Text>
         <Feather name="grid" size={18} color={colors.navy} />
       </TouchableOpacity>
     </ScrollView>
@@ -188,8 +192,8 @@ const styles = (colors: ReturnType<typeof useColors>) =>
       flexDirection: 'row', alignItems: 'center', gap: 8,
       backgroundColor: colors.gold + '20', margin: 16, padding: 12, borderRadius: 12,
     },
-    subBannerText: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.gold },
-    sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.foreground, marginHorizontal: 16, marginTop: 16, marginBottom: 8 },
+    subBannerText: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.gold, textAlign: 'right' },
+    sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.foreground, marginHorizontal: 16, marginTop: 16, marginBottom: 8, textAlign: 'right' },
     sessionCard: {
       flexDirection: 'row', backgroundColor: colors.card, marginHorizontal: 16,
       marginBottom: 8, borderRadius: 12, overflow: 'hidden', borderLeftWidth: 4,
@@ -199,8 +203,8 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     sessionTimeText: { fontSize: 13, fontWeight: '700', color: colors.navy },
     sessionTimeSub: { fontSize: 11, color: colors.mutedForeground },
     sessionInfo: { flex: 1, padding: 12 },
-    sessionCourse: { fontSize: 14, fontWeight: '600', color: colors.foreground },
-    sessionMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
+    sessionCourse: { fontSize: 14, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
+    sessionMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textAlign: 'right' },
     card: {
       backgroundColor: colors.card, borderRadius: 12, padding: 14,
       marginHorizontal: 16, marginBottom: 8,
@@ -211,8 +215,8 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.navy },
     priorityBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
     priorityText: { fontSize: 10, fontWeight: '700' },
-    cardTitle: { fontSize: 15, fontWeight: '600', color: colors.foreground },
-    cardMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 4 },
+    cardTitle: { fontSize: 15, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
+    cardMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 4, textAlign: 'right' },
     cardRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     chip: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
     chipText: { fontSize: 11, fontWeight: '600' },

@@ -12,8 +12,11 @@ export default function ClubsScreen() {
   const { data, isLoading, refetch, isRefetching } = useListClubs();
   const join = useJoinClub({
     mutation: {
-      onSuccess: () => { qc.invalidateQueries({ queryKey: getListClubsQueryKey() }); Alert.alert('Request sent!', 'Your join request has been submitted.'); },
-      onError: () => Alert.alert('Error', 'Could not submit join request.'),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: getListClubsQueryKey() });
+        Alert.alert('تم إرسال الطلب!', 'تم إرسال طلب الانضمام بنجاح.');
+      },
+      onError: () => Alert.alert('خطأ', 'تعذّر إرسال طلب الانضمام.'),
     },
   });
 
@@ -28,7 +31,7 @@ export default function ClubsScreen() {
           keyExtractor={(c: any) => c.id}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-          ListEmptyComponent={<View style={s.empty}><F name="users" size={48} color={colors.border} /><Text style={s.emptyText}>No clubs available</Text></View>}
+          ListEmptyComponent={<View style={s.empty}><F name="users" size={48} color={colors.border} /><Text style={s.emptyText}>لا توجد نوادٍ متاحة</Text></View>}
           renderItem={({ item }: { item: any }) => (
             <View style={s.card}>
               <View style={s.cardHeader}>
@@ -38,15 +41,15 @@ export default function ClubsScreen() {
                   {item.category && <Text style={s.category}>{item.category}</Text>}
                 </View>
                 {item.isMember ? (
-                  <View style={s.memberBadge}><Text style={s.memberText}>Member</Text></View>
+                  <View style={s.memberBadge}><Text style={s.memberText}>عضو</Text></View>
                 ) : (
                   <TouchableOpacity style={s.joinBtn} onPress={() => join.mutate({ clubId: item.id })}>
-                    <Text style={s.joinBtnText}>Join</Text>
+                    <Text style={s.joinBtnText}>انضم</Text>
                   </TouchableOpacity>
                 )}
               </View>
               {item.description && <Text style={s.desc} numberOfLines={2}>{item.descriptionAr || item.description}</Text>}
-              {item.memberCount > 0 && <Text style={s.meta}>{item.memberCount} members</Text>}
+              {item.memberCount > 0 && <Text style={s.meta}>{item.memberCount} عضو</Text>}
             </View>
           )}
         />
@@ -62,14 +65,14 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     cardHeader: { flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 8 },
     clubIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.navy + '10', alignItems: 'center', justifyContent: 'center' },
     clubEmoji: { fontSize: 22 },
-    name: { fontSize: 15, fontWeight: '700', color: colors.foreground },
-    category: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textTransform: 'capitalize' },
+    name: { fontSize: 15, fontWeight: '700', color: colors.foreground, textAlign: 'right' },
+    category: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textAlign: 'right' },
     memberBadge: { backgroundColor: colors.success + '20', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
     memberText: { fontSize: 12, fontWeight: '600', color: colors.success },
     joinBtn: { backgroundColor: colors.navy, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8 },
     joinBtnText: { fontSize: 13, fontWeight: '600', color: '#fff' },
-    desc: { fontSize: 13, color: colors.mutedForeground, lineHeight: 19 },
-    meta: { fontSize: 11, color: colors.mutedForeground, marginTop: 6 },
+    desc: { fontSize: 13, color: colors.mutedForeground, lineHeight: 19, textAlign: 'right' },
+    meta: { fontSize: 11, color: colors.mutedForeground, marginTop: 6, textAlign: 'right' },
     empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
     emptyText: { fontSize: 15, color: colors.mutedForeground },
   });

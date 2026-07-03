@@ -9,7 +9,7 @@ interface Message { id: string; role: 'user' | 'assistant'; content: string; ts:
 export default function AIScreen() {
   const colors = useColors();
   const [messages, setMessages] = useState<Message[]>([
-    { id: '0', role: 'assistant', content: 'مرحباً! أنا مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟\n\nHello! I\'m your AI assistant. How can I help you today?', ts: new Date() },
+    { id: '0', role: 'assistant', content: 'مرحباً! أنا مساعدك الذكي في جامعتي. كيف يمكنني مساعدتك اليوم؟ 🎓', ts: new Date() },
   ]);
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList>(null);
@@ -20,13 +20,13 @@ export default function AIScreen() {
   const chatMutation = useAiChat({
     mutation: {
       onSuccess: (data: any) => {
-        const reply = data?.data?.reply ?? 'Sorry, I could not process your request.';
+        const reply = data?.data?.reply ?? 'عذراً، تعذّر معالجة طلبك.';
         setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'assistant', content: reply, ts: new Date() }]);
         setTimeout(() => listRef.current?.scrollToEnd(), 100);
       },
       onError: (err: any) => {
-        const msg = err?.data?.error?.message ?? 'Could not reach AI. Please try again.';
-        setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'assistant', content: `Error: ${msg}`, ts: new Date() }]);
+        const msg = err?.data?.error?.message ?? 'تعذّر الاتصال بالمساعد الذكي. يرجى المحاولة مجدداً.';
+        setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'assistant', content: msg, ts: new Date() }]);
       },
     },
   });
@@ -48,7 +48,7 @@ export default function AIScreen() {
       {usage && (
         <View style={s.usageBanner}>
           <Feather name="zap" size={14} color={colors.gold} />
-          <Text style={s.usageText}>{usage.used}/{usage.limit} requests today · {usage.plan} plan</Text>
+          <Text style={s.usageText}>{usage.used}/{usage.limit} طلب اليوم · {usage.plan}</Text>
         </View>
       )}
 
@@ -73,7 +73,7 @@ export default function AIScreen() {
       {chatMutation.isPending && (
         <View style={s.thinking}>
           <ActivityIndicator size="small" color={colors.navy} />
-          <Text style={s.thinkingText}>Thinking…</Text>
+          <Text style={s.thinkingText}>جارٍ التفكير…</Text>
         </View>
       )}
 
@@ -82,7 +82,7 @@ export default function AIScreen() {
           style={s.input}
           value={input}
           onChangeText={setInput}
-          placeholder="Ask me anything…"
+          placeholder="اسألني أي شيء…"
           placeholderTextColor={colors.mutedForeground}
           multiline
           maxLength={500}

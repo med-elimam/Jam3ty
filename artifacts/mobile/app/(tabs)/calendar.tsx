@@ -4,13 +4,13 @@ import { useColors } from '@/hooks/useColors';
 import { useGetTimetable } from '@workspace/api-client-react';
 
 const DAYS = [
-  { short: 'Sun', label: 'Sunday', ar: 'الأحد' },
-  { short: 'Mon', label: 'Monday', ar: 'الاثنين' },
-  { short: 'Tue', label: 'Tuesday', ar: 'الثلاثاء' },
-  { short: 'Wed', label: 'Wednesday', ar: 'الأربعاء' },
-  { short: 'Thu', label: 'Thursday', ar: 'الخميس' },
-  { short: 'Fri', label: 'Friday', ar: 'الجمعة' },
-  { short: 'Sat', label: 'Saturday', ar: 'السبت' },
+  { short: 'أح', label: 'الأحد' },
+  { short: 'اث', label: 'الاثنين' },
+  { short: 'ث', label: 'الثلاثاء' },
+  { short: 'أر', label: 'الأربعاء' },
+  { short: 'خ', label: 'الخميس' },
+  { short: 'ج', label: 'الجمعة' },
+  { short: 'س', label: 'السبت' },
 ];
 
 const SESSION_COLORS = ['#1E3A5F', '#2B5480', '#D4A853', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444'];
@@ -47,7 +47,7 @@ export default function CalendarScreen() {
         ))}
       </ScrollView>
 
-      <Text style={s.dayTitle}>{DAYS[selectedDay]?.ar} · {DAYS[selectedDay]?.label}</Text>
+      <Text style={s.dayTitle}>{DAYS[selectedDay]?.label}</Text>
 
       {isLoading ? (
         <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
@@ -56,7 +56,7 @@ export default function CalendarScreen() {
           {currentSessions.length === 0 ? (
             <View style={s.empty}>
               <Text style={s.emptyIcon}>📅</Text>
-              <Text style={s.emptyText}>No classes</Text>
+              <Text style={s.emptyText}>لا توجد محاضرات</Text>
             </View>
           ) : (
             currentSessions.map((session: any, idx: number) => (
@@ -68,10 +68,10 @@ export default function CalendarScreen() {
                 </View>
                 <View style={s.sessionBody}>
                   <Text style={s.sessionName}>{session.courseName}</Text>
-                  {session.professorName && <Text style={s.sessionMeta}>Dr. {session.professorName}</Text>}
+                  {session.professorName && <Text style={s.sessionMeta}>د. {session.professorName}</Text>}
                   <View style={s.sessionRow}>
                     {session.room && <Text style={s.sessionTag}>🏫 {session.room}</Text>}
-                    {session.sessionType && <Text style={s.sessionTag}>{session.sessionType.toUpperCase()}</Text>}
+                    {session.sessionType && <Text style={s.sessionTag}>{{ lecture: 'محاضرة', td: 'TD', tp: 'TP', other: 'أخرى' }[session.sessionType as string] ?? session.sessionType}</Text>}
                     {session.groupName && <Text style={s.sessionTag}>👥 {session.groupName}</Text>}
                   </View>
                 </View>
@@ -91,15 +91,15 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     dayPill: {
       paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
       backgroundColor: colors.card, borderWidth: 1.5, borderColor: colors.border,
-      alignItems: 'center', minWidth: 54,
+      alignItems: 'center', minWidth: 46,
     },
     dayPillActive: { backgroundColor: colors.navy, borderColor: colors.navy },
     dayPillToday: { borderColor: colors.gold },
-    dayPillShort: { fontSize: 13, fontWeight: '600', color: colors.foreground },
+    dayPillShort: { fontSize: 13, fontWeight: '700', color: colors.foreground },
     dayPillTextActive: { color: '#fff' },
     dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.mutedForeground, marginTop: 3 },
     dotActive: { backgroundColor: colors.gold },
-    dayTitle: { fontSize: 16, fontWeight: '700', color: colors.foreground, paddingHorizontal: 16, marginBottom: 8 },
+    dayTitle: { fontSize: 16, fontWeight: '700', color: colors.foreground, paddingHorizontal: 16, marginBottom: 8, textAlign: 'right' },
     sessionCard: {
       flexDirection: 'row', backgroundColor: colors.card, borderRadius: 12,
       marginBottom: 10, borderLeftWidth: 4, overflow: 'hidden',
@@ -110,9 +110,9 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     timeTextEnd: { fontSize: 11, color: colors.mutedForeground },
     timeLine: { width: 2, flex: 1, borderRadius: 1 },
     sessionBody: { flex: 1, padding: 12 },
-    sessionName: { fontSize: 15, fontWeight: '600', color: colors.foreground },
-    sessionMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
-    sessionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
+    sessionName: { fontSize: 15, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
+    sessionMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textAlign: 'right' },
+    sessionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6, justifyContent: 'flex-end' },
     sessionTag: { fontSize: 11, color: colors.navy, backgroundColor: colors.secondary, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
     empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
     emptyIcon: { fontSize: 48 },

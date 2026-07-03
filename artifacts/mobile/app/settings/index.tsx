@@ -9,9 +9,9 @@ function SettingRow({ icon, label, value, onPress, destructive = false }: { icon
   return (
     <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12, borderBottomWidth: 1, borderBottomColor: colors.border }} onPress={onPress}>
       <Feather name={icon as any} size={20} color={destructive ? colors.destructive : colors.navy} />
-      <Text style={{ flex: 1, fontSize: 15, color: destructive ? colors.destructive : colors.foreground, fontWeight: '500' }}>{label}</Text>
+      <Text style={{ flex: 1, fontSize: 15, color: destructive ? colors.destructive : colors.foreground, fontWeight: '500', textAlign: 'right' }}>{label}</Text>
       {value && <Text style={{ fontSize: 13, color: colors.mutedForeground }}>{value}</Text>}
-      {onPress && <Feather name="chevron-right" size={18} color={colors.mutedForeground} />}
+      {onPress && <Feather name="chevron-left" size={18} color={colors.mutedForeground} />}
     </TouchableOpacity>
   );
 }
@@ -22,9 +22,9 @@ export default function SettingsScreen() {
   const s = styles(colors);
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: () => logout() },
+    Alert.alert('تسجيل الخروج', 'هل أنت متأكد من تسجيل الخروج؟', [
+      { text: 'إلغاء', style: 'cancel' },
+      { text: 'تسجيل الخروج', style: 'destructive', onPress: () => logout() },
     ]);
   };
 
@@ -35,7 +35,7 @@ export default function SettingsScreen() {
         <View style={s.avatar}>
           <Text style={s.avatarText}>{(user?.fullName ?? 'U').split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}</Text>
         </View>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={s.name}>{user?.fullName}</Text>
           <Text style={s.email}>{user?.email}</Text>
           <Text style={s.role}>{user?.role?.replace('_', ' ')}</Text>
@@ -44,41 +44,41 @@ export default function SettingsScreen() {
 
       {/* App settings */}
       <View style={s.section}>
-        <Text style={s.sectionHeader}>App</Text>
+        <Text style={s.sectionHeader}>التطبيق</Text>
         <View style={s.card}>
-          <SettingRow icon="globe" label="Language" value="Arabic (العربية)" />
-          <SettingRow icon="moon" label="Appearance" value="System" />
-          <SettingRow icon="bell" label="Notifications" value="Enabled" />
+          <SettingRow icon="globe" label="اللغة" value="العربية" />
+          <SettingRow icon="moon" label="المظهر" value="النظام" />
+          <SettingRow icon="bell" label="الإشعارات" value="مفعّل" />
         </View>
       </View>
 
       {/* Account */}
       <View style={s.section}>
-        <Text style={s.sectionHeader}>Account</Text>
+        <Text style={s.sectionHeader}>الحساب</Text>
         <View style={s.card}>
-          <SettingRow icon="lock" label="Change Password" onPress={() => Alert.alert('Coming Soon', 'Password change will be available soon.')} />
-          <SettingRow icon="shield" label="Privacy" onPress={() => Alert.alert('Privacy', 'Your data is stored securely on Mauritanian servers.')} />
-          <SettingRow icon="trash-2" label="Delete Account" destructive onPress={() => Alert.alert('Delete Account', 'To delete your account, please contact support.')} />
+          <SettingRow icon="lock" label="تغيير كلمة المرور" onPress={() => Alert.alert('قريباً', 'ستتوفر هذه الميزة قريباً.')} />
+          <SettingRow icon="shield" label="الخصوصية" onPress={() => Alert.alert('الخصوصية', 'بياناتك محفوظة بأمان على خوادم موريتانية.')} />
+          <SettingRow icon="trash-2" label="حذف الحساب" destructive onPress={() => Alert.alert('حذف الحساب', 'لحذف حسابك، يرجى التواصل مع الدعم.')} />
         </View>
       </View>
 
       {/* About */}
       <View style={s.section}>
-        <Text style={s.sectionHeader}>About</Text>
+        <Text style={s.sectionHeader}>حول التطبيق</Text>
         <View style={s.card}>
-          <SettingRow icon="info" label="App Version" value="1.0.0" />
-          <SettingRow icon="help-circle" label="Help & Support" onPress={() => Alert.alert('Support', 'Email: support@jamiati.mr')} />
-          <SettingRow icon="file-text" label="Terms of Service" onPress={() => {}} />
-          <SettingRow icon="shield" label="Privacy Policy" onPress={() => {}} />
+          <SettingRow icon="info" label="إصدار التطبيق" value="1.0.0" />
+          <SettingRow icon="help-circle" label="المساعدة والدعم" onPress={() => Alert.alert('الدعم', 'البريد: support@jamiati.mr')} />
+          <SettingRow icon="file-text" label="الشروط والأحكام" onPress={() => {}} />
+          <SettingRow icon="shield" label="سياسة الخصوصية" onPress={() => {}} />
         </View>
       </View>
 
       <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
         <Feather name="log-out" size={18} color={colors.destructive} />
-        <Text style={s.logoutText}>Sign Out</Text>
+        <Text style={s.logoutText}>تسجيل الخروج</Text>
       </TouchableOpacity>
 
-      <Text style={s.footer}>جامعتي · جامعتك في جيبك · Made with ❤️ for Mauritanian students</Text>
+      <Text style={s.footer}>جامعتي · جامعتك في جيبك · صُنع بكل ❤️ للطلاب الموريتانيين</Text>
     </ScrollView>
   );
 }
@@ -93,7 +93,7 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     email: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
     role: { fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2, textTransform: 'capitalize' },
     section: { marginHorizontal: 16, marginTop: 20 },
-    sectionHeader: { fontSize: 13, fontWeight: '700', color: colors.mutedForeground, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 },
+    sectionHeader: { fontSize: 13, fontWeight: '700', color: colors.mutedForeground, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, textAlign: 'right' },
     card: { backgroundColor: colors.card, borderRadius: 12, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
     logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginHorizontal: 16, marginTop: 24, padding: 16, borderRadius: 12, borderWidth: 1.5, borderColor: colors.destructive + '40' },
     logoutText: { fontSize: 15, fontWeight: '600', color: colors.destructive },

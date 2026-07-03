@@ -10,7 +10,7 @@ const PAYMENT_METHODS = [
   { id: 'bankily', label: 'Bankily', icon: '🏦' },
   { id: 'masrvi', label: 'Masrvi', icon: '📱' },
   { id: 'sedad', label: 'Sedad', icon: '💳' },
-  { id: 'cash_agent', label: 'Cash Agent', icon: '💵' },
+  { id: 'cash_agent', label: 'وكيل نقدي', icon: '💵' },
 ];
 
 export default function SubscriptionScreen() {
@@ -31,10 +31,10 @@ export default function SubscriptionScreen() {
     mutation: {
       onSuccess: (data: any) => {
         qc.invalidateQueries({ queryKey: getGetMySubscriptionQueryKey() });
-        Alert.alert('🎉 Success!', `${data?.data?.planName} activated for ${data?.data?.daysRemaining} days!`);
+        Alert.alert('🎉 تم التفعيل!', `تم تفعيل ${data?.data?.planName} لمدة ${data?.data?.daysRemaining} يوماً!`);
         setRedeemCode('');
       },
-      onError: (err: any) => Alert.alert('Error', err?.data?.error?.message ?? 'Invalid code.'),
+      onError: (err: any) => Alert.alert('خطأ', err?.data?.error?.message ?? 'رمز غير صالح.'),
     },
   });
 
@@ -42,9 +42,9 @@ export default function SubscriptionScreen() {
     mutation: {
       onSuccess: () => {
         setShowPayment(false);
-        Alert.alert('Payment Submitted', 'Your payment proof has been submitted and is under review. You will be notified once approved.');
+        Alert.alert('تم إرسال الدفع', 'تم إرسال إثبات الدفع وهو قيد المراجعة. ستُعلَم فور الموافقة.');
       },
-      onError: () => Alert.alert('Error', 'Could not submit payment.'),
+      onError: () => Alert.alert('خطأ', 'تعذّر إرسال الدفع.'),
     },
   });
 
@@ -58,50 +58,53 @@ export default function SubscriptionScreen() {
           <Feather name="check-circle" size={28} color={colors.success} />
           <View>
             <Text style={s.currentPlan}>{sub.planName}</Text>
-            <Text style={s.currentDays}>{sub.daysRemaining} days remaining</Text>
+            <Text style={s.currentDays}>{sub.daysRemaining} يوم متبقٍ</Text>
           </View>
         </View>
       ) : (
         <View style={s.freeBanner}>
-          <Text style={s.freeBannerTitle}>Free Plan</Text>
-          <Text style={s.freeBannerSub}>Upgrade for full access to all features</Text>
+          <Text style={s.freeBannerTitle}>الخطة المجانية</Text>
+          <Text style={s.freeBannerSub}>ترقِّ للحصول على الوصول الكامل لجميع الميزات</Text>
         </View>
       )}
 
       {/* Redeem code */}
       <View style={s.section}>
-        <Text style={s.sectionTitle}>🎟 Redeem Activation Code</Text>
+        <Text style={s.sectionTitle}>🎟 استرداد رمز التفعيل</Text>
         <View style={s.redeemRow}>
           <TextInput
             style={s.codeInput}
-            placeholder="Enter your code (e.g. TLB-XXXX)"
+            placeholder="أدخل رمزك (مثال: JMT-XXXX)"
             placeholderTextColor={colors.mutedForeground}
             value={redeemCode}
             onChangeText={setRedeemCode}
             autoCapitalize="characters"
+            textAlign="right"
           />
           <TouchableOpacity
             style={[s.redeemBtn, (!redeemCode.trim() || redeemMutation.isPending) && s.btnDisabled]}
             onPress={() => redeemMutation.mutate({ data: { code: redeemCode.trim() } })}
             disabled={!redeemCode.trim() || redeemMutation.isPending}
           >
-            {redeemMutation.isPending ? <ActivityIndicator size="small" color="#fff" /> : <Text style={s.redeemBtnText}>Redeem</Text>}
+            {redeemMutation.isPending
+              ? <ActivityIndicator size="small" color="#fff" />
+              : <Text style={s.redeemBtnText}>استرداد</Text>}
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Plans */}
       <View style={s.section}>
-        <Text style={s.sectionTitle}>💎 Subscription Plans</Text>
+        <Text style={s.sectionTitle}>💎 خطط الاشتراك</Text>
         {plansQuery.isLoading ? <ActivityIndicator color={colors.navy} /> : (
           plans.filter((p) => p.priceMru > 0).map((plan) => (
             <View key={plan.id} style={[s.planCard, plan.isFeatured && s.planFeatured]}>
-              {plan.isFeatured && <View style={s.featuredTag}><Text style={s.featuredTagText}>⭐ Popular</Text></View>}
+              {plan.isFeatured && <View style={s.featuredTag}><Text style={s.featuredTagText}>⭐ الأكثر طلباً</Text></View>}
               <Text style={s.planName}>{plan.nameAr || plan.name}</Text>
-              <Text style={s.planPrice}>{plan.priceMru} MRU / {plan.durationDays} days</Text>
+              <Text style={s.planPrice}>{plan.priceMru} أوقية / {plan.durationDays} يوم</Text>
               <Text style={s.planDesc}>{plan.descriptionAr || plan.description}</Text>
               <TouchableOpacity style={s.buyBtn} onPress={() => { setSelectedPlan(plan); setShowPayment(true); }}>
-                <Text style={s.buyBtnText}>Subscribe — {plan.priceMru} MRU</Text>
+                <Text style={s.buyBtnText}>اشترك الآن — {plan.priceMru} أوقية</Text>
               </TouchableOpacity>
             </View>
           ))
@@ -112,15 +115,17 @@ export default function SubscriptionScreen() {
       <Modal visible={showPayment} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowPayment(false)}>
         <View style={s.modal}>
           <View style={s.modalHeader}>
-            <TouchableOpacity onPress={() => setShowPayment(false)}><Text style={s.cancelText}>Cancel</Text></TouchableOpacity>
-            <Text style={s.modalTitle}>Payment Details</Text>
+            <TouchableOpacity onPress={() => setShowPayment(false)}>
+              <Text style={s.cancelText}>إلغاء</Text>
+            </TouchableOpacity>
+            <Text style={s.modalTitle}>تفاصيل الدفع</Text>
             <View style={{ width: 60 }} />
           </View>
           <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
-            <Text style={s.payInfo}>Plan: <Text style={{ fontWeight: '700', color: colors.navy }}>{selectedPlan?.name}</Text></Text>
-            <Text style={s.payInfo}>Amount: <Text style={{ fontWeight: '700', color: colors.navy }}>{selectedPlan?.priceMru} MRU</Text></Text>
+            <Text style={s.payInfo}>الخطة: <Text style={{ fontWeight: '700', color: colors.navy }}>{selectedPlan?.nameAr || selectedPlan?.name}</Text></Text>
+            <Text style={s.payInfo}>المبلغ: <Text style={{ fontWeight: '700', color: colors.navy }}>{selectedPlan?.priceMru} أوقية</Text></Text>
 
-            <Text style={s.payLabel}>Payment Method</Text>
+            <Text style={s.payLabel}>طريقة الدفع</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {PAYMENT_METHODS.map((m) => (
                 <TouchableOpacity key={m.id} style={[s.methodBtn, payMethod === m.id && s.methodBtnActive]} onPress={() => setPayMethod(m.id)}>
@@ -130,14 +135,22 @@ export default function SubscriptionScreen() {
               ))}
             </View>
 
-            <Text style={s.payLabel}>Your Phone Number</Text>
-            <TextInput style={s.payInput} placeholder="+222 XXXX XXXX" placeholderTextColor={colors.mutedForeground} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+            <Text style={s.payLabel}>رقم هاتفك</Text>
+            <TextInput
+              style={s.payInput}
+              placeholder="+222 XXXX XXXX"
+              placeholderTextColor={colors.mutedForeground}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              textAlign="right"
+            />
 
             <View style={s.instructBox}>
-              <Text style={s.instructTitle}>📋 Payment Instructions</Text>
-              <Text style={s.instructText}>1. Send {selectedPlan?.priceMru} MRU via {PAYMENT_METHODS.find((m) => m.id === payMethod)?.label}</Text>
-              <Text style={s.instructText}>2. Use your phone number as the reference</Text>
-              <Text style={s.instructText}>3. Submit this form — your account will be activated within 24h</Text>
+              <Text style={s.instructTitle}>📋 تعليمات الدفع</Text>
+              <Text style={s.instructText}>١. أرسل {selectedPlan?.priceMru} أوقية عبر {PAYMENT_METHODS.find((m) => m.id === payMethod)?.label}</Text>
+              <Text style={s.instructText}>٢. استخدم رقم هاتفك كمرجع</Text>
+              <Text style={s.instructText}>٣. أرسل هذا النموذج — سيُفعَّل حسابك خلال 24 ساعة</Text>
             </View>
 
             <TouchableOpacity
@@ -145,7 +158,9 @@ export default function SubscriptionScreen() {
               onPress={() => paymentMutation.mutate({ data: { planId: selectedPlan?.id, amountMru: selectedPlan?.priceMru, method: payMethod as any, phoneNumber: phone.trim() } })}
               disabled={!phone.trim() || paymentMutation.isPending}
             >
-              {paymentMutation.isPending ? <ActivityIndicator color="#fff" /> : <Text style={s.submitBtnText}>Submit Payment Proof</Text>}
+              {paymentMutation.isPending
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={s.submitBtnText}>إرسال إثبات الدفع</Text>}
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -161,21 +176,21 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     currentPlan: { fontSize: 18, fontWeight: '700', color: colors.success },
     currentDays: { fontSize: 13, color: colors.mutedForeground },
     freeBanner: { backgroundColor: colors.gold + '15', margin: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.gold + '30' },
-    freeBannerTitle: { fontSize: 18, fontWeight: '700', color: colors.gold },
-    freeBannerSub: { fontSize: 13, color: colors.mutedForeground, marginTop: 4 },
+    freeBannerTitle: { fontSize: 18, fontWeight: '700', color: colors.gold, textAlign: 'right' },
+    freeBannerSub: { fontSize: 13, color: colors.mutedForeground, marginTop: 4, textAlign: 'right' },
     section: { marginHorizontal: 16, marginBottom: 20 },
-    sectionTitle: { fontSize: 17, fontWeight: '700', color: colors.foreground, marginBottom: 12 },
+    sectionTitle: { fontSize: 17, fontWeight: '700', color: colors.foreground, marginBottom: 12, textAlign: 'right' },
     redeemRow: { flexDirection: 'row', gap: 8 },
     codeInput: { flex: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.foreground, backgroundColor: colors.card, letterSpacing: 2 },
     redeemBtn: { backgroundColor: colors.navy, borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center' },
     redeemBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
     planCard: { backgroundColor: colors.card, borderRadius: 12, padding: 16, marginBottom: 12, borderWidth: 1.5, borderColor: colors.border },
     planFeatured: { borderColor: colors.gold, backgroundColor: colors.gold + '08' },
-    featuredTag: { backgroundColor: colors.gold, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10, alignSelf: 'flex-start', marginBottom: 8 },
+    featuredTag: { backgroundColor: colors.gold, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10, alignSelf: 'flex-end', marginBottom: 8 },
     featuredTagText: { fontSize: 11, fontWeight: '700', color: '#fff' },
-    planName: { fontSize: 20, fontWeight: '700', color: colors.navy },
-    planPrice: { fontSize: 15, color: colors.foreground, fontWeight: '600', marginTop: 4 },
-    planDesc: { fontSize: 13, color: colors.mutedForeground, marginVertical: 8 },
+    planName: { fontSize: 20, fontWeight: '700', color: colors.navy, textAlign: 'right' },
+    planPrice: { fontSize: 15, color: colors.foreground, fontWeight: '600', marginTop: 4, textAlign: 'right' },
+    planDesc: { fontSize: 13, color: colors.mutedForeground, marginVertical: 8, textAlign: 'right' },
     buyBtn: { backgroundColor: colors.navy, borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
     buyBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
     btnDisabled: { opacity: 0.5 },
@@ -183,8 +198,8 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
     cancelText: { fontSize: 16, color: colors.mutedForeground },
     modalTitle: { fontSize: 17, fontWeight: '700', color: colors.foreground },
-    payInfo: { fontSize: 15, color: colors.foreground },
-    payLabel: { fontSize: 14, fontWeight: '600', color: colors.foreground },
+    payInfo: { fontSize: 15, color: colors.foreground, textAlign: 'right' },
+    payLabel: { fontSize: 14, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
     methodBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.card },
     methodBtnActive: { borderColor: colors.navy, backgroundColor: colors.navy + '10' },
     methodIcon: { fontSize: 18 },
@@ -192,8 +207,8 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     methodLabelActive: { color: colors.navy },
     payInput: { borderWidth: 1.5, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.foreground, backgroundColor: colors.card },
     instructBox: { backgroundColor: colors.secondary, borderRadius: 10, padding: 14, gap: 6 },
-    instructTitle: { fontSize: 14, fontWeight: '700', color: colors.foreground },
-    instructText: { fontSize: 13, color: colors.mutedForeground, lineHeight: 20 },
+    instructTitle: { fontSize: 14, fontWeight: '700', color: colors.foreground, textAlign: 'right' },
+    instructText: { fontSize: 13, color: colors.mutedForeground, lineHeight: 20, textAlign: 'right' },
     submitBtn: { backgroundColor: colors.navy, borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
     submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   });

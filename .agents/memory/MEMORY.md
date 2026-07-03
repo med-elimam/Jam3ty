@@ -1,3 +1,4 @@
 - [Talib MR schema facts](talib-mr-schema.md) — column names that differ from intuition; prevents seed/route bugs
 - [API URL double-prefix bug](api-url-prefix.md) — EXPO_PUBLIC_API_BASE_URL must be root domain; generated client already includes /api
 - [Expo Router index routes](expo-router-index-routes.md) — use /route not /route/index for navigation and Stack.Screen names
+- [Jamiati Arabic pass patterns](jamiati-arabic-pass.md) — enum display maps, filter type casting, orval hook option typing patterns used in Phase 1

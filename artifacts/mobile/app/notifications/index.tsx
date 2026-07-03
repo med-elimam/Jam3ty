@@ -10,10 +10,10 @@ const NOTIF_ICON: Record<string, string> = { announcement: 'bell', assignment: '
 
 function timeAgo(date: string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 60) return 'الآن';
+  if (diff < 3600) return `${Math.floor(diff / 60)}د`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}س`;
+  return `${Math.floor(diff / 86400)}ي`;
 }
 
 export default function NotificationsScreen() {
@@ -30,7 +30,7 @@ export default function NotificationsScreen() {
     <View style={s.root}>
       {unreadCount > 0 && (
         <TouchableOpacity style={s.markAllBtn} onPress={() => markAll.mutate()}>
-          <Text style={s.markAllText}>Mark all as read ({unreadCount})</Text>
+          <Text style={s.markAllText}>تحديد الكل كمقروء ({unreadCount})</Text>
         </TouchableOpacity>
       )}
       {isLoading ? <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} /> : (
@@ -39,7 +39,7 @@ export default function NotificationsScreen() {
           keyExtractor={(n: any) => n.id}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-          ListEmptyComponent={<View style={s.empty}><Feather name="bell-off" size={48} color={colors.border} /><Text style={s.emptyText}>No notifications</Text></View>}
+          ListEmptyComponent={<View style={s.empty}><Feather name="bell-off" size={48} color={colors.border} /><Text style={s.emptyText}>لا توجد إشعارات</Text></View>}
           renderItem={({ item }: { item: any }) => (
             <View style={[s.card, !item.isRead && s.cardUnread]}>
               <View style={[s.iconBox, { backgroundColor: colors.navy + '10' }]}>
@@ -68,9 +68,9 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     cardUnread: { borderLeftWidth: 3, borderLeftColor: colors.navy },
     iconBox: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
     content: { flex: 1 },
-    title: { fontSize: 14, fontWeight: '600', color: colors.foreground },
-    body: { fontSize: 13, color: colors.mutedForeground, marginTop: 2, lineHeight: 18 },
-    time: { fontSize: 11, color: colors.mutedForeground, marginTop: 4 },
+    title: { fontSize: 14, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
+    body: { fontSize: 13, color: colors.mutedForeground, marginTop: 2, lineHeight: 18, textAlign: 'right' },
+    time: { fontSize: 11, color: colors.mutedForeground, marginTop: 4, textAlign: 'right' },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.navy, marginTop: 6 },
     empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
     emptyText: { fontSize: 15, color: colors.mutedForeground },

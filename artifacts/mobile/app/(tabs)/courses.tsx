@@ -28,10 +28,11 @@ export default function CoursesScreen() {
         <Feather name="search" size={18} color={colors.mutedForeground} />
         <TextInput
           style={s.searchInput}
-          placeholder="Search courses…"
+          placeholder="ابحث عن مادة…"
           placeholderTextColor={colors.mutedForeground}
           value={search}
           onChangeText={setSearch}
+          textAlign="right"
         />
         {search.length > 0 && (
           <TouchableOpacity onPress={() => setSearch('')}>
@@ -50,7 +51,7 @@ export default function CoursesScreen() {
           ListEmptyComponent={
             <View style={s.empty}>
               <Feather name="book" size={48} color={colors.border} />
-              <Text style={s.emptyText}>No courses found</Text>
+              <Text style={s.emptyText}>لا توجد مواد بعد</Text>
             </View>
           }
           renderItem={({ item }: { item: any }) => (
@@ -63,19 +64,19 @@ export default function CoursesScreen() {
               </View>
               <View style={s.courseInfo}>
                 <Text style={s.courseName} numberOfLines={2}>{item.nameAr || item.name}</Text>
-                {item.professorName && <Text style={s.courseProfessor}>Dr. {item.professorName}</Text>}
+                {item.professorName && <Text style={s.courseProfessor}>د. {item.professorName}</Text>}
                 <View style={s.courseStats}>
                   <View style={s.statItem}>
                     <Feather name="file" size={12} color={colors.mutedForeground} />
-                    <Text style={s.statText}>{item.fileCount ?? 0} files</Text>
+                    <Text style={s.statText}>{item.fileCount ?? 0} ملف</Text>
                   </View>
                   <View style={s.statItem}>
                     <Feather name="clipboard" size={12} color={colors.mutedForeground} />
-                    <Text style={s.statText}>{item.assignmentCount ?? 0} assignments</Text>
+                    <Text style={s.statText}>{item.assignmentCount ?? 0} واجب</Text>
                   </View>
                 </View>
               </View>
-              <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+              <Feather name="chevron-left" size={20} color={colors.mutedForeground} />
             </TouchableOpacity>
           )}
         />
@@ -101,9 +102,9 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     courseIcon: { width: 52, height: 52, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
     courseCode: { fontSize: 11, fontWeight: '700', color: '#fff', textAlign: 'center' },
     courseInfo: { flex: 1 },
-    courseName: { fontSize: 15, fontWeight: '600', color: colors.foreground },
-    courseProfessor: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
-    courseStats: { flexDirection: 'row', gap: 12, marginTop: 6 },
+    courseName: { fontSize: 15, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
+    courseProfessor: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textAlign: 'right' },
+    courseStats: { flexDirection: 'row', gap: 12, marginTop: 6, justifyContent: 'flex-end' },
     statItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     statText: { fontSize: 12, color: colors.mutedForeground },
     empty: { alignItems: 'center', paddingTop: 60, gap: 12 },

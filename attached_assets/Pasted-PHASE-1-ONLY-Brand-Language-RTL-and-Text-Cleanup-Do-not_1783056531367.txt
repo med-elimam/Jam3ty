@@ -1,0 +1,107 @@
+PHASE 1 ONLY — Brand, Language, RTL, and Text Cleanup.
+
+Do not work on backend.
+Do not work on payments.
+Do not work on admin dashboard.
+Do not add new features.
+Do not redesign the whole app yet.
+Do not touch database schema unless absolutely required.
+Do not break auth, onboarding, or navigation.
+
+Current app works but the UI language and branding are messy.
+
+Goal:
+Clean the app brand and language foundation before visual redesign.
+
+Brand:
+- App name Arabic: جامعتي
+- Latin name: Jamiati
+- Subscription name Arabic: جامعتي بلس
+- Subscription name Latin: Jamiati Plus
+- Tagline Arabic: جامعتك في جيبك
+- Remove all old names such as Talib MR from user-facing screens.
+- Internal technical names can remain unchanged if changing them risks breaking the app.
+
+Language:
+- Arabic must be the default UI language.
+- French can remain supported through translations.
+- English should not appear in Arabic mode except for technical fallback.
+- Fix all broken labels such as:
+  - Announcem ents
+  - Opportunitie s
+  - AI Assistant mixed labels
+  - Create Account
+  - Register
+  - Sign in
+  - Home
+  - Courses
+  - Timetable
+  - Community
+  - Profile
+  - More Modules
+  - Settings
+  - Change Password
+  - Coming Soon
+
+RTL:
+- Arabic layout must be RTL where appropriate.
+- Text alignment must be correct.
+- Buttons, headers, labels, and lists must look natural in Arabic.
+- Do not force everything into awkward RTL if icons/navigation become broken; fix layout thoughtfully.
+
+Required Arabic labels:
+- Home = الرئيسية
+- Courses = المواد
+- Timetable = الجدول
+- Community = المجتمع
+- Profile = الملف الشخصي
+- More Modules = المزيد
+- Files = الملفات
+- Announcements = الإعلانات
+- Assignments = الواجبات
+- Exams = الامتحانات
+- Events = الفعاليات
+- Clubs = النوادي
+- Opportunities = الفرص
+- AI Assistant = المساعد الذكي
+- Subscription = الاشتراك
+- Settings = الإعدادات
+- Notifications = الإشعارات
+- Change Password = تغيير كلمة المرور
+- Privacy = الخصوصية
+- Delete Account = حذف الحساب
+- Sign Out = تسجيل الخروج
+- Free Plan = الخطة المجانية
+- Upgrade = ترقية
+- Tap to upgrade = اضغط للترقية
+- No courses found = لا توجد مواد بعد
+- No classes = لا توجد محاضرات
+- No announcements = لا توجد إعلانات حاليًا
+- No posts yet. Be the first! = لا توجد منشورات بعد. كن أول من يشارك.
+
+Onboarding text:
+- Select University = اختر جامعتك
+- Select Faculty = اختر الكلية أو المعهد
+- Select Department = اختر القسم
+- Select Level = اختر السنة الدراسية
+- Select Group = اختر المجموعة
+- Next = التالي
+- Back = رجوع
+- Finish = إنهاء
+
+Auth text:
+- Create Account = إنشاء حساب
+- Full Name = الاسم الكامل
+- Email = البريد الإلكتروني
+- Password = كلمة المرور
+- Register = إنشاء الحساب
+- Already have an account? Sign in = لديك حساب؟ تسجيل الدخول
+- Sign in = تسجيل الدخول
+
+Fix duplicate or awkward Arabic strings where visible.
+
+Important:
+- Do not leave mixed English/Arabic in the same Arabic screen.
+- Do not create placeholder texts.
+- Do not claim completion until you test the main tabs and onboarding screens visually in Expo.
+- After finishing, list exactly which files were changed.

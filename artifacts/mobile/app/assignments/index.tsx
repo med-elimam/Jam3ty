@@ -2,34 +2,34 @@ import React, { useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
-import { useListAssignments } from '@workspace/api-client-react';
+import { useListAssignments, ListAssignmentsStatus } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
 
-const STATUS_COLORS: Record<string, string> = { submitted: '#10B981', late: '#EF4444', not_submitted: '#F59E0B' };
-const STATUS_LABELS: Record<string, string> = { submitted: 'Submitted', late: 'Late', not_submitted: 'Pending' };
+const STATUS_COLORS: Record<string, string> = { submitted: '#10B981', late: '#EF4444', pending: '#F59E0B', not_submitted: '#F59E0B', reviewed: '#6B7280' };
+const STATUS_LABELS: Record<string, string> = { submitted: 'مُسلَّم', late: 'متأخر', pending: 'معلّق', not_submitted: 'معلّق', reviewed: 'مراجَع' };
 
 function daysLeft(deadline: string) {
   const d = Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000);
-  if (d < 0) return 'Overdue';
-  if (d === 0) return 'Due today';
-  if (d === 1) return 'Due tomorrow';
-  return `${d} days left`;
+  if (d < 0) return 'انتهى الموعد';
+  if (d === 0) return 'اليوم';
+  if (d === 1) return 'غداً';
+  return `${d} أيام متبقية`;
 }
 
 export default function AssignmentsScreen() {
   const colors = useColors();
   const router = useRouter();
-  const [filter, setFilter] = useState<string | undefined>(undefined);
+  const [filter, setFilter] = useState<ListAssignmentsStatus | undefined>(undefined);
   const { data, isLoading, refetch, isRefetching } = useListAssignments({ status: filter });
 
   const assignments: any[] = (data as any)?.data ?? [];
   const s = styles(colors);
 
-  const filters = [
-    { label: 'All', value: undefined },
-    { label: 'Pending', value: 'not_submitted' },
-    { label: 'Submitted', value: 'submitted' },
-    { label: 'Late', value: 'late' },
+  const filters: { label: string; value: ListAssignmentsStatus | undefined }[] = [
+    { label: 'الكل', value: undefined },
+    { label: 'معلّق', value: ListAssignmentsStatus.pending },
+    { label: 'مُسلَّم', value: ListAssignmentsStatus.submitted },
+    { label: 'متأخر', value: ListAssignmentsStatus.late },
   ];
 
   return (
@@ -47,7 +47,7 @@ export default function AssignmentsScreen() {
           keyExtractor={(a: any) => a.id}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-          ListEmptyComponent={<View style={s.empty}><Feather name="clipboard" size={48} color={colors.border} /><Text style={s.emptyText}>No assignments</Text></View>}
+          ListEmptyComponent={<View style={s.empty}><Feather name="clipboard" size={48} color={colors.border} /><Text style={s.emptyText}>لا توجد واجبات</Text></View>}
           renderItem={({ item }: { item: any }) => {
             const color = STATUS_COLORS[item.submissionStatus] ?? colors.mutedForeground;
             return (
@@ -58,15 +58,15 @@ export default function AssignmentsScreen() {
                     <Text style={s.cardCourse}>{item.courseName}</Text>
                   </View>
                   <View style={[s.statusBadge, { backgroundColor: color + '20' }]}>
-                    <Text style={[s.statusText, { color }]}>{STATUS_LABELS[item.submissionStatus] ?? 'Pending'}</Text>
+                    <Text style={[s.statusText, { color }]}>{STATUS_LABELS[item.submissionStatus] ?? 'معلّق'}</Text>
                   </View>
                 </View>
                 <View style={s.cardBottom}>
                   <View style={s.deadlineRow}>
                     <Feather name="clock" size={12} color={colors.mutedForeground} />
-                    <Text style={s.deadline}>{daysLeft(item.deadline)} · {new Date(item.deadline).toLocaleDateString()}</Text>
+                    <Text style={s.deadline}>{daysLeft(item.deadline)} · {new Date(item.deadline).toLocaleDateString('ar')}</Text>
                   </View>
-                  {item.maxScore && <Text style={s.score}>{item.maxScore} pts</Text>}
+                  {item.maxScore && <Text style={s.score}>{item.maxScore} نقطة</Text>}
                 </View>
               </View>
             );
@@ -87,8 +87,8 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     filterTextActive: { color: '#fff' },
     card: { backgroundColor: colors.card, borderRadius: 12, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
     cardTop: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-    cardTitle: { fontSize: 15, fontWeight: '600', color: colors.foreground },
-    cardCourse: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
+    cardTitle: { fontSize: 15, fontWeight: '600', color: colors.foreground, textAlign: 'right' },
+    cardCourse: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, textAlign: 'right' },
     statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, alignSelf: 'flex-start' },
     statusText: { fontSize: 11, fontWeight: '700' },
     cardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

@@ -42,35 +42,35 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'الرئيسية',
           tabBarIcon: ({ color, size }) => <Feather name="home" size={size ?? 22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="courses"
         options={{
-          title: 'Courses',
+          title: 'المواد',
           tabBarIcon: ({ color, size }) => <Feather name="book-open" size={size ?? 22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
-          title: 'Timetable',
+          title: 'الجدول',
           tabBarIcon: ({ color, size }) => <Feather name="calendar" size={size ?? 22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="community"
         options={{
-          title: 'Community',
+          title: 'المجتمع',
           tabBarIcon: ({ color, size }) => <Feather name="users" size={size ?? 22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: 'الملف الشخصي',
           tabBarIcon: ({ color, size }) => <Feather name="user" size={size ?? 22} color={color} />,
         }}
       />
