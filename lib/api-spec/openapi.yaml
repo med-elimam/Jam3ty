@@ -2,21 +2,37 @@ openapi: 3.1.0
 info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 1.0.0
+  description: Talib MR - University Student Platform for Mauritania
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: universities
+  - name: profile
+  - name: courses
+  - name: files
+  - name: announcements
+  - name: timetable
+  - name: assignments
+  - name: exams
+  - name: community
+  - name: events
+  - name: clubs
+  - name: opportunities
+  - name: subscriptions
+  - name: notifications
+  - name: ai
+  - name: dashboard
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +40,2073 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── AUTH ────────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new student account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout (invalidate refresh token)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required: [refreshToken]
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/refresh:
+    post:
+      operationId: refreshTokens
+      tags: [auth]
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required: [refreshToken]
+      responses:
+        "200":
+          description: New tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPairResponse"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      tags: [auth]
+      summary: Request password reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required: [email]
+      responses:
+        "200":
+          description: Reset email queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── UNIVERSITIES & ACADEMIC STRUCTURE ───────────────────────────────────────
+  /universities:
+    get:
+      operationId: listUniversities
+      tags: [universities]
+      summary: List all universities
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [community_created, verified, official_partner]
+      responses:
+        "200":
+          description: Universities list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/University"
+                required: [success, data]
+
+  /universities/{universityId}/faculties:
+    get:
+      operationId: listFaculties
+      tags: [universities]
+      summary: List faculties for a university
+      parameters:
+        - name: universityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Faculties list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Faculty"
+                required: [success, data]
+
+  /faculties/{facultyId}/departments:
+    get:
+      operationId: listDepartments
+      tags: [universities]
+      summary: List departments for a faculty
+      parameters:
+        - name: facultyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Departments list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Department"
+                required: [success, data]
+
+  /departments/{departmentId}/levels:
+    get:
+      operationId: listLevels
+      tags: [universities]
+      summary: List levels for a department
+      parameters:
+        - name: departmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Levels list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Level"
+                required: [success, data]
+
+  /levels/{levelId}/groups:
+    get:
+      operationId: listGroups
+      tags: [universities]
+      summary: List groups for a level
+      parameters:
+        - name: levelId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Groups list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Group"
+                required: [success, data]
+
+  # ─── PROFILE ─────────────────────────────────────────────────────────────────
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get current user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Profile"
+                required: [success, data]
+
+    put:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileInput"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Profile"
+                required: [success, data]
+
+  /profile/complete-onboarding:
+    post:
+      operationId: completeOnboarding
+      tags: [profile]
+      summary: Complete onboarding with academic selections
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardingInput"
+      responses:
+        "200":
+          description: Onboarding complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Profile"
+                required: [success, data]
+
+  # ─── COURSES ─────────────────────────────────────────────────────────────────
+  /courses:
+    get:
+      operationId: listCourses
+      tags: [courses]
+      summary: List courses for current student
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: semesterId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Courses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Course"
+                required: [success, data]
+
+  /courses/{courseId}:
+    get:
+      operationId: getCourse
+      tags: [courses]
+      summary: Get course detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/CourseDetail"
+                required: [success, data]
+
+  # ─── FILES ───────────────────────────────────────────────────────────────────
+  /files:
+    get:
+      operationId: listFiles
+      tags: [files]
+      summary: List academic files
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [lecture, td, tp, summary, exam, correction, book, other]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Files list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AcademicFile"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                required: [success, data]
+
+  /files/{fileId}/favorite:
+    post:
+      operationId: toggleFileFavorite
+      tags: [files]
+      summary: Toggle favorite status of a file
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Favorite toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      isFavorited:
+                        type: boolean
+                    required: [isFavorited]
+                required: [success, data]
+
+  # ─── ANNOUNCEMENTS ───────────────────────────────────────────────────────────
+  /announcements:
+    get:
+      operationId: listAnnouncements
+      tags: [announcements]
+      summary: List announcements relevant to current student
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Announcements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Announcement"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                required: [success, data]
+
+  /announcements/{announcementId}/read:
+    post:
+      operationId: markAnnouncementRead
+      tags: [announcements]
+      summary: Mark announcement as read
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Marked as read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── TIMETABLE ───────────────────────────────────────────────────────────────
+  /timetable:
+    get:
+      operationId: getTimetable
+      tags: [timetable]
+      summary: Get weekly timetable for current student
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Weekly timetable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TimetableSession"
+                required: [success, data]
+
+  # ─── ASSIGNMENTS ─────────────────────────────────────────────────────────────
+  /assignments:
+    get:
+      operationId: listAssignments
+      tags: [assignments]
+      summary: List assignments for current student
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, submitted, late, reviewed]
+      responses:
+        "200":
+          description: Assignments list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Assignment"
+                required: [success, data]
+
+  /assignments/{assignmentId}:
+    get:
+      operationId: getAssignment
+      tags: [assignments]
+      summary: Get assignment detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Assignment detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AssignmentDetail"
+                required: [success, data]
+
+  # ─── EXAMS ───────────────────────────────────────────────────────────────────
+  /exams:
+    get:
+      operationId: listExams
+      tags: [exams]
+      summary: List exams for current student
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: query
+          schema:
+            type: string
+        - name: upcoming
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Exams list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Exam"
+                required: [success, data]
+
+  # ─── COMMUNITY ───────────────────────────────────────────────────────────────
+  /community/posts:
+    get:
+      operationId: listPosts
+      tags: [community]
+      summary: List community posts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Posts list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Post"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                required: [success, data]
+
+    post:
+      operationId: createPost
+      tags: [community]
+      summary: Create a community post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostInput"
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Post"
+                required: [success, data]
+
+  /community/posts/{postId}/react:
+    post:
+      operationId: reactToPost
+      tags: [community]
+      summary: React to a post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reaction:
+                  type: string
+                  enum: [like, love, insightful, helpful]
+              required: [reaction]
+      responses:
+        "200":
+          description: Reaction added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── EVENTS ──────────────────────────────────────────────────────────────────
+  /events:
+    get:
+      operationId: listEvents
+      tags: [events]
+      summary: List upcoming events
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Events list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                required: [success, data]
+
+  /events/{eventId}/register:
+    post:
+      operationId: registerForEvent
+      tags: [events]
+      summary: Register for an event
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── CLUBS ───────────────────────────────────────────────────────────────────
+  /clubs:
+    get:
+      operationId: listClubs
+      tags: [clubs]
+      summary: List clubs at the user's university
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Clubs list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Club"
+                required: [success, data]
+
+  /clubs/{clubId}/join:
+    post:
+      operationId: joinClub
+      tags: [clubs]
+      summary: Request to join a club
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Join requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── OPPORTUNITIES ────────────────────────────────────────────────────────────
+  /opportunities:
+    get:
+      operationId: listOpportunities
+      tags: [opportunities]
+      summary: List opportunities
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [internship, job, training, scholarship, competition, hackathon, freelance, volunteering]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Opportunities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Opportunity"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                required: [success, data]
+
+  # ─── SUBSCRIPTIONS ────────────────────────────────────────────────────────────
+  /subscriptions/plans:
+    get:
+      operationId: listPlans
+      tags: [subscriptions]
+      summary: List available subscription plans
+      responses:
+        "200":
+          description: Plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Plan"
+                required: [success, data]
+
+  /subscriptions/me:
+    get:
+      operationId: getMySubscription
+      tags: [subscriptions]
+      summary: Get current user's active subscription
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current subscription
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Subscription"
+                required: [success, data]
+
+  /subscriptions/redeem:
+    post:
+      operationId: redeemActivationCode
+      tags: [subscriptions]
+      summary: Redeem an activation code
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+              required: [code]
+      responses:
+        "200":
+          description: Code redeemed, subscription activated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Subscription"
+                required: [success, data]
+        "400":
+          description: Invalid or expired code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /subscriptions/payment:
+    post:
+      operationId: submitPaymentProof
+      tags: [subscriptions]
+      summary: Submit manual payment proof
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentProofInput"
+      responses:
+        "201":
+          description: Payment submitted for review
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Payment"
+                required: [success, data]
+
+  /subscriptions/payments:
+    get:
+      operationId: listMyPayments
+      tags: [subscriptions]
+      summary: List current user's payment history
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Payment history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Payment"
+                required: [success, data]
+
+  # ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List notifications for current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Notification"
+                  unreadCount:
+                    type: integer
+                required: [success, data, unreadCount]
+
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: All marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── AI ─────────────────────────────────────────────────────────────────────
+  /ai/chat:
+    post:
+      operationId: aiChat
+      tags: [ai]
+      summary: Send a message to the AI study assistant
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                context:
+                  type: string
+                  description: Optional course/file context
+              required: [message]
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      reply:
+                        type: string
+                      usageRemaining:
+                        type: integer
+                    required: [reply, usageRemaining]
+                required: [success, data]
+        "403":
+          description: AI not configured or usage limit reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /ai/usage:
+    get:
+      operationId: getAiUsage
+      tags: [ai]
+      summary: Get AI usage stats for current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Usage stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      used:
+                        type: integer
+                      limit:
+                        type: integer
+                      plan:
+                        type: string
+                    required: [used, limit, plan]
+                required: [success, data]
+
+  # ─── DASHBOARD ────────────────────────────────────────────────────────────────
+  /dashboard/home:
+    get:
+      operationId: getDashboardHome
+      tags: [dashboard]
+      summary: Get home dashboard data
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Home dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/DashboardHome"
+                required: [success, data]
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+          required: [code, message]
+      required: [success, error]
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+      required: [page, limit, total, totalPages]
+
+    # ─── AUTH SCHEMAS ────────────────────────────────────────────────────────
+    RegisterInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        language:
+          type: string
+          enum: [ar, fr, en]
+          default: ar
+      required: [fullName, email, password]
+
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+
+    AuthTokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+      required: [accessToken, refreshToken, expiresIn]
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/User"
+            tokens:
+              $ref: "#/components/schemas/AuthTokens"
+          required: [user, tokens]
+      required: [success, data]
+
+    TokenPairResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/AuthTokens"
+      required: [success, data]
+
+    UserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/User"
+      required: [success, data]
+
+    # ─── USER SCHEMAS ─────────────────────────────────────────────────────────
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        fullName:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [student, professor, club_manager, department_admin, faculty_admin, university_admin, moderator, agent, finance_admin, super_admin]
+        emailVerified:
+          type: boolean
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        profile:
+          $ref: "#/components/schemas/Profile"
+          nullable: true
+      required: [id, email, fullName, role, emailVerified, isActive, createdAt]
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        universityId:
+          type: string
+          nullable: true
+        facultyId:
+          type: string
+          nullable: true
+        departmentId:
+          type: string
+          nullable: true
+        levelId:
+          type: string
+          nullable: true
+        groupId:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        skills:
+          type: array
+          items:
+            type: string
+        privacy:
+          type: string
+          enum: [private, same_university, public]
+        language:
+          type: string
+          enum: [ar, fr, en]
+        university:
+          $ref: "#/components/schemas/University"
+          nullable: true
+        faculty:
+          $ref: "#/components/schemas/Faculty"
+          nullable: true
+        department:
+          $ref: "#/components/schemas/Department"
+          nullable: true
+        level:
+          $ref: "#/components/schemas/Level"
+          nullable: true
+        group:
+          $ref: "#/components/schemas/Group"
+          nullable: true
+        onboardingComplete:
+          type: boolean
+      required: [id, userId, privacy, language, onboardingComplete]
+
+    UpdateProfileInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+        phone:
+          type: string
+        bio:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        privacy:
+          type: string
+          enum: [private, same_university, public]
+        language:
+          type: string
+          enum: [ar, fr, en]
+        linkedinUrl:
+          type: string
+        githubUrl:
+          type: string
+        portfolioUrl:
+          type: string
+
+    OnboardingInput:
+      type: object
+      properties:
+        universityId:
+          type: string
+        facultyId:
+          type: string
+        departmentId:
+          type: string
+        levelId:
+          type: string
+        groupId:
+          type: string
+        language:
+          type: string
+          enum: [ar, fr, en]
+      required: [universityId, facultyId, departmentId, levelId]
+
+    # ─── ACADEMIC SCHEMAS ─────────────────────────────────────────────────────
+    University:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        city:
+          type: string
+        logoUrl:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [community_created, verified, official_partner]
+        facultyCount:
+          type: integer
+          nullable: true
+      required: [id, name, city, status]
+
+    Faculty:
+      type: object
+      properties:
+        id:
+          type: string
+        universityId:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+      required: [id, universityId, name]
+
+    Department:
+      type: object
+      properties:
+        id:
+          type: string
+        facultyId:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+      required: [id, facultyId, name]
+
+    Level:
+      type: object
+      properties:
+        id:
+          type: string
+        departmentId:
+          type: string
+        name:
+          type: string
+        yearNumber:
+          type: integer
+      required: [id, departmentId, name, yearNumber]
+
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+        levelId:
+          type: string
+        name:
+          type: string
+      required: [id, levelId, name]
+
+    # ─── COURSE SCHEMAS ───────────────────────────────────────────────────────
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        semester:
+          type: string
+        professorId:
+          type: string
+          nullable: true
+        professorName:
+          type: string
+          nullable: true
+        fileCount:
+          type: integer
+        assignmentCount:
+          type: integer
+      required: [id, name, semester, fileCount, assignmentCount]
+
+    CourseDetail:
+      allOf:
+        - $ref: "#/components/schemas/Course"
+        - type: object
+          properties:
+            recentFiles:
+              type: array
+              items:
+                $ref: "#/components/schemas/AcademicFile"
+            recentAnnouncements:
+              type: array
+              items:
+                $ref: "#/components/schemas/Announcement"
+            upcomingAssignments:
+              type: array
+              items:
+                $ref: "#/components/schemas/Assignment"
+            upcomingExams:
+              type: array
+              items:
+                $ref: "#/components/schemas/Exam"
+          required: [recentFiles, recentAnnouncements, upcomingAssignments, upcomingExams]
+
+    # ─── FILE SCHEMAS ─────────────────────────────────────────────────────────
+    AcademicFile:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        fileType:
+          type: string
+          enum: [lecture, td, tp, summary, exam, correction, book, other]
+        mimeType:
+          type: string
+        fileSize:
+          type: integer
+        fileUrl:
+          type: string
+        courseId:
+          type: string
+          nullable: true
+        courseName:
+          type: string
+          nullable: true
+        uploadedById:
+          type: string
+        uploaderName:
+          type: string
+        approvalStatus:
+          type: string
+          enum: [pending, approved, rejected]
+        downloadCount:
+          type: integer
+        isFavorited:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, fileType, mimeType, fileSize, fileUrl, uploadedById, uploaderName, approvalStatus, downloadCount, isFavorited, createdAt]
+
+    # ─── ANNOUNCEMENT SCHEMAS ─────────────────────────────────────────────────
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        priority:
+          type: string
+          enum: [normal, important, urgent]
+        scope:
+          type: string
+          enum: [global, university, faculty, department, level, group, course]
+        createdById:
+          type: string
+        createdByName:
+          type: string
+        courseName:
+          type: string
+          nullable: true
+        isRead:
+          type: boolean
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, content, priority, scope, createdById, createdByName, isRead, createdAt]
+
+    # ─── TIMETABLE SCHEMAS ────────────────────────────────────────────────────
+    TimetableSession:
+      type: object
+      properties:
+        id:
+          type: string
+        courseId:
+          type: string
+        courseName:
+          type: string
+        courseCode:
+          type: string
+          nullable: true
+        professorName:
+          type: string
+          nullable: true
+        dayOfWeek:
+          type: integer
+          description: 0=Sunday, 1=Monday ... 6=Saturday
+        startTime:
+          type: string
+          description: "HH:MM format"
+        endTime:
+          type: string
+          description: "HH:MM format"
+        room:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [lecture, td, tp]
+        groupName:
+          type: string
+          nullable: true
+      required: [id, courseId, courseName, dayOfWeek, startTime, endTime, type]
+
+    # ─── ASSIGNMENT SCHEMAS ───────────────────────────────────────────────────
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        courseId:
+          type: string
+        courseName:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        submissionStatus:
+          type: string
+          enum: [not_submitted, submitted, late, reviewed]
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, courseId, courseName, deadline, createdAt]
+
+    AssignmentDetail:
+      allOf:
+        - $ref: "#/components/schemas/Assignment"
+        - type: object
+          properties:
+            submission:
+              type: object
+              nullable: true
+              properties:
+                id:
+                  type: string
+                fileUrl:
+                  type: string
+                  nullable: true
+                status:
+                  type: string
+                grade:
+                  type: string
+                  nullable: true
+                comment:
+                  type: string
+                  nullable: true
+                submittedAt:
+                  type: string
+                  format: date-time
+                  nullable: true
+              required: [id, status]
+
+    # ─── EXAM SCHEMAS ─────────────────────────────────────────────────────────
+    Exam:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        courseId:
+          type: string
+        courseName:
+          type: string
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          nullable: true
+        room:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [midterm, final, makeup, test, other]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, courseId, courseName, date, type, createdAt]
+
+    # ─── COMMUNITY SCHEMAS ────────────────────────────────────────────────────
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        authorId:
+          type: string
+        authorName:
+          type: string
+        authorAvatarUrl:
+          type: string
+          nullable: true
+        visibility:
+          type: string
+          enum: [public, same_university, same_department, same_course, same_group]
+        reactionCount:
+          type: integer
+        commentCount:
+          type: integer
+        userReaction:
+          type: string
+          nullable: true
+        isPinned:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, content, authorId, authorName, visibility, reactionCount, commentCount, isPinned, createdAt]
+
+    CreatePostInput:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+        visibility:
+          type: string
+          enum: [public, same_university, same_department, same_course, same_group]
+          default: same_university
+      required: [content]
+
+    # ─── EVENT SCHEMAS ────────────────────────────────────────────────────────
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [university, club, training, competition, workshop, conference, other]
+        location:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+        isRegistered:
+          type: boolean
+        registrationCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, type, startDate, isRegistered, registrationCount, createdAt]
+
+    # ─── CLUB SCHEMAS ─────────────────────────────────────────────────────────
+    Club:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        memberCount:
+          type: integer
+        isMember:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, memberCount, isMember, createdAt]
+
+    # ─── OPPORTUNITY SCHEMAS ──────────────────────────────────────────────────
+    Opportunity:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        organization:
+          type: string
+        type:
+          type: string
+          enum: [internship, job, training, scholarship, competition, hackathon, freelance, volunteering]
+        description:
+          type: string
+        location:
+          type: string
+          nullable: true
+        deadline:
+          type: string
+          format: date
+          nullable: true
+        link:
+          type: string
+          nullable: true
+        isFeatured:
+          type: boolean
+        status:
+          type: string
+          enum: [active, closed]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, organization, type, description, isFeatured, status, createdAt]
+
+    # ─── SUBSCRIPTION SCHEMAS ─────────────────────────────────────────────────
+    Plan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        priceMru:
+          type: integer
+        durationDays:
+          type: integer
+        features:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+      required: [id, name, priceMru, durationDays, features, isActive]
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        planId:
+          type: string
+        planName:
+          type: string
+        status:
+          type: string
+          enum: [active, expired, cancelled]
+        source:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        daysRemaining:
+          type: integer
+      required: [id, userId, planId, planName, status, source, startsAt, expiresAt, daysRemaining]
+
+    PaymentProofInput:
+      type: object
+      properties:
+        planId:
+          type: string
+        amountMru:
+          type: integer
+        method:
+          type: string
+          enum: [bankily, masrvi, sedad, cash_agent]
+        phoneNumber:
+          type: string
+        transactionRef:
+          type: string
+          nullable: true
+        proofUrl:
+          type: string
+          nullable: true
+      required: [planId, amountMru, method, phoneNumber]
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        planId:
+          type: string
+        planName:
+          type: string
+        amountMru:
+          type: integer
+        method:
+          type: string
+        status:
+          type: string
+          enum: [pending, under_review, approved, rejected, expired, refunded]
+        phoneNumber:
+          type: string
+          nullable: true
+        transactionRef:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, userId, planId, planName, amountMru, method, status, createdAt]
+
+    # ─── NOTIFICATION SCHEMAS ─────────────────────────────────────────────────
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, type, title, body, isRead, createdAt]
+
+    # ─── DASHBOARD SCHEMAS ────────────────────────────────────────────────────
+    DashboardHome:
+      type: object
+      properties:
+        student:
+          $ref: "#/components/schemas/User"
+        subscription:
+          $ref: "#/components/schemas/Subscription"
+          nullable: true
+        todaysSessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimetableSession"
+        latestAnnouncements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Announcement"
+        upcomingAssignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assignment"
+        upcomingExams:
+          type: array
+          items:
+            $ref: "#/components/schemas/Exam"
+        recentFiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/AcademicFile"
+        upcomingEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+        featuredOpportunities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Opportunity"
+        unreadNotificationsCount:
+          type: integer
+      required: [student, todaysSessions, latestAnnouncements, upcomingAssignments, upcomingExams, recentFiles, upcomingEvents, featuredOpportunities, unreadNotificationsCount]

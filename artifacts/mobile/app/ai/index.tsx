@@ -1,0 +1,123 @@
+import React, { useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useColors } from '@/hooks/useColors';
+import { useAiChat, useGetAiUsage } from '@workspace/api-client-react';
+import { Feather } from '@expo/vector-icons';
+
+interface Message { id: string; role: 'user' | 'assistant'; content: string; ts: Date; }
+
+export default function AIScreen() {
+  const colors = useColors();
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '0', role: 'assistant', content: 'مرحباً! أنا مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟\n\nHello! I\'m your AI assistant. How can I help you today?', ts: new Date() },
+  ]);
+  const [input, setInput] = useState('');
+  const listRef = useRef<FlatList>(null);
+
+  const { data: usageData } = useGetAiUsage();
+  const usage = (usageData as any)?.data;
+
+  const chatMutation = useAiChat({
+    mutation: {
+      onSuccess: (data: any) => {
+        const reply = data?.data?.reply ?? 'Sorry, I could not process your request.';
+        setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'assistant', content: reply, ts: new Date() }]);
+        setTimeout(() => listRef.current?.scrollToEnd(), 100);
+      },
+      onError: (err: any) => {
+        const msg = err?.data?.error?.message ?? 'Could not reach AI. Please try again.';
+        setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'assistant', content: `Error: ${msg}`, ts: new Date() }]);
+      },
+    },
+  });
+
+  const sendMessage = () => {
+    if (!input.trim() || chatMutation.isPending) return;
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: input.trim(), ts: new Date() };
+    setMessages((prev) => [...prev, userMsg]);
+    chatMutation.mutate({ data: { message: input.trim() } });
+    setInput('');
+    setTimeout(() => listRef.current?.scrollToEnd(), 100);
+  };
+
+  const s = styles(colors);
+
+  return (
+    <KeyboardAvoidingView style={s.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
+      {/* Usage indicator */}
+      {usage && (
+        <View style={s.usageBanner}>
+          <Feather name="zap" size={14} color={colors.gold} />
+          <Text style={s.usageText}>{usage.used}/{usage.limit} requests today · {usage.plan} plan</Text>
+        </View>
+      )}
+
+      <FlatList
+        ref={listRef}
+        data={messages}
+        keyExtractor={(m) => m.id}
+        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 20 }}
+        onContentSizeChange={() => listRef.current?.scrollToEnd()}
+        renderItem={({ item }) => (
+          <View style={[s.bubble, item.role === 'user' ? s.bubbleUser : s.bubbleAI]}>
+            {item.role === 'assistant' && (
+              <View style={s.aiAvatar}><Text style={{ fontSize: 14 }}>🤖</Text></View>
+            )}
+            <View style={[s.bubbleContent, item.role === 'user' ? s.contentUser : s.contentAI]}>
+              <Text style={[s.bubbleText, item.role === 'user' && s.bubbleTextUser]}>{item.content}</Text>
+            </View>
+          </View>
+        )}
+      />
+
+      {chatMutation.isPending && (
+        <View style={s.thinking}>
+          <ActivityIndicator size="small" color={colors.navy} />
+          <Text style={s.thinkingText}>Thinking…</Text>
+        </View>
+      )}
+
+      <View style={s.inputRow}>
+        <TextInput
+          style={s.input}
+          value={input}
+          onChangeText={setInput}
+          placeholder="Ask me anything…"
+          placeholderTextColor={colors.mutedForeground}
+          multiline
+          maxLength={500}
+          onSubmitEditing={sendMessage}
+        />
+        <TouchableOpacity
+          style={[s.sendBtn, (!input.trim() || chatMutation.isPending) && s.sendBtnDisabled]}
+          onPress={sendMessage}
+          disabled={!input.trim() || chatMutation.isPending}
+        >
+          <Feather name="send" size={18} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = (colors: ReturnType<typeof useColors>) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: colors.background },
+    usageBanner: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.gold + '15', paddingHorizontal: 16, paddingVertical: 8 },
+    usageText: { fontSize: 12, color: colors.gold, fontWeight: '500' },
+    bubble: { flexDirection: 'row', gap: 8, alignItems: 'flex-end' },
+    bubbleUser: { justifyContent: 'flex-end' },
+    bubbleAI: { justifyContent: 'flex-start' },
+    aiAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.secondary, alignItems: 'center', justifyContent: 'center' },
+    bubbleContent: { maxWidth: '80%', borderRadius: 16, padding: 12 },
+    contentUser: { backgroundColor: colors.navy, borderBottomRightRadius: 4 },
+    contentAI: { backgroundColor: colors.card, borderBottomLeftRadius: 4, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
+    bubbleText: { fontSize: 15, color: colors.foreground, lineHeight: 22 },
+    bubbleTextUser: { color: '#fff' },
+    thinking: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingBottom: 8 },
+    thinkingText: { fontSize: 13, color: colors.mutedForeground },
+    inputRow: { flexDirection: 'row', gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background },
+    input: { flex: 1, backgroundColor: colors.card, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.foreground, maxHeight: 100, borderWidth: 1, borderColor: colors.border },
+    sendBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center' },
+    sendBtnDisabled: { opacity: 0.4 },
+  });

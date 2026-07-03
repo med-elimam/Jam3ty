@@ -1,0 +1,1406 @@
+You are a senior full-stack product engineer. Build a complete production-grade university student platform for Mauritania.
+
+This is NOT an MVP, NOT a prototype, NOT a demo, and NOT a WebView app.
+
+The product must be a real full-stack application with:
+
+* iOS app code
+* Android app code
+* Web student app
+* Admin dashboard
+* Backend API
+* Database schema
+* Authentication
+* Role-based permissions
+* Subscription system
+* Local Mauritanian payment workflow
+* Activation codes
+* Agent/reseller system
+* Security
+* Seed data
+* Documentation
+* Production-ready structure
+
+The app must use React, Expo, and React Native Web for the student app. It must not be a WebView wrapper.
+
+The target market is Mauritania only.
+
+Business model:
+
+* B2C first: students register directly and use the app.
+* B2B-ready from day one: universities, institutes, faculties, and departments can later become official partners without rebuilding the system.
+* Monetization must be based mainly on local Mauritanian payment methods, not Apple Pay, Google Pay, Apple In-App Purchases, or Google Play Billing.
+* The main payment methods are:
+    * Bankily manual payment
+    * Masrvi / مصرفي manual payment
+    * Sedad manual payment
+    * Cash through local agents
+    * Activation codes
+    * Admin-approved payment proofs
+    * Agent/reseller code sales
+
+Do not implement fake payment APIs. Keep the architecture ready for future integrations with Bankily, Masrvi, Sedad, or a local payment aggregator, but for now implement the full manual payment and activation-code system.
+
+============================================================
+PRODUCT VISION
+
+Build a complete student operating system for university students in Mauritania.
+
+The app should help students manage:
+
+* University profile
+* Courses
+* Files
+* Timetable
+* Announcements
+* Assignments
+* Exams
+* Events
+* Clubs
+* Student community
+* Notifications
+* Opportunities
+* AI study assistant
+* Subscription status
+* Offline saved materials
+* Academic organization
+
+The app must support Arabic and French from the beginning. Arabic must support RTL layout. English can be included as a technical/default fallback, but the main market languages are Arabic and French.
+
+Suggested working name:
+Talib MR
+
+Use this only as the internal product name unless a better neutral name is needed.
+
+============================================================
+TECH STACK
+
+Use a TypeScript monorepo.
+
+Preferred structure:
+
+apps/
+mobile/
+Expo app for iOS, Android, and Web student app
+admin/
+React web admin dashboard
+api/
+Backend API
+
+packages/
+shared/
+Shared TypeScript types, constants, utilities
+validation/
+Zod schemas
+ui/
+Shared UI primitives if useful
+config/
+Shared config
+
+Frontend student app:
+
+* Expo
+* React Native
+* Expo Router
+* React Native Web
+* TypeScript
+* TanStack Query
+* Zustand or another lightweight store
+* React Hook Form
+* Zod validation
+* i18n Arabic/French
+* RTL support
+* Dark mode support
+* Responsive web layout
+* Secure token storage for mobile
+* Accessible UI
+
+Admin dashboard:
+
+* React + Vite
+* TypeScript
+* TanStack Query
+* TanStack Table
+* React Hook Form
+* Zod
+* Charts for analytics
+* Responsive desktop-first dashboard
+* Role-based navigation
+
+Backend:
+
+* Node.js
+* Express or Fastify
+* TypeScript
+* PostgreSQL
+* Drizzle ORM preferred
+* Zod validation
+* JWT access tokens + refresh tokens
+* Secure password hashing with bcrypt or argon2
+* OpenAPI documentation if practical
+* Centralized error handling
+* Request logging
+* Rate limiting
+* File upload validation
+* Background jobs structure if practical
+
+Database:
+
+* PostgreSQL
+* Proper migrations
+* Strong relational schema
+* Indexes for search/filter fields
+* Soft delete where appropriate
+* created_at / updated_at on all major tables
+* created_by / updated_by where useful
+* Audit logs for sensitive actions
+
+Do not use mock-only storage.
+Do not store production data in local arrays.
+Do not hardcode users.
+Do not fake authentication.
+
+============================================================
+CORE USER ROLES
+
+Implement these roles:
+
+1. Student
+2. Professor
+3. Club Manager
+4. Department Admin
+5. Faculty Admin
+6. University Admin
+7. Moderator
+8. Agent / Reseller
+9. Finance Admin
+10. Super Admin
+
+Permissions must be real. Do not only hide buttons in the UI. Every backend endpoint must enforce authorization.
+
+The B2C model means students can register directly.
+
+The B2B-ready model means the data model must support:
+
+* Multiple universities
+* Faculties
+* Departments
+* Programs
+* Levels
+* Semesters
+* Groups
+* Courses
+* Official university admins later
+
+Each university must have a status:
+
+* community_created
+* verified
+* official_partner
+
+Students can create or select a community university. Admins can verify it later. If the university becomes an official partner, the same structure should support official administration.
+
+============================================================
+MAIN STUDENT APP MODULES
+
+Build the student app with these main tabs:
+
+1. Home
+2. Courses
+3. Calendar
+4. Community
+5. Profile
+
+Also include a More area with:
+
+* Files
+* Announcements
+* Assignments
+* Exams
+* Events
+* Clubs
+* Opportunities
+* AI Assistant
+* Subscription
+* Settings
+* Help / Support
+
+⸻
+
+1. Authentication and onboarding
+
+⸻
+
+Implement:
+
+* Register
+* Login
+* Logout
+* Password reset flow
+* Email verification structure
+* Profile completion
+* Select country: fixed to Mauritania
+* Select university / institute
+* Select faculty
+* Select department
+* Select level/year
+* Select group
+* Choose language: Arabic or French
+* Accept Terms and Privacy Policy
+
+Student onboarding must not be fake. Store all selected academic data in the database.
+
+⸻
+
+2. Home dashboard
+
+⸻
+
+Home must show:
+
+* Today overview
+* Upcoming class/session
+* Latest announcements
+* New course files
+* Upcoming assignments
+* Upcoming exams
+* Events
+* Opportunities
+* Subscription status
+* Quick actions
+* AI study shortcut
+
+Do not build a useless home page with static cards. It must fetch real data from the backend.
+
+⸻
+
+3. Academic profile
+
+⸻
+
+Student profile includes:
+
+* Full name
+* Avatar
+* Phone optional
+* Email
+* University
+* Faculty
+* Department
+* Level
+* Group
+* Bio
+* Skills
+* Interests
+* LinkedIn/GitHub/Portfolio links optional
+* Privacy setting:
+    * private
+    * same_university
+    * public
+
+⸻
+
+4. Courses
+
+⸻
+
+Students must see courses based on university/faculty/department/level/semester/group.
+
+Course detail page must include:
+
+* Course name
+* Professor
+* Description
+* Files
+* Announcements
+* Assignments
+* Exams
+* Discussions
+* Saved resources
+* Progress indicators
+
+Professors and admins can manage courses from the admin dashboard.
+
+⸻
+
+5. Files and library
+
+⸻
+
+Implement a real academic file library:
+
+* Upload files
+* Download files
+* File categories:
+    * lecture
+    * td
+    * tp
+    * summary
+    * exam
+    * correction
+    * book
+    * other
+* Course association
+* University/faculty/department/level association
+* File search
+* File tags
+* File visibility
+* File approval status:
+    * pending
+    * approved
+    * rejected
+* Report file
+* Favorite file
+* Saved offline marker
+* Download count
+* View count
+
+File upload must validate:
+
+* File type
+* File size
+* User permission
+* Course association
+
+Do not allow dangerous file types.
+
+⸻
+
+6. Timetable and calendar
+
+⸻
+
+Implement:
+
+* Weekly timetable
+* Daily view
+* Course sessions
+* TD/TP/Lecture type
+* Room/location
+* Professor
+* Start/end time
+* Recurrence
+* Exam dates
+* Events
+* Assignment deadlines
+* Notifications before important items
+
+Calendar data must come from the backend.
+
+⸻
+
+7. Announcements
+
+⸻
+
+Announcements can be created by:
+
+* Professor
+* Department Admin
+* Faculty Admin
+* University Admin
+* Super Admin
+
+Announcement scopes:
+
+* Global
+* University
+* Faculty
+* Department
+* Level
+* Group
+* Course
+
+Priority:
+
+* normal
+* important
+* urgent
+
+Track:
+
+* Created by
+* Target audience
+* Read status
+* Read count
+* Expiry date
+
+Student app must show relevant announcements only.
+
+⸻
+
+8. Assignments
+
+⸻
+
+Implement:
+
+* Assignment creation
+* Course assignment
+* Description
+* Deadline
+* Attachment support
+* Submission upload
+* Submission status
+* Late status
+* Professor review status
+* Grade/comment optional
+* Student reminders
+
+⸻
+
+9. Exams
+
+⸻
+
+Implement:
+
+* Exam calendar
+* Course
+* Date/time
+* Room
+* Type:
+    * midterm
+    * final
+    * makeup
+    * test
+    * other
+* Exam resources
+* Past exams
+* Corrections
+* Student reminders
+
+⸻
+
+10. Community
+
+⸻
+
+Build an academic community, not a random social network.
+
+Community features:
+
+* University feed
+* Department feed
+* Course discussions
+* Group discussions
+* Posts
+* Comments
+* Reactions
+* Polls
+* Reports
+* Moderation status
+* Pinned posts
+* Anonymous academic question option if allowed
+* Search
+
+Every post must have visibility:
+
+* public
+* same_university
+* same_department
+* same_course
+* same_group
+
+Moderation:
+
+* pending
+* visible
+* hidden
+* removed
+
+⸻
+
+11. Chat
+
+⸻
+
+If implemented, chat must include:
+
+* Private conversations
+* Course groups
+* Department groups
+* Club groups
+* Message reporting
+* Blocking
+* Basic moderation
+* Attachment validation
+
+If real-time WebSocket is too large for the first implementation, create a clean backend structure and polling-based chat that can later move to WebSockets. Do not fake chat with local-only messages.
+
+⸻
+
+12. Events and clubs
+
+⸻
+
+Events:
+
+* University events
+* Club events
+* Training sessions
+* Competitions
+* Workshops
+* Conferences
+* Registration
+* Attendance QR structure
+* Event reminders
+
+Clubs:
+
+* Club profile
+* Members
+* Club admins
+* Posts
+* Events
+* Join request
+* Approval workflow
+
+⸻
+
+13. Opportunities
+
+⸻
+
+Implement opportunities for:
+
+* Internships
+* Jobs
+* Training
+* Scholarships
+* Competitions
+* Hackathons
+* Freelance
+* Volunteering
+
+Fields:
+
+* Title
+* Organization
+* Type
+* Description
+* Location
+* Deadline
+* Link/contact
+* Target students
+* Featured flag
+* Paid promotion flag
+* Status
+
+This is also a monetization module. Admins must be able to mark opportunities as featured/paid.
+
+⸻
+
+14. AI Assistant
+
+⸻
+
+Implement an AI Assistant module, but do not fake AI.
+
+The AI Assistant must support the structure for:
+
+* Summarize PDF
+* Explain a course file
+* Generate quiz from notes
+* Create revision plan
+* Extract key points
+* Help with CV/internship messages
+* Ask questions about course material
+
+If no AI API key is configured, show a clear message:
+“AI features are not configured yet.”
+
+Do not return fake AI responses.
+
+Implement feature gating:
+
+* Free users get limited AI requests.
+* Plus users get more AI requests.
+* Premium AI users get higher limits.
+
+Track AI usage:
+
+* user_id
+* feature
+* input size
+* created_at
+* subscription plan
+* status
+
+============================================================
+SUBSCRIPTION AND MONETIZATION SYSTEM
+
+This is critical.
+
+Do NOT build the monetization around Apple Pay, Google Pay, Apple In-App Purchases, or Google Play Billing.
+
+The primary monetization system is backend-controlled local subscriptions using:
+
+* Activation codes
+* Manual payment proofs
+* Bankily manual
+* Masrvi manual
+* Sedad manual
+* Cash agent payments
+* Admin approval
+* Agent/reseller commissions
+
+Plans:
+
+1. Free
+    Price: 0 MRU
+    Features:
+
+* Basic home dashboard
+* Courses
+* Announcements
+* Timetable
+* Limited file access
+* Limited favorites
+* Basic community
+* Limited AI usage
+* Ads/featured content visible
+
+2. Plus Monthly
+    Price: 100 MRU
+    Duration: 30 days
+    Features:
+
+* Unlimited file saving
+* Offline saved materials marker
+* More AI usage
+* PDF summaries
+* Quiz generation
+* Revision plans
+* Smart reminders
+* Full past exam archive
+* Remove ads
+* Priority support
+
+3. Plus Semester
+    Price: 400 MRU
+    Duration: 120 days
+    Features:
+
+* Same as Plus Monthly
+* Best for university semester
+
+4. Plus Year
+    Price: 800 MRU
+    Duration: 365 days
+    Features:
+
+* Same as Plus Monthly
+* Best long-term value
+
+5. Premium AI
+    Price: 200 MRU/month or higher
+    Features:
+
+* Higher AI limits
+* Longer PDF summaries
+* Advanced study planning
+* CV and internship assistant
+
+Subscription source values:
+
+* free
+* activation_code
+* bankily_manual
+* masrvi_manual
+* sedad_manual
+* cash_agent
+* admin_manual
+* b2b_university
+* promo
+* future_api_provider
+
+Payment status:
+
+* pending
+* under_review
+* approved
+* rejected
+* expired
+* refunded
+
+Activation code types:
+
+* trial_7_days
+* plus_30_days
+* plus_120_days
+* plus_365_days
+* premium_ai_30_days
+* university_campaign
+* agent_code
+* promo_code
+* gift_code
+
+Each activation code must support:
+
+* code
+* plan_id
+* duration_days
+* max_uses
+* used_count
+* status
+* assigned_agent_id
+* university_id optional
+* expires_at
+* created_by
+* created_at
+* redeemed_by
+* redeemed_at
+
+Manual payment workflow:
+
+1. Student selects a plan.
+2. Student sees payment instructions on web or allowed platforms.
+3. Student submits:
+    * payment method
+    * amount
+    * phone number
+    * transaction reference
+    * screenshot/proof upload
+4. Payment becomes pending/under_review.
+5. Finance Admin reviews it.
+6. Finance Admin approves or rejects.
+7. If approved, subscription is activated automatically.
+8. Student receives notification.
+9. Audit log is created.
+
+Important iOS rule:
+The architecture must support backend subscription activation and activation-code redemption. Avoid hardcoding external payment links into iOS screens in a way that could violate App Store rules. The web app can show full local payment instructions.
+
+============================================================
+AGENT / RESELLER SYSTEM
+
+Implement a local agent/reseller system.
+
+Agents are students or local sellers who sell activation codes.
+
+Agent fields:
+
+* name
+* phone
+* email optional
+* university_id optional
+* city
+* commission_rate
+* status:
+    * active
+    * suspended
+    * inactive
+* created_at
+
+Agent features:
+
+* Assigned activation codes
+* Sold codes
+* Commission tracking
+* Settlement status
+* Sales dashboard
+* Total revenue
+* Total commission
+* Remaining unsold codes
+
+Commission example:
+
+* Plus monthly code sells for 100 MRU
+* Agent commission 20%
+* Agent earns 20 MRU
+* Platform earns 80 MRU
+
+Implement:
+
+* agent_commissions table
+* agent_settlements table
+* admin screen to create agents
+* admin screen to assign codes
+* admin screen to track commissions
+* admin screen to mark settlements as paid
+
+============================================================
+B2B-READY UNIVERSITY SYSTEM
+
+Even though the launch is B2C, the app must be B2B-ready.
+
+Implement:
+
+* university status:
+    * community_created
+    * verified
+    * official_partner
+* official admin assignment
+* university subscription/account structure
+* b2b features toggle
+* university-level analytics
+* ability for a university to sponsor students
+* ability to activate Plus for all students under a university contract
+
+B2B future pricing must be supported structurally, but not necessarily charged automatically.
+
+Possible B2B packages:
+
+* Institute Basic
+* Faculty Pro
+* University Enterprise
+
+Database must support:
+
+* university_contracts
+* university_plan
+* contract_start
+* contract_end
+* student_limit
+* official_features_enabled
+
+============================================================
+ADMIN DASHBOARD MODULES
+
+Build a complete admin dashboard with role-based navigation.
+
+Super Admin:
+
+* Overview analytics
+* Manage universities
+* Manage faculties/departments/levels/groups
+* Manage users
+* Manage roles and permissions
+* Manage courses
+* Manage files
+* Manage announcements
+* Manage assignments
+* Manage exams
+* Manage events
+* Manage clubs
+* Manage opportunities
+* Manage subscriptions
+* Manage plans
+* Manage payments
+* Manage activation codes
+* Manage agents
+* Manage reports/moderation
+* Audit logs
+* App settings
+
+Finance Admin:
+
+* Payment review
+* Proof screenshots
+* Approve/reject payments
+* Activation history
+* Revenue reports
+* Agent commissions
+* Settlements
+
+University Admin:
+
+* Manage own university
+* Faculties/departments
+* Courses
+* Students
+* Professors
+* Announcements
+* Timetables
+* Files
+* Events
+* Analytics
+
+Department Admin:
+
+* Manage department courses
+* Groups
+* Announcements
+* Timetable
+* Files
+* Students
+
+Professor:
+
+* My courses
+* Upload files
+* Announcements
+* Assignments
+* Exams
+* Student submissions
+* Course discussions
+
+Moderator:
+
+* Reported posts
+* Reported comments
+* Reported files
+* Reported users
+* Hide/remove content
+* Warn/suspend users
+* Moderation logs
+
+Agent:
+
+* My assigned codes
+* Sold/redeemed codes
+* My commissions
+* Settlement status
+
+Dashboard must not be decorative. It must connect to backend APIs.
+
+============================================================
+DATABASE TABLES
+
+Create a strong schema including at least:
+
+users
+profiles
+sessions
+refresh_tokens
+roles
+permissions
+user_roles
+
+universities
+faculties
+departments
+programs
+levels
+semesters
+student_groups
+
+courses
+course_enrollments
+professor_course_assignments
+
+files
+file_categories
+file_downloads
+file_favorites
+file_reports
+
+announcements
+announcement_reads
+
+timetable_sessions
+calendar_events
+
+assignments
+assignment_submissions
+
+exams
+exam_resources
+
+clubs
+club_members
+club_join_requests
+
+posts
+comments
+reactions
+polls
+poll_votes
+reports
+moderation_actions
+
+conversations
+conversation_members
+messages
+
+opportunities
+
+notifications
+push_tokens
+
+plans
+subscriptions
+payments
+payment_proofs
+activation_codes
+code_redemptions
+
+agents
+agent_code_batches
+agent_commissions
+agent_settlements
+
+university_contracts
+
+ai_usage_logs
+
+audit_logs
+app_settings
+
+Use proper foreign keys where appropriate.
+Use indexes for common queries.
+Use status enums.
+Use timestamps.
+Use soft delete where useful.
+
+============================================================
+SECURITY REQUIREMENTS
+
+Implement serious security.
+
+Authentication:
+
+* Secure password hashing
+* Access token + refresh token
+* Refresh token rotation
+* Logout invalidates refresh token
+* Password reset token structure
+* Email verification structure
+* Rate limiting on login/register/reset
+* Secure mobile token handling
+
+Authorization:
+
+* Enforce permissions on backend
+* No endpoint should rely only on frontend hiding
+* Students only access relevant university/course/group data
+* Admins only access allowed scopes
+* Super Admin has global access
+
+Input validation:
+
+* Zod validation for all request bodies
+* Validate params and query filters
+* Sanitize user-generated content where needed
+
+File security:
+
+* Validate file size
+* Validate MIME type
+* Reject executable files
+* Store file metadata
+* Signed/private access structure if possible
+* Report and moderation workflow
+
+Abuse protection:
+
+* Rate limit posts/comments/messages
+* Report users/content
+* Block/mute users if practical
+* Moderation queue
+* Audit logs
+
+Admin safety:
+
+* Audit every sensitive action:
+    * approve payment
+    * reject payment
+    * generate activation codes
+    * assign agent codes
+    * change role
+    * delete content
+    * suspend user
+    * activate subscription
+    * create university admin
+
+============================================================
+NOTIFICATIONS
+
+Implement notification structure:
+
+* In-app notifications
+* Push token table
+* Notification preferences
+* Notification types:
+    * announcement
+    * file_added
+    * assignment_due
+    * exam_reminder
+    * timetable_change
+    * event_reminder
+    * payment_approved
+    * payment_rejected
+    * subscription_expiring
+    * code_redeemed
+    * comment_reply
+    * message
+    * moderation_action
+
+If push delivery cannot be fully configured without external credentials, implement the full backend and frontend structure and show configuration instructions. Do not fake successful push delivery.
+
+============================================================
+LOCALIZATION
+
+Support:
+
+* Arabic
+* French
+* English fallback
+
+Arabic must support:
+
+* RTL layout
+* Arabic labels
+* Mauritanian-friendly wording
+* MRU currency display
+
+French must be clean and simple.
+
+All major UI strings must come from translation files, not hardcoded randomly.
+
+============================================================
+UI / UX REQUIREMENTS
+
+Design style:
+
+* Clean
+* Modern
+* Professional
+* University-focused
+* Not childish
+* Not overloaded
+* Mobile-first for student app
+* Desktop-first for admin dashboard
+
+Student app:
+
+* Bottom tabs
+* Clear onboarding
+* Fast search
+* Empty states
+* Loading states
+* Error states
+* Offline-friendly saved states where practical
+
+Admin:
+
+* Sidebar navigation
+* Tables with filters
+* Detail pages
+* Create/edit forms
+* Status badges
+* Charts
+* Confirmation dialogs for dangerous actions
+
+Do not leave broken screens.
+Do not create buttons that do nothing.
+Do not create placeholder pages unless they clearly state a feature is disabled due to missing configuration, such as AI API key or push credentials.
+
+============================================================
+API REQUIREMENTS
+
+Create REST APIs for all major modules.
+
+Use consistent response format:
+
+Success:
+{
+“success”: true,
+“data”: …
+}
+
+Error:
+{
+“success”: false,
+“error”: {
+“code”: “…”,
+“message”: “…”
+}
+}
+
+Implement:
+
+* Pagination
+* Search
+* Filtering
+* Sorting where relevant
+* Auth middleware
+* Permission middleware
+* Error middleware
+* Request validation middleware
+
+Core API routes should include:
+
+* /auth
+* /users
+* /profiles
+* /universities
+* /faculties
+* /departments
+* /levels
+* /groups
+* /courses
+* /files
+* /announcements
+* /timetable
+* /assignments
+* /exams
+* /community
+* /events
+* /clubs
+* /opportunities
+* /subscriptions
+* /payments
+* /activation-codes
+* /agents
+* /notifications
+* /moderation
+* /admin
+* /ai
+
+============================================================
+SEED DATA
+
+Create realistic seed data for Mauritania.
+
+Include:
+
+* University of Nouakchott
+* ISCAE
+* Faculty of Science and Technology
+* Faculty of Medicine
+* Sample departments
+* Sample levels
+* Sample groups
+* Sample courses
+* Sample professors
+* Sample students
+* Sample announcements
+* Sample files metadata
+* Sample assignments
+* Sample exams
+* Sample opportunities
+* Sample plans
+* Sample activation codes
+* Sample agent
+* Super Admin account
+* Finance Admin account
+* Professor account
+* Student account
+* Agent account
+
+Use safe default test credentials in documentation only for development.
+
+Do not seed real private people.
+
+============================================================
+DEVELOPMENT AND DOCUMENTATION
+
+Create:
+
+* README.md
+* .env.example for each app
+* Setup instructions
+* Database migration instructions
+* Seed instructions
+* Admin login instructions
+* API documentation overview
+* Security notes
+* Payment workflow documentation
+* Activation code workflow documentation
+* Agent system documentation
+* B2B readiness notes
+* Deployment notes for Replit/Railway/Vercel where relevant
+
+Include scripts:
+
+* install
+* dev
+* build
+* db:migrate
+* db:seed
+* lint
+* typecheck
+
+============================================================
+STRICTLY FORBIDDEN
+
+Do NOT:
+
+* Build a WebView app
+* Build only a landing page
+* Build only UI without backend
+* Use mock data as the final implementation
+* Hardcode users
+* Hardcode subscriptions
+* Fake payments
+* Fake AI answers
+* Fake admin actions
+* Ignore permissions
+* Store sensitive tokens insecurely
+* Leave important buttons non-functional
+* Create placeholder modules and call the app complete
+* Build only an MVP
+* Use Apple Pay or Google Pay as the main payment system
+* Require credit cards for Mauritanian students
+* Make the app generic for the whole world
+* Ignore Arabic/French localization
+* Ignore RTL support
+* Ignore B2B readiness
+* Ignore audit logs for sensitive actions
+* Ignore payment approval workflow
+* Ignore activation codes
+* Ignore agent commissions
+
+============================================================
+IMPLEMENTATION PRIORITY
+
+Build in this order:
+
+1. Monorepo structure
+2. Database schema and migrations
+3. Backend API foundation
+4. Auth and roles
+5. Student onboarding
+6. University academic structure
+7. Courses
+8. Files
+9. Announcements
+10. Timetable/calendar
+11. Subscription plans
+12. Activation codes
+13. Manual payments
+14. Agent system
+15. Admin dashboard
+16. Student app UI
+17. Community
+18. Events/clubs/opportunities
+19. Assignments/exams
+20. Notifications
+21. AI assistant structure
+22. Security hardening
+23. Seed data
+24. Documentation
+25. Final testing and cleanup
+
+Do not stop after scaffolding. Implement as much as possible as real working software.
+
+If a feature requires external credentials, implement the full internal structure and show a clear configuration message instead of faking success.
+
+============================================================
+DEFINITION OF DONE
+
+The project is done only when:
+
+* Student can register and login.
+* Student can complete academic onboarding.
+* Student can see home dashboard with real backend data.
+* Student can browse courses.
+* Student can browse files.
+* Student can see announcements.
+* Student can see timetable.
+* Student can see subscription status.
+* Student can redeem activation code.
+* Student can submit manual payment proof.
+* Admin can login.
+* Admin can manage universities and academic structure.
+* Admin can manage users and roles.
+* Admin can manage courses.
+* Admin can manage files.
+* Admin can manage announcements.
+* Finance Admin can review payments.
+* Finance Admin can approve payment and activate subscription.
+* Admin can generate activation codes.
+* Agent can have assigned codes.
+* System tracks agent commissions.
+* Moderator can review reports.
+* Database has real relational schema.
+* Backend enforces permissions.
+* UI has Arabic/French structure.
+* README explains how to run everything.
+* No major screen is fake.
+* No payment workflow is fake.
+* No security-critical action is only frontend-based.
+
+Now build the application.
