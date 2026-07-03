@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
+import { useT } from '@/contexts/PreferencesContext';
 import type { AuthUser } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -24,6 +25,7 @@ export default function RegisterScreen() {
   const colors = useColors();
   const router = useRouter();
   const { login } = useAuth();
+  const { t } = useT();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -32,11 +34,11 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!fullName.trim() || !email.trim() || !password) {
-      Alert.alert('خطأ', 'جميع الحقول مطلوبة.');
+      Alert.alert(t('common.error'), t('auth.allFieldsRequired'));
       return;
     }
     if (password.length < 8) {
-      Alert.alert('خطأ', 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
+      Alert.alert(t('common.error'), t('auth.passwordTooShort'));
       return;
     }
 
@@ -55,12 +57,12 @@ export default function RegisterScreen() {
       const rawText = await response.text();
 
       if (!response.ok) {
-        let msg = 'حدث خطأ غير متوقع. يرجى المحاولة مجدداً.';
+        let msg = t('auth.unexpectedError');
         try {
           const parsed = JSON.parse(rawText);
           msg = parsed?.error?.message ?? parsed?.message ?? msg;
         } catch {}
-        Alert.alert('فشل إنشاء الحساب', msg);
+        Alert.alert(t('auth.registerFailed'), msg);
         return;
       }
 
@@ -69,10 +71,10 @@ export default function RegisterScreen() {
       if (d?.user && d?.tokens) {
         await login(d.user as AuthUser, d.tokens.accessToken, d.tokens.refreshToken);
       } else {
-        Alert.alert('خطأ', 'استجابة غير متوقعة من الخادم. يرجى المحاولة مجدداً.');
+        Alert.alert(t('common.error'), t('auth.unexpectedResponse'));
       }
     } catch (err: any) {
-      Alert.alert('خطأ في الاتصال', err?.message ?? String(err));
+      Alert.alert(t('auth.connectionError'), err?.message ?? String(err));
     } finally {
       setLoading(false);
     }
@@ -90,24 +92,24 @@ export default function RegisterScreen() {
         {/* Header */}
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={[s.back, { color: colors.navy }]}>→ رجوع</Text>
+            <Text style={[s.back, { color: colors.navy }]}>→ {t('common.back')}</Text>
           </TouchableOpacity>
-          <Text style={[s.title, { color: colors.navy }]}>إنشاء حساب</Text>
-          <Text style={[s.subtitle, { color: colors.mutedForeground }]}>انضم إلى جامعتي</Text>
+          <Text style={[s.title, { color: colors.navy }]}>{t('auth.registerTitle')}</Text>
+          <Text style={[s.subtitle, { color: colors.mutedForeground }]}>{t('auth.joinJamiati')}</Text>
         </View>
 
         {/* Form */}
         <View style={s.form}>
           <Input
-            label="الاسم الكامل"
+            label={t('auth.fullName')}
             value={fullName}
             onChangeText={setFullName}
-            placeholder="أحمد ولد محمد"
+            placeholder={t('auth.fullNamePlaceholder')}
             autoCapitalize="words"
           />
 
           <Input
-            label="البريد الإلكتروني"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             placeholder="example@email.com"
@@ -117,15 +119,15 @@ export default function RegisterScreen() {
           />
 
           <Input
-            label="كلمة المرور"
+            label={t('auth.password')}
             value={password}
             onChangeText={setPassword}
-            placeholder="على الأقل 8 أحرف"
+            placeholder={t('auth.passwordMin')}
             isPassword
           />
 
           <Button
-            label="إنشاء الحساب"
+            label={t('auth.createAccountBtn')}
             variant="primary"
             size="lg"
             loading={loading}
@@ -137,8 +139,8 @@ export default function RegisterScreen() {
         {/* Link */}
         <TouchableOpacity onPress={() => router.back()} style={s.linkRow}>
           <Text style={[s.linkText, { color: colors.mutedForeground }]}>
-            لديك حساب؟{' '}
-            <Text style={{ color: colors.navy, fontWeight: fontWeight.semibold }}>تسجيل الدخول</Text>
+            {t('auth.haveAccount')}{' '}
+            <Text style={{ color: colors.navy, fontWeight: fontWeight.semibold }}>{t('auth.login')}</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>

@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
+import { useT } from '@/contexts/PreferencesContext';
 import {
   useListUniversities,
   useListFaculties,
@@ -23,13 +24,11 @@ import { Button } from '@/components/ui/Button';
 import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
 const STEPS = ['University', 'Faculty', 'Department', 'Level', 'Language'] as const;
-const STEP_TITLES = ['اختر جامعتك', 'اختر الكلية أو المعهد', 'اختر القسم', 'اختر السنة الدراسية', 'اختر لغة التطبيق'];
 
 const LANGUAGES = [
   { code: 'ar', label: 'العربية', flag: '🇲🇷' },
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-];
+] as const;
 
 interface Selection {
   universityId?: string;
@@ -37,13 +36,14 @@ interface Selection {
   departmentId?: string;
   levelId?: string;
   groupId?: string;
-  language: 'ar' | 'fr' | 'en';
+  language: 'ar' | 'fr';
 }
 
 export default function OnboardingScreen() {
   const colors = useColors();
   const router = useRouter();
   const { updateUser } = useAuth();
+  const { t, tArray } = useT();
   const [step, setStep] = useState(0);
   const [sel, setSel] = useState<Selection>({ language: 'ar' });
 
@@ -59,7 +59,7 @@ export default function OnboardingScreen() {
         updateUser({ profile: { onboardingComplete: true } });
         router.replace('/(tabs)');
       },
-      onError: () => Alert.alert('خطأ', 'تعذّر حفظ بياناتك. يرجى المحاولة مجدداً.'),
+      onError: () => Alert.alert(t('common.error'), t('onboarding.saveError')),
     },
   });
 
@@ -100,7 +100,7 @@ export default function OnboardingScreen() {
       case 1: return { items: (faculties.data as any)?.data ?? [], isLoading: faculties.isLoading, field: 'facultyId', getId: (i) => i.id, getLabel: (i) => i.nameAr || i.name };
       case 2: return { items: (departments.data as any)?.data ?? [], isLoading: departments.isLoading, field: 'departmentId', getId: (i) => i.id, getLabel: (i) => i.nameAr || i.name };
       case 3: return { items: (levels.data as any)?.data ?? [], isLoading: levels.isLoading, field: 'levelId', getId: (i) => i.id, getLabel: (i) => i.nameAr || i.name };
-      case 4: return { items: LANGUAGES, isLoading: false, field: 'language', getId: (i) => i.code, getLabel: (i) => `${i.flag}  ${i.label}` };
+      case 4: return { items: LANGUAGES as any, isLoading: false, field: 'language', getId: (i) => i.code, getLabel: (i) => `${i.flag}  ${i.label}` };
       default: return { items: [], isLoading: false, field: 'universityId', getId: () => '', getLabel: () => '' };
     }
   };
@@ -133,6 +133,7 @@ export default function OnboardingScreen() {
   };
 
   const progressPct = ((step + 1) / STEPS.length) * 100;
+  const stepTitles = tArray('onboarding.steps');
 
   return (
     <View style={[s.root, { backgroundColor: colors.background }]}>
@@ -151,7 +152,7 @@ export default function OnboardingScreen() {
         <Text style={[s.stepCount, { color: colors.mutedForeground }]}>
           {step + 1} / {STEPS.length}
         </Text>
-        <Text style={[s.stepTitle, { color: colors.navy }]}>{STEP_TITLES[step]}</Text>
+        <Text style={[s.stepTitle, { color: colors.navy }]}>{stepTitles[step]}</Text>
       </View>
 
       {/* Options list */}
@@ -166,7 +167,7 @@ export default function OnboardingScreen() {
           contentContainerStyle={s.list}
           ListEmptyComponent={
             <Text style={[s.emptyText, { color: colors.mutedForeground }]}>
-              لا توجد خيارات متاحة
+              {t('onboarding.noOptions')}
             </Text>
           }
           renderItem={({ item }) => {
@@ -217,7 +218,7 @@ export default function OnboardingScreen() {
       {/* Optional group selector on step 3 */}
       {step === 3 && sel.levelId && (groups.data as any)?.data?.length > 0 && (
         <View style={[s.groupSection, { borderTopColor: colors.border }]}>
-          <Text style={[s.groupTitle, { color: colors.mutedForeground }]}>المجموعة (اختياري)</Text>
+          <Text style={[s.groupTitle, { color: colors.mutedForeground }]}>{t('onboarding.groupOptional')}</Text>
           <View style={s.groupRow}>
             {((groups.data as any)?.data ?? []).map((g: any) => (
               <TouchableOpacity
@@ -244,7 +245,7 @@ export default function OnboardingScreen() {
       <View style={[s.bottom, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
         {step > 0 && (
           <Button
-            label="رجوع"
+            label={t('onboarding.back')}
             variant="outline"
             size="md"
             onPress={() => setStep((p) => p - 1)}
@@ -252,7 +253,7 @@ export default function OnboardingScreen() {
           />
         )}
         <Button
-          label={step === STEPS.length - 1 ? 'إنهاء' : 'التالي'}
+          label={step === STEPS.length - 1 ? t('onboarding.finish') : t('onboarding.next')}
           variant="primary"
           size="lg"
           disabled={!canNext()}

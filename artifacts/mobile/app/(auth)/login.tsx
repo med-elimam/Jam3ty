@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
+import { useT } from '@/contexts/PreferencesContext';
 import type { AuthUser } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -24,6 +25,7 @@ export default function LoginScreen() {
   const colors = useColors();
   const router = useRouter();
   const { login, loginAsGuest } = useAuth();
+  const { t } = useT();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +33,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      Alert.alert('خطأ', 'يرجى إدخال البريد الإلكتروني وكلمة المرور.');
+      Alert.alert(t('common.error'), t('auth.fillCredentials'));
       return;
     }
 
@@ -46,12 +48,12 @@ export default function LoginScreen() {
       const rawText = await response.text();
 
       if (!response.ok) {
-        let msg = 'حدث خطأ غير متوقع. يرجى المحاولة مجدداً.';
+        let msg = t('auth.unexpectedError');
         try {
           const parsed = JSON.parse(rawText);
           msg = parsed?.error?.message ?? parsed?.message ?? msg;
         } catch {}
-        Alert.alert('فشل تسجيل الدخول', msg);
+        Alert.alert(t('auth.loginFailed'), msg);
         return;
       }
 
@@ -60,10 +62,10 @@ export default function LoginScreen() {
       if (d?.user && d?.tokens) {
         await login(d.user as AuthUser, d.tokens.accessToken, d.tokens.refreshToken);
       } else {
-        Alert.alert('خطأ', 'استجابة غير متوقعة من الخادم. يرجى المحاولة مجدداً.');
+        Alert.alert(t('common.error'), t('auth.unexpectedResponse'));
       }
     } catch (err: any) {
-      Alert.alert('خطأ في الاتصال', err?.message ?? String(err));
+      Alert.alert(t('auth.connectionError'), err?.message ?? String(err));
     } finally {
       setLoading(false);
     }
@@ -83,14 +85,14 @@ export default function LoginScreen() {
           <View style={[s.logoBox, { backgroundColor: colors.navy }]}>
             <Text style={[s.logoLetter, { color: colors.gold }]}>ج</Text>
           </View>
-          <Text style={[s.appName, { color: colors.navy }]}>جامعتي</Text>
-          <Text style={[s.tagline, { color: colors.mutedForeground }]}>جامعتك في جيبك.</Text>
+          <Text style={[s.appName, { color: colors.navy }]}>{t('brand.appName')}</Text>
+          <Text style={[s.tagline, { color: colors.mutedForeground }]}>{t('auth.appTagline')}</Text>
         </View>
 
         {/* Form */}
         <View style={s.form}>
           <Input
-            label="البريد الإلكتروني"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             placeholder="example@email.com"
@@ -101,7 +103,7 @@ export default function LoginScreen() {
           />
 
           <Input
-            label="كلمة المرور"
+            label={t('auth.password')}
             value={password}
             onChangeText={setPassword}
             placeholder="••••••••"
@@ -110,7 +112,7 @@ export default function LoginScreen() {
           />
 
           <Button
-            label="تسجيل الدخول"
+            label={t('auth.login')}
             variant="primary"
             size="lg"
             loading={loading}
@@ -122,14 +124,14 @@ export default function LoginScreen() {
         <View style={s.links}>
           <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={s.linkRow}>
             <Text style={[s.linkText, { color: colors.mutedForeground }]}>
-              ليس لديك حساب؟{' '}
-              <Text style={{ color: colors.navy, fontWeight: fontWeight.semibold }}>إنشاء حساب</Text>
+              {t('auth.noAccount')}{' '}
+              <Text style={{ color: colors.navy, fontWeight: fontWeight.semibold }}>{t('auth.createAccount')}</Text>
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={loginAsGuest} style={s.linkRow}>
             <Text style={[s.skipText, { color: colors.mutedForeground }]}>
-              تخطي في الوقت الحالي
+              {t('auth.skipForNow')}
             </Text>
           </TouchableOpacity>
         </View>
