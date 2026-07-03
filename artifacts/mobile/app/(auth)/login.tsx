@@ -14,8 +14,11 @@ import {
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLogin } from '@workspace/api-client-react';
 import type { AuthUser } from '@/contexts/AuthContext';
+
+// ─── Read the env var at module scope so we can see exactly what Metro baked in ─
+const BAKED_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? '(NOT SET)';
+const LOGIN_ENDPOINT = `${BAKED_BASE_URL.replace(/\/+$/, '')}/api/auth/login`;
 
 export default function LoginScreen() {
   const colors = useColors();
@@ -24,28 +27,65 @@ export default function LoginScreen() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const loginMutation = useLogin({
-    mutation: {
-      onSuccess: async (data: any) => {
-        const d = data?.data;
-        if (d?.user && d?.tokens) {
-          await login(d.user as AuthUser, d.tokens.accessToken, d.tokens.refreshToken);
-        }
-      },
-      onError: (err: any) => {
-        const msg = err?.data?.error?.message ?? 'Login failed. Check your email and password.';
-        Alert.alert('Login failed', msg);
-      },
-    },
-  });
+  // ── Debug state ──────────────────────────────────────────────────────────────
+  const [debugStatus, setDebugStatus] = useState<number | null>(null);
+  const [debugBody, setDebugBody] = useState<string>('');
+  const [debugError, setDebugError] = useState<string>('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email.trim() || !password) {
       Alert.alert('Error', 'Please enter your email and password.');
       return;
     }
-    loginMutation.mutate({ data: { email: email.trim().toLowerCase(), password } });
+
+    setLoading(true);
+    setDebugStatus(null);
+    setDebugBody('');
+    setDebugError('');
+
+    try {
+      console.log('[Login] URL:', LOGIN_ENDPOINT);
+      const response = await fetch(LOGIN_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      });
+
+      const rawText = await response.text();
+      setDebugStatus(response.status);
+      setDebugBody(rawText);
+      console.log('[Login] status:', response.status, 'body:', rawText);
+
+      if (!response.ok) {
+        let msg = `HTTP ${response.status}`;
+        try {
+          const parsed = JSON.parse(rawText);
+          msg = parsed?.error?.message ?? parsed?.message ?? msg;
+        } catch {}
+        Alert.alert(`Login failed (${response.status})`, msg);
+        return;
+      }
+
+      const data = JSON.parse(rawText);
+      const d = data?.data;
+      if (d?.user && d?.tokens) {
+        await login(d.user as AuthUser, d.tokens.accessToken, d.tokens.refreshToken);
+      } else {
+        Alert.alert('Error', 'Unexpected response shape from server.');
+      }
+    } catch (err: any) {
+      const msg = err?.message ?? String(err);
+      setDebugError(msg);
+      console.log('[Login] Network error:', msg);
+      Alert.alert('Network Error', msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const s = styles(colors);
@@ -60,6 +100,35 @@ export default function LoginScreen() {
           </View>
           <Text style={s.title}>Talib MR</Text>
           <Text style={s.subtitle}>طالب موريتانيا</Text>
+        </View>
+
+        {/* ── DEBUG PANEL ─────────────────────────────────────────── */}
+        <View style={s.debug}>
+          <Text style={s.debugTitle}>🔍 DEBUG</Text>
+          <Text style={s.debugRow}>
+            <Text style={s.debugKey}>EXPO_PUBLIC_API_BASE_URL: </Text>
+            <Text style={s.debugVal}>{BAKED_BASE_URL}</Text>
+          </Text>
+          <Text style={s.debugRow}>
+            <Text style={s.debugKey}>Endpoint: </Text>
+            <Text style={s.debugVal}>{LOGIN_ENDPOINT}</Text>
+          </Text>
+          {debugStatus !== null && (
+            <Text style={[s.debugRow, { color: debugStatus < 300 ? '#4ade80' : '#f87171' }]}>
+              Status: {debugStatus}
+            </Text>
+          )}
+          {debugBody !== '' && (
+            <Text style={s.debugRow} numberOfLines={6}>
+              <Text style={s.debugKey}>Response: </Text>
+              <Text style={s.debugVal}>{debugBody}</Text>
+            </Text>
+          )}
+          {debugError !== '' && (
+            <Text style={[s.debugRow, { color: '#f87171' }]}>
+              Network Error: {debugError}
+            </Text>
+          )}
         </View>
 
         {/* Form */}
@@ -87,11 +156,11 @@ export default function LoginScreen() {
           />
 
           <TouchableOpacity
-            style={[s.btn, loginMutation.isPending && s.btnDisabled]}
+            style={[s.btn, loading && s.btnDisabled]}
             onPress={handleLogin}
-            disabled={loginMutation.isPending}
+            disabled={loading}
           >
-            {loginMutation.isPending ? (
+            {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={s.btnText}>Sign In</Text>
@@ -99,7 +168,9 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={s.link} onPress={() => router.push('/(auth)/register')}>
-            <Text style={s.linkText}>Don't have an account? <Text style={s.linkBold}>Register</Text></Text>
+            <Text style={s.linkText}>
+              Don't have an account? <Text style={s.linkBold}>Register</Text>
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -111,7 +182,7 @@ const styles = (colors: ReturnType<typeof useColors>) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
     scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-    header: { alignItems: 'center', marginBottom: 40 },
+    header: { alignItems: 'center', marginBottom: 24 },
     logoBox: {
       width: 80, height: 80, borderRadius: 24,
       backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center',
@@ -120,6 +191,20 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     logoText: { fontSize: 40, color: colors.gold, fontWeight: '700' },
     title: { fontSize: 28, fontWeight: '700', color: colors.navy, letterSpacing: 0.5 },
     subtitle: { fontSize: 16, color: colors.mutedForeground, marginTop: 4 },
+    // debug panel
+    debug: {
+      backgroundColor: '#0f172a',
+      borderRadius: 8,
+      padding: 10,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: '#334155',
+    },
+    debugTitle: { color: '#94a3b8', fontSize: 11, fontWeight: '700', marginBottom: 6 },
+    debugRow: { fontSize: 10, color: '#cbd5e1', marginBottom: 2, flexWrap: 'wrap' },
+    debugKey: { color: '#64748b', fontWeight: '600' },
+    debugVal: { color: '#e2e8f0' },
+    // form
     form: { gap: 8 },
     label: { fontSize: 14, fontWeight: '600', color: colors.foreground, marginBottom: 4 },
     input: {
