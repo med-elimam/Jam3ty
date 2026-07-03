@@ -64,8 +64,8 @@ if (process.env.NODE_ENV === "production") {
   const adminPath = path.join(__dirname, "../public/admin");
   if (fs.existsSync(adminPath)) {
     app.use("/admin", express.static(adminPath));
-    // SPA fallback for admin
-    app.get("/admin/*", (req, res) => {
+    // SPA fallback for admin - use regex instead of wildcard
+    app.get(/^\/admin\/.+/, (req, res) => {
       res.sendFile(path.join(adminPath, "index.html"));
     });
     logger.info("Admin dashboard served at /admin");
@@ -76,10 +76,8 @@ if (process.env.NODE_ENV === "production") {
   if (fs.existsSync(studentPath)) {
     app.use("/", express.static(studentPath));
     // SPA fallback for student web (catch-all, but don't intercept API routes)
-    app.get("*", (req, res) => {
-      if (!req.path.startsWith("/api")) {
-        res.sendFile(path.join(studentPath, "index.html"));
-      }
+    app.get(/^(?!\/api).*/, (req, res) => {
+      res.sendFile(path.join(studentPath, "index.html"));
     });
     logger.info("Student web served at /");
   }
