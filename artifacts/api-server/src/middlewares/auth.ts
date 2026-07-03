@@ -1,12 +1,7 @@
-import type { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../lib/jwt";
 
-declare module "express-serve-static-core" {
-  interface Request {
-    userId?: string;
-    userRole?: string;
-  }
-}
+
 
 export async function requireAuth(
   req: Request,
