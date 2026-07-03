@@ -1,0 +1,375 @@
+STOP CURRENT WORK AND FIX CRITICAL MOBILE UX BUGS FIRST.
+
+PHASE 3A ONLY — Critical RTL, Safe Area, Language Settings, and Layout Fixes.
+
+Do not continue seed/data work until these layout and language problems are fixed.
+Do not work on payments.
+Do not work on admin dashboard.
+Do not redesign unrelated screens.
+Do not change backend schema.
+Do not break login/register/onboarding.
+Do not claim completion until tested in Expo Go on iPhone.
+
+The app currently has serious UX failures:
+
+1. Arabic bottom tab order is wrong.
+2. Timetable layout is unacceptable and must be rebuilt.
+3. More Modules and many secondary screens start too high and collide with the status bar / top area.
+4. Arabic/French language switching is fake or not applied.
+5. Settings rows such as Language, Appearance, Notifications, Privacy are decorative and do not work.
+6. Some seeded/user-facing content still shows English and old branding such as “Talib MR”.
+7. Several lists show duplicated items.
+8. RTL is inconsistent across the app.
+
+============================================================
+1. Fix bottom tab order based on active language
+============================================================
+
+Arabic mode must display tabs visually from RIGHT to LEFT:
+
+Right side first:
+- الرئيسية
+- المواد
+- الجدول
+- المجتمع
+- الملف
+
+So for Arabic, the visual order on the screen must be:
+[الملف] [المجتمع] [الجدول] [المواد] [الرئيسية]
+when looking left-to-right, meaning الرئيسية is on the far RIGHT.
+
+For French/English/LTR mode, the visual order must be normal LEFT to RIGHT:
+- Home / Accueil
+- Courses / Cours
+- Timetable / Emploi du temps
+- Community / Communauté
+- Profile / Profil
+
+Technical requirement:
+- Use the active app language/direction to control tabBar flex direction.
+- In RTL Arabic, use row-reverse or equivalent so the first/main tab appears on the far right.
+- Do not just rename labels. The actual visual tab order must change.
+- Active indicator must still work correctly.
+- Navigation route mapping must remain correct.
+
+Test:
+- Set language Arabic → الرئيسية must be far right.
+- Set language French → Accueil/Home must be far left.
+
+============================================================
+2. Implement real language selection and persistence
+============================================================
+
+Currently language is shown in settings but changing it does nothing.
+
+Fix this properly.
+
+Requirements:
+- During registration/onboarding, selected language must be saved locally and/or in user profile.
+- App must immediately apply selected language.
+- Settings > Language must open a real selection screen or modal.
+- User can choose:
+  - العربية
+  - Français
+- Selection must persist after app reload.
+- Arabic must apply RTL layout.
+- French must apply LTR layout.
+- All tab labels, headers, buttons, and common strings must update.
+- Do not require logout to apply language.
+- If full app reload is required for I18nManager RTL change, show a clean Arabic/French message and programmatically reload if possible.
+
+Technical:
+- Centralize language state.
+- Do not hardcode Arabic everywhere.
+- Use translation files.
+- Use I18nManager.isRTL where needed.
+- Avoid mixed Arabic/English in Arabic mode.
+- Avoid mixed French/Arabic in French mode except official names.
+
+============================================================
+3. Fix settings actions — no decorative rows
+============================================================
+
+Settings rows must do something.
+
+Fix these:
+
+Language:
+- Opens language selector.
+- Applies Arabic/French.
+- Persists choice.
+
+Appearance:
+- Opens selector:
+  - النظام
+  - فاتح
+  - داكن
+- Persists selected theme.
+- Applies theme if supported.
+- If only dark theme is implemented, do not pretend. Show a clear message and store the preference for future support.
+
+Notifications:
+- Opens notification preferences.
+- Toggle:
+  - الإعلانات
+  - الملفات الجديدة
+  - الواجبات
+  - الامتحانات
+  - الرسائل/المجتمع
+  - الاشتراك
+- Persist preferences locally/backend if available.
+- Do not show a fake static row.
+
+Privacy:
+- Opens privacy settings screen.
+- Include:
+  - ظهور الملف الشخصي: خاص / نفس الجامعة / عام
+  - السماح بالرسائل: نعم/لا if supported
+  - حظر المستخدمين placeholder only if no backend yet, but do not use “coming soon” as primary behavior.
+
+Change Password:
+- Either implement real change password API flow if backend exists
+- Or hide the row until implemented
+- Do not show “Coming Soon” in a production-looking app.
+
+Delete Account:
+- Must show confirmation modal.
+- If backend delete is not implemented, show a clear development message:
+  "حذف الحساب غير مفعّل في بيئة التطوير."
+- Do not silently fail.
+
+============================================================
+4. Fix global Safe Area and screen layout
+============================================================
+
+Many screens start too high and content appears under the status bar / top edge.
+
+Create a reusable Screen component if needed:
+
+Required:
+- Uses SafeAreaView or react-native-safe-area-context.
+- Applies correct paddingTop and paddingBottom.
+- Handles scrollable and non-scrollable screens.
+- Consistent header spacing.
+- Content must never appear under iPhone status bar.
+- Bottom content must not be hidden behind tab bar.
+- Works in Arabic RTL and French LTR.
+
+Apply to:
+- الرئيسية
+- المواد
+- الجدول
+- المجتمع
+- الملف
+- المزيد
+- الإعدادات
+- الاشتراك
+- الملفات
+- الإعلانات
+- الواجبات
+- الامتحانات
+- الفعاليات
+- النوادي
+- الفرص
+- المساعد الذكي
+- الإشعارات
+- تسجيل الدخول
+- إنشاء الحساب
+- onboarding screens
+
+Important:
+- The “جميع الأقسام” / More Modules screen currently begins too high and is visually broken. Fix it.
+- Secondary screens currently have content too high. Fix all of them.
+- Do not patch each screen randomly. Use a shared layout pattern.
+
+============================================================
+5. Completely rebuild Timetable UI
+============================================================
+
+The current timetable UI is unacceptable.
+
+Problems:
+- Giant vertical day columns look ugly.
+- Arabic day labels are unclear.
+- Layout wastes space.
+- It does not look like a university schedule.
+
+Replace it with a clean mobile timetable design.
+
+Required design:
+- Horizontal day selector chips at the top.
+- Arabic full/short labels:
+  - الأحد
+  - الاثنين
+  - الثلاثاء
+  - الأربعاء
+  - الخميس
+  - الجمعة
+  - السبت
+- Selected day chip clearly highlighted.
+- Under it show list of sessions for that selected day.
+- Each session card should show:
+  - course name
+  - type: محاضرة / أعمال موجهة / أعمال تطبيقية
+  - time range
+  - room
+  - professor if available
+- If no sessions:
+  - show polished empty state:
+    Title: لا توجد محاضرات
+    Text: لا توجد محاضرات مجدولة لهذا اليوم.
+- Add a small weekly summary if useful:
+  "هذا الأسبوع"
+- No huge empty vertical columns.
+- No broken RTL.
+
+For French:
+- Use LTR labels:
+  - Dim
+  - Lun
+  - Mar
+  - Mer
+  - Jeu
+  - Ven
+  - Sam
+
+============================================================
+6. Fix More Modules and all module screens
+============================================================
+
+The More Modules screen and module pages have top spacing/layout problems.
+
+Fix More Modules:
+- Proper safe area.
+- Title visible and not under status bar.
+- 2-column grid is okay.
+- Cards must fit the screen.
+- No excessive top margin.
+- No clipping.
+- No awkward huge empty space.
+- Arabic labels centered and readable.
+
+Fix module screens:
+- Files
+- Announcements
+- Assignments
+- Exams
+- Events
+- Clubs
+- Opportunities
+- AI Assistant
+- Subscription
+
+Each must:
+- Use shared Screen layout.
+- Use safe area.
+- Have consistent header.
+- Have readable cards.
+- Have good spacing.
+- Not start under status bar.
+- Not mix English and Arabic in Arabic mode.
+
+============================================================
+7. Remove old branding and English seed text from user-facing Arabic mode
+============================================================
+
+The app still shows old branding:
+- “Welcome to Talib MR!”
+- “Upload your course files”
+- English events/opportunities like “Web Developer Intern”, “Tech Talk: AI in Mauritania”
+
+Fix user-facing seeded Arabic content.
+
+Arabic mode should show Arabic content:
+- مرحبًا بك في جامعتي
+- شارك ملفات موادك
+- تدريب مطور ويب
+- منحة تحليل البيانات
+- محاضرة تقنية حول الذكاء الاصطناعي في موريتانيا
+- هاكاثون 2026
+
+Do not show Talib MR anywhere user-facing.
+Use:
+- جامعتي
+- Jamiati only where Latin is needed
+
+Seed content can have French/English alternatives if the schema supports it, but Arabic mode must display Arabic.
+
+============================================================
+8. Dedupe visible data
+============================================================
+
+Some screens show duplicated items:
+- Events repeated
+- Opportunities repeated
+- Announcements repeated
+- Universities may be duplicated
+
+Fix at least the visible duplication.
+
+Rules:
+- Seed must be idempotent.
+- Re-running seed must not create duplicates.
+- If duplicates already exist in DB, add a safe cleanup/dedupe migration or seed cleanup function.
+- UI may also defensively dedupe by id/title only if needed, but database should be corrected.
+
+Do not create multiple copies of the same:
+- university
+- event
+- opportunity
+- announcement
+- plan
+
+============================================================
+9. Fix subscription display
+============================================================
+
+Subscription currently shows repeated identical plans:
+- بلس 500 أوقية / 30 يوم repeated many times.
+
+Fix:
+- Show only unique plans.
+- Plans should be:
+  - الخطة المجانية
+  - جامعتي بلس شهري — 100 أوقية / 30 يوم
+  - جامعتي بلس سداسي — 400 أوقية / 120 يوم
+  - جامعتي بلس سنوي — 800 أوقية / 365 يوم
+- Activation code input should be clean.
+- Do not duplicate plan cards.
+- Do not show "بلس 500" unless that is intentionally configured.
+- Use MRU/أوقية consistently.
+
+============================================================
+10. Done criteria
+============================================================
+
+This phase is complete only when:
+
+- Arabic tab order is correct: الرئيسية is visually on the far right.
+- French/LTR tab order is correct: Home/Accueil is visually on the far left.
+- Language selector works and persists.
+- Appearance row opens a real selector or honest settings UI.
+- Notifications row opens real preferences.
+- Privacy row opens real privacy settings.
+- No decorative settings rows.
+- Timetable is redesigned with day chips + session cards.
+- More Modules screen no longer starts too high.
+- All secondary screens respect Safe Area.
+- No user-facing “Talib MR”.
+- Arabic mode does not show English seeded content where Arabic content exists.
+- Subscription plans are not duplicated.
+- Visible events/opportunities/announcements are not duplicated.
+- TypeScript passes.
+- Expo Go works after reload.
+- Login/register still work.
+- Onboarding still works.
+
+After finishing, report:
+- Files changed
+- How RTL tab order was implemented
+- How language persistence was implemented
+- How settings actions were implemented
+- How timetable was rebuilt
+- How safe area was centralized
+- What duplicates were removed
+- What was tested in Expo Go

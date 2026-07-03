@@ -1,6 +1,8 @@
 import React from 'react';
-import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { useColors } from '@/hooks/useColors';
+import { usePreferences } from '@/contexts/PreferencesContext';
+import { useResolvedScheme } from '@/contexts/PreferencesContext';
 import { Feather } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
@@ -18,8 +20,8 @@ function TabIcon({ name, color, focused }: { name: FeatherName; color: string; f
 
 export default function TabLayout() {
   const colors = useColors();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { t, isRTL } = usePreferences();
+  const isDark = useResolvedScheme() === 'dark';
   const isIOS = Platform.OS === 'ios';
 
   return (
@@ -32,6 +34,9 @@ export default function TabLayout() {
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '700', fontSize: 17 },
         tabBarStyle: {
+          // RTL (Arabic): first tab (Home) sits on the far right.
+          // LTR (French): first tab sits on the far left.
+          flexDirection: isRTL ? 'row-reverse' : 'row',
           position: 'absolute',
           backgroundColor: isIOS ? 'transparent' : colors.card,
           borderTopWidth: 1,
@@ -59,7 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'الرئيسية',
+          title: t('nav.home'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="home" color={color} focused={focused} />
           ),
@@ -68,7 +73,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="courses"
         options={{
-          title: 'المواد',
+          title: t('nav.courses'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="book-open" color={color} focused={focused} />
           ),
@@ -77,7 +82,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="calendar"
         options={{
-          title: 'الجدول',
+          title: t('nav.timetable'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="calendar" color={color} focused={focused} />
           ),
@@ -86,7 +91,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="community"
         options={{
-          title: 'المجتمع',
+          title: t('nav.community'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="users" color={color} focused={focused} />
           ),
@@ -95,7 +100,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'الملف',
+          title: t('nav.profile'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="user" color={color} focused={focused} />
           ),

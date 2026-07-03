@@ -5,3 +5,5 @@
 - [Jamiati Phase 2 design system](jamiati-phase2-design.md) — UI component locations, onboarding cascade-reset pattern, Card/Badge/Button style prop types
 - [Jamiati route double-prefix pattern](jamiati-route-prefix.md) — four routers were mounted WITH a prefix but had redundant prefix in handler paths; fix rule and checker pattern
 - [Jamiati Phase 3 seed design](jamiati-phase3-seed.md) — idempotency strategy, levelId linkage quirk, reaction auth fix
+- [Jamiati Phase 3A seed safety](jamiati-phase3a-seed-safety.md) — content=truncate-cascade (dev only), plans=non-cascading canonicalize, univ dedup repoints all university_id FKs
+- [Jamiati Phase 3A i18n/RTL](jamiati-phase3a-seed-safety.md) — no global forceRTL; logical isRTL from language, applied per-component; PreferencesContext persists lang/theme; tab order via flexDirection row-reverse

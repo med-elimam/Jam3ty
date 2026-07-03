@@ -31,7 +31,7 @@ import {
   clubsTable,
 } from "@workspace/db";
 import bcrypt from "bcryptjs";
-import { eq, count, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -89,9 +89,98 @@ async function findOrCreateCourse(code: string, payload: typeof coursesTable.$in
   return row!;
 }
 
-async function tableIsEmpty<T extends { id: unknown }>(table: any): Promise<boolean> {
-  const [row] = await db.select({ c: count() }).from(table);
-  return (row?.c ?? 0) === 0;
+// This seed is a demo/dev fixture. Destructive resets are refused in production
+// so it can never wipe a live database (e.g. if wired into a prod pipeline).
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+/**
+ * Wipe a content table (and its dependent interaction rows) so it can be re-seeded cleanly.
+ * Content tables hold only demo fixtures; the CASCADE clears interaction rows
+ * (favorites, reactions, reads, submissions, registrations) that belong to demo data.
+ * Refused in production to avoid destroying real user data.
+ */
+async function resetTable(sqlName: string): Promise<void> {
+  if (IS_PRODUCTION) {
+    throw new Error(`Refusing to TRUNCATE "${sqlName}" in production — seed is a dev-only fixture.`);
+  }
+  await db.execute(sql.raw(`TRUNCATE TABLE "${sqlName}" RESTART IDENTITY CASCADE`));
+}
+
+/**
+ * Remove duplicate universities left by older seed runs (same name_ar).
+ * Keeps the oldest row, repoints every table that has a university_id column
+ * to the kept row, then deletes the duplicates. Atomic (transaction) & idempotent.
+ */
+async function dedupeUniversities(): Promise<void> {
+  const groups = await db.execute(sql`
+    SELECT name_ar, (array_agg(id ORDER BY created_at))[1] AS keep_id,
+           array_agg(id ORDER BY created_at) AS all_ids
+    FROM universities GROUP BY name_ar HAVING count(*) > 1
+  `);
+  const rows = (groups as any).rows ?? groups;
+  if (!rows?.length) return;
+
+  // All tables that reference a university via a university_id column.
+  const colsRes = await db.execute(sql`
+    SELECT table_name FROM information_schema.columns
+    WHERE column_name = 'university_id' AND table_schema = 'public'
+  `);
+  const tables: string[] = ((colsRes as any).rows ?? colsRes).map((r: any) => r.table_name);
+
+  let removed = 0;
+  await db.transaction(async (tx) => {
+    for (const g of rows as any[]) {
+      const keep = g.keep_id as string;
+      const dupes = (g.all_ids as string[]).filter((id) => id !== keep);
+      if (!dupes.length) continue;
+      const dupeList = dupes.map((d) => `'${d}'`).join(",");
+      for (const tbl of tables) {
+        await tx.execute(sql.raw(
+          `UPDATE "${tbl}" SET university_id = '${keep}' WHERE university_id IN (${dupeList})`,
+        ));
+      }
+      await tx.execute(sql.raw(`DELETE FROM universities WHERE id IN (${dupeList})`));
+      removed += dupes.length;
+    }
+  });
+  if (removed) console.log(`    removed ${removed} duplicate universities`);
+}
+
+/**
+ * Canonicalize subscription plans WITHOUT a cascading truncate (plans are referenced
+ * by subscriptions/payments/activation_codes, so a CASCADE would wipe billing history).
+ * Strategy: deactivate all plans, upsert the 4 canonical plans by stable name,
+ * then delete only leftover plan rows that have NO dependent references.
+ */
+async function canonicalizePlans(
+  canonical: (typeof plansTable.$inferInsert)[],
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    // Deactivate everything first; canonical upserts below re-activate the 4.
+    await tx.update(plansTable).set({ isActive: false });
+
+    const keepIds: string[] = [];
+    for (const plan of canonical) {
+      const [existing] = await tx.select().from(plansTable).where(eq(plansTable.name, plan.name)).limit(1);
+      if (existing) {
+        await tx.update(plansTable).set({ ...plan, isActive: true }).where(eq(plansTable.id, existing.id));
+        keepIds.push(existing.id);
+      } else {
+        const [row] = await tx.insert(plansTable).values({ ...plan, isActive: true }).returning();
+        keepIds.push(row!.id);
+      }
+    }
+
+    // Delete only non-canonical, UNREFERENCED plan rows (safe: never touches billing history).
+    const keepList = keepIds.map((id) => `'${id}'`).join(",");
+    await tx.execute(sql.raw(`
+      DELETE FROM plans p
+      WHERE p.id NOT IN (${keepList})
+        AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.plan_id = p.id)
+        AND NOT EXISTS (SELECT 1 FROM payments pm WHERE pm.plan_id = p.id)
+        AND NOT EXISTS (SELECT 1 FROM activation_codes ac WHERE ac.plan_id = p.id)
+    `));
+  });
 }
 
 function daysFromNow(n: number): Date {
@@ -105,16 +194,25 @@ function fmt(d: Date) { return d.toISOString().split("T")[0]!; }
 async function main() {
   console.log("🌱  Starting Phase 3 seed…");
 
+  // ── Cleanup: remove duplicates left by earlier seed runs ────────────────────
+  console.log("  Cleanup (dedupe)…");
+  await dedupeUniversities();
+
   // ── Plans ─────────────────────────────────────────────────────────────────
   console.log("  Plans…");
-  const plansEmpty = await tableIsEmpty(plansTable);
-  if (plansEmpty) {
-    await db.insert(plansTable).values([
-      { name: "Free",       nameAr: "مجاني",                    priceMru: 0,    durationDays: 36500, features: ["files","announcements","timetable","ai"], isActive: true },
-      { name: "Plus",       nameAr: "بلاس",                     priceMru: 500,  durationDays: 30,    features: ["files","announcements","timetable","community","ai","downloads"], isActive: true },
-      { name: "Premium AI", nameAr: "الذكاء الاصطناعي المميز",  priceMru: 1000, durationDays: 30,    features: ["files","announcements","timetable","community","ai","downloads","aiUnlimited"], isActive: true },
-    ]);
-  }
+  // Non-cascading canonicalization: upserts the 4 canonical plans and removes only
+  // unreferenced duplicate plan rows (never touches subscriptions/payments/codes).
+  const plusFeatures = ["files", "announcements", "timetable", "community", "ai", "downloads"];
+  await canonicalizePlans([
+    { name: "Free", nameAr: "مجاني", nameFr: "Gratuit", priceMru: 0, durationDays: 36500,
+      features: ["files", "announcements", "timetable"] },
+    { name: "Jamiati Plus — Monthly", nameAr: "جامعتي بلس — شهري", nameFr: "Jamiati Plus — Mensuel",
+      priceMru: 100, durationDays: 30, features: plusFeatures },
+    { name: "Jamiati Plus — Semester", nameAr: "جامعتي بلس — سداسي", nameFr: "Jamiati Plus — Semestriel",
+      priceMru: 400, durationDays: 120, features: plusFeatures },
+    { name: "Jamiati Plus — Yearly", nameAr: "جامعتي بلس — سنوي", nameFr: "Jamiati Plus — Annuel",
+      priceMru: 800, durationDays: 365, features: plusFeatures },
+  ]);
 
   // ── Universities (9 institutions) ─────────────────────────────────────────
   console.log("  Universities…");
@@ -319,8 +417,8 @@ async function main() {
   // dayOfWeek: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday
   // groupId=null → visible to all students (no group filter)
   console.log("  Timetable sessions…");
-  const timetableEmpty = await tableIsEmpty(timetableSessionsTable);
-  if (timetableEmpty) {
+  await resetTable("timetable_sessions");
+  {
     await db.insert(timetableSessionsTable).values([
       // ── CS Year 2 ────────────────────────────────────────────────────────
       // CS201 البرمجة الكائنية
@@ -351,8 +449,8 @@ async function main() {
 
   // ── Files ──────────────────────────────────────────────────────────────────
   console.log("  Files…");
-  const filesEmpty = await tableIsEmpty(filesTable);
-  if (filesEmpty) {
+  await resetTable("files");
+  {
     await db.insert(filesTable).values([
       // CS201
       { title: "محاضرة 1 - مقدمة في البرمجة الكائنية", fileType: "lecture",    courseId: csCourse201.id, uploadedBy: professor.id, approvalStatus: "approved", fileUrl: "#", mimeType: "application/pdf", fileSize: 512000 },
@@ -381,8 +479,8 @@ async function main() {
 
   // ── Announcements ──────────────────────────────────────────────────────────
   console.log("  Announcements…");
-  const annoEmpty = await tableIsEmpty(announcementsTable);
-  if (annoEmpty) {
+  await resetTable("announcements");
+  {
     await db.insert(announcementsTable).values([
       // Global
       {
@@ -434,8 +532,8 @@ async function main() {
 
   // ── Assignments ────────────────────────────────────────────────────────────
   console.log("  Assignments…");
-  const assignEmpty = await tableIsEmpty(assignmentsTable);
-  if (assignEmpty) {
+  await resetTable("assignments");
+  {
     await db.insert(assignmentsTable).values([
       // CS201
       { title: "واجب البرمجة الكائنية — تصميم نظام مكتبة", description: "صمّم نظاماً لإدارة مكتبة باستخدام مبادئ OOP: الأصناف، الوراثة، والتعددية الشكلية. يجب تسليم الكود مع تقرير قصير.", courseId: csCourse201.id, deadline: daysFromNow(10), createdBy: adminRow.id },
@@ -452,8 +550,8 @@ async function main() {
 
   // ── Exams ──────────────────────────────────────────────────────────────────
   console.log("  Exams…");
-  const examsEmpty = await tableIsEmpty(examsTable);
-  if (examsEmpty) {
+  await resetTable("exams");
+  {
     await db.insert(examsTable).values([
       // CS201
       { title: "امتحان نصفي — البرمجة الكائنية",   courseId: csCourse201.id, date: fmt(daysFromNow(12)), startTime: "09:00", room: "قاعة الامتحانات A", type: "midterm", createdBy: adminRow.id },
@@ -470,8 +568,8 @@ async function main() {
 
   // ── Community Posts ────────────────────────────────────────────────────────
   console.log("  Community posts…");
-  const postsEmpty = await tableIsEmpty(postsTable);
-  if (postsEmpty) {
+  await resetTable("posts");
+  {
     await db.insert(postsTable).values([
       { content: "مرحباً بالجميع! أنا طالب جديد في قسم علوم الحاسوب، أبحث عن زملاء للمذاكرة معاً. هل أحد مهتم؟ 📚", authorId: studentRow.id, universityId: univNouakchott.id, departmentId: deptCS.id, moderationStatus: "visible", visibility: "same_university" },
       { content: "من لديه ملخص جيد لمادة الخوارزميات (CS102)؟ رجاءً ارفعه في قسم الملفات أو شاركه هنا. شكراً! 🙏", authorId: studentRow.id, universityId: univNouakchott.id, departmentId: deptCS.id, moderationStatus: "visible", visibility: "same_department" },
@@ -485,8 +583,8 @@ async function main() {
 
   // ── Events ─────────────────────────────────────────────────────────────────
   console.log("  Events…");
-  const eventsEmpty = await tableIsEmpty(eventsTable);
-  if (eventsEmpty) {
+  await resetTable("events");
+  {
     await db.insert(eventsTable).values([
       {
         title: "ملتقى التوظيف الجامعي 2026",
@@ -514,8 +612,8 @@ async function main() {
 
   // ── Opportunities ──────────────────────────────────────────────────────────
   console.log("  Opportunities…");
-  const oppsEmpty = await tableIsEmpty(opportunitiesTable);
-  if (oppsEmpty) {
+  await resetTable("opportunities");
+  {
     await db.insert(opportunitiesTable).values([
       {
         title: "تدريب صيفي: مطوّر تطبيقات في شركة تقنية",
@@ -558,8 +656,8 @@ async function main() {
 
   // ── Clubs ──────────────────────────────────────────────────────────────────
   console.log("  Clubs…");
-  const clubsEmpty = await tableIsEmpty(clubsTable);
-  if (clubsEmpty) {
+  await resetTable("clubs");
+  {
     await db.insert(clubsTable).values([
       { name: "نادي البرمجة والتقنية", description: "نادٍ يجمع عشاق البرمجة وتطوير البرمجيات. ننظم ورش عمل، هاكاثونات، وجلسات تدريبية أسبوعية.", universityId: univNouakchott.id, presidentId: professor.id, memberCount: 47, status: "active" },
       { name: "نادي ريادة الأعمال",    description: "نادٍ يهتم بتطوير مهارات ريادة الأعمال والابتكار. نستضيف رواد أعمال ناجحين ونطلق مشاريع طلابية.", universityId: univISCAE.id,        presidentId: adminRow.id,    memberCount: 32, status: "active" },

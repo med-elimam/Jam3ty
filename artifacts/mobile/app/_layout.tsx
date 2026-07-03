@@ -14,6 +14,8 @@ import {
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { PreferencesProvider, usePreferences } from '@/contexts/PreferencesContext';
+import { useColors } from '@/hooks/useColors';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,28 +30,45 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
+  const { t } = usePreferences();
+  const colors = useColors();
+
+  const headerScreen = (name: string, titleKey: string) => (
+    <Stack.Screen
+      name={name}
+      options={{
+        headerShown: true,
+        title: t(titleKey),
+        headerStyle: { backgroundColor: colors.navy },
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: '700', fontSize: 17 },
+      }}
+    />
+  );
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="more" options={{ headerShown: true, title: 'More Modules' }} />
-      <Stack.Screen name="course/[id]" options={{ headerShown: true, title: '' }} />
-      <Stack.Screen name="files" options={{ headerShown: true, title: 'Files' }} />
-      <Stack.Screen name="announcements" options={{ headerShown: true, title: 'Announcements' }} />
-      <Stack.Screen name="assignments" options={{ headerShown: true, title: 'Assignments' }} />
-      <Stack.Screen name="exams" options={{ headerShown: true, title: 'Exams' }} />
-      <Stack.Screen name="events" options={{ headerShown: true, title: 'Events' }} />
-      <Stack.Screen name="clubs" options={{ headerShown: true, title: 'Clubs' }} />
-      <Stack.Screen name="opportunities" options={{ headerShown: true, title: 'Opportunities' }} />
-      <Stack.Screen name="ai" options={{ headerShown: true, title: 'AI Assistant' }} />
-      <Stack.Screen name="subscription" options={{ headerShown: true, title: 'Subscription' }} />
-      <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
-      <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings' }} />
+      {headerScreen('more', 'screens.more')}
+      {headerScreen('course/[id]', 'screens.course')}
+      {headerScreen('files', 'screens.files')}
+      {headerScreen('announcements', 'screens.announcements')}
+      {headerScreen('assignments', 'screens.assignments')}
+      {headerScreen('exams', 'screens.exams')}
+      {headerScreen('events', 'screens.events')}
+      {headerScreen('clubs', 'screens.clubs')}
+      {headerScreen('opportunities', 'screens.opportunities')}
+      {headerScreen('ai', 'screens.ai')}
+      {headerScreen('subscription', 'screens.subscription')}
+      {headerScreen('notifications', 'screens.notifications')}
+      <Stack.Screen name="settings" options={{ headerShown: false }} />
     </Stack>
   );
 }
 
-export default function RootLayout() {
+function Gate() {
+  const { ready } = usePreferences();
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -58,24 +77,30 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if ((fontsLoaded || fontError) && ready) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, ready]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if ((!fontsLoaded && !fontError) || !ready) return null;
 
+  return <RootLayoutNav />;
+}
+
+export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </AuthProvider>
+          <PreferencesProvider>
+            <AuthProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <KeyboardProvider>
+                  <Gate />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </AuthProvider>
+          </PreferencesProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
