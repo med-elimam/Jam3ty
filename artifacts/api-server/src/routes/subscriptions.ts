@@ -6,7 +6,7 @@ import { requireAuth } from "../middlewares/auth";
 const router = Router();
 
 // GET /subscriptions/plans
-router.get("/subscriptions/plans", async (req, res) => {
+router.get("/plans", async (req, res) => {
   try {
     const plans = await db.select().from(plansTable).where(eq(plansTable.isActive, true)).orderBy(plansTable.priceMru);
     res.json({ success: true, data: plans });
@@ -17,7 +17,7 @@ router.get("/subscriptions/plans", async (req, res) => {
 });
 
 // GET /subscriptions/me
-router.get("/subscriptions/me", requireAuth, async (req, res) => {
+router.get("/me", requireAuth, async (req, res) => {
   try {
     const [sub] = await db.select().from(subscriptionsTable).where(
       and(eq(subscriptionsTable.userId, req.userId!), eq(subscriptionsTable.status, "active"), gt(subscriptionsTable.expiresAt, new Date()))
@@ -39,7 +39,7 @@ router.get("/subscriptions/me", requireAuth, async (req, res) => {
 });
 
 // POST /subscriptions/redeem
-router.post("/subscriptions/redeem", requireAuth, async (req, res) => {
+router.post("/redeem", requireAuth, async (req, res) => {
   try {
     const { code } = req.body as { code?: string };
     if (!code) {
@@ -95,7 +95,7 @@ router.post("/subscriptions/redeem", requireAuth, async (req, res) => {
 });
 
 // POST /subscriptions/payment
-router.post("/subscriptions/payment", requireAuth, async (req, res) => {
+router.post("/payment", requireAuth, async (req, res) => {
   try {
     const { planId, amountMru, method, phoneNumber, transactionRef, proofUrl } = req.body as Record<string, string | number>;
     if (!planId || !amountMru || !method || !phoneNumber) {
@@ -121,7 +121,7 @@ router.post("/subscriptions/payment", requireAuth, async (req, res) => {
 });
 
 // GET /subscriptions/payments
-router.get("/subscriptions/payments", requireAuth, async (req, res) => {
+router.get("/payments", requireAuth, async (req, res) => {
   try {
     const payments = await db.select().from(paymentsTable).where(eq(paymentsTable.userId, req.userId!)).orderBy(sql`${paymentsTable.createdAt} DESC`);
     const enriched = await Promise.all(payments.map(async (p) => {

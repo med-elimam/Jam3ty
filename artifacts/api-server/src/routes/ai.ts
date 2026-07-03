@@ -19,7 +19,7 @@ async function getUserPlan(userId: string): Promise<"free" | "plus" | "premium_a
 }
 
 // POST /ai/chat
-router.post("/ai/chat", requireAuth, async (req, res) => {
+router.post("/chat", requireAuth, async (req, res) => {
   try {
     const { message, context } = req.body as { message?: string; context?: string };
     if (!message?.trim()) {
@@ -62,7 +62,7 @@ router.post("/ai/chat", requireAuth, async (req, res) => {
 });
 
 // GET /ai/usage
-router.get("/ai/usage", requireAuth, async (req, res) => {
+router.get("/usage", requireAuth, async (req, res) => {
   try {
     const userPlan = await getUserPlan(req.userId!);
     const limit = AI_LIMITS[userPlan];

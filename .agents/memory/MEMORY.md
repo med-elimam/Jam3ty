@@ -3,3 +3,5 @@
 - [Expo Router index routes](expo-router-index-routes.md) — use /route not /route/index for navigation and Stack.Screen names
 - [Jamiati Arabic pass patterns](jamiati-arabic-pass.md) — enum display maps, filter type casting, orval hook option typing patterns used in Phase 1
 - [Jamiati Phase 2 design system](jamiati-phase2-design.md) — UI component locations, onboarding cascade-reset pattern, Card/Badge/Button style prop types
+- [Jamiati route double-prefix pattern](jamiati-route-prefix.md) — four routers were mounted WITH a prefix but had redundant prefix in handler paths; fix rule and checker pattern
+- [Jamiati Phase 3 seed design](jamiati-phase3-seed.md) — idempotency strategy, levelId linkage quirk, reaction auth fix

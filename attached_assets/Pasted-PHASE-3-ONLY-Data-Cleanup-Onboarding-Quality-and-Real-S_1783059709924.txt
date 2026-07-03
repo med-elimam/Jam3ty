@@ -1,0 +1,446 @@
+PHASE 3 ONLY — Data Cleanup, Onboarding Quality, and Real Student Content.
+
+Do not redesign the UI.
+Do not change the Phase 2 design system.
+Do not work on payments yet.
+Do not work on admin dashboard yet.
+Do not change authentication logic.
+Do not add random new features.
+Do not break Expo Go.
+Do not rename technical package IDs.
+
+Current state:
+- Phase 1 Arabic language cleanup is complete.
+- Phase 2 mobile design system and visual upgrade is complete.
+- Login/register work.
+- The app still feels empty because seed data, onboarding data, and student-linked content are weak or duplicated.
+
+Goal:
+Make the student app feel alive after onboarding by cleaning academic seed data and ensuring the selected university/faculty/department/level/group produces relevant courses, timetable sessions, announcements, files, assignments, exams, community posts, and opportunities.
+
+Main problems to fix:
+- University list has duplicates.
+- Some Arabic academic names are repeated many times.
+- After onboarding, courses page shows no courses.
+- Home shows no classes and no announcements.
+- Timetable shows no classes.
+- Community shows no posts.
+- The app looks empty even after successful onboarding.
+- The student profile must show correct selected academic information.
+
+============================================================
+1. Clean Mauritanian academic seed data
+============================================================
+
+Fix the seed data to be clean, realistic, and non-duplicated.
+
+Create a small but solid Mauritanian academic structure.
+
+Universities / institutions:
+- جامعة نواكشوط
+- المعهد العالي للتجارة وإدارة المؤسسات
+- المعهد العالي للمحاسبة وإدارة المؤسسات
+- كلية العلوم والتقنيات
+- كلية الطب
+- المعهد العالي للدراسات والبحوث الإسلامية
+- المعهد الجامعي المهني
+- المدرسة العليا متعددة التقنيات
+- جامعة العلوم الإسلامية بلعيون
+
+Do not duplicate the same university name multiple times.
+
+Faculties / institutes:
+For جامعة نواكشوط:
+- كلية العلوم والتقنيات
+- كلية الآداب والعلوم الإنسانية
+- كلية العلوم القانونية والاقتصادية
+- كلية الطب
+
+For ISCAE / المعهد العالي للتجارة وإدارة المؤسسات:
+- إدارة الأعمال
+- المحاسبة والمالية
+- التجارة والتسويق
+- نظم المعلومات الإدارية
+
+Departments examples:
+- علوم الحاسوب
+- الرياضيات
+- الفيزياء
+- الكيمياء
+- الاقتصاد
+- القانون
+- الطب العام
+- المحاسبة
+- إدارة الأعمال
+- نظم المعلومات
+
+Levels:
+- السنة الأولى ليسانس
+- السنة الثانية ليسانس
+- السنة الثالثة ليسانس
+- السنة الأولى ماستر
+- السنة الثانية ماستر
+
+Groups:
+- المجموعة A
+- المجموعة B
+- المجموعة C
+
+Important:
+- Use stable unique records.
+- Seed must be idempotent.
+- No duplicates on repeated seed runs.
+- Use upsert/onConflict logic properly.
+- Do not create 10 copies of the same university.
+- If previous duplicate rows already exist, add a cleanup step or create a safe dedupe script if practical.
+
+============================================================
+2. Onboarding must show clean data
+============================================================
+
+Improve onboarding data loading:
+
+University step:
+- Show unique universities only.
+- Search works.
+- No duplicates.
+- Arabic names clear.
+- Selected state clear.
+
+Faculty step:
+- Show faculties only for selected university.
+
+Department step:
+- Show departments only for selected faculty.
+
+Level step:
+- Show levels available for selected department/program.
+
+Group step:
+- Show groups only for selected level/department.
+
+When the user changes a parent field:
+- Reset all downstream fields.
+- Prevent stale mismatched IDs.
+- Disable Next until valid selection.
+
+On finish:
+- Save selected academic profile correctly.
+- Navigate to main tabs.
+- Profile screen must show the correct selected university/department/level.
+
+============================================================
+3. Seed realistic courses
+============================================================
+
+Create realistic courses linked to departments and levels.
+
+For علوم الحاسوب / السنة الأولى:
+- البرمجة 1
+- الخوارزميات
+- الرياضيات 1
+- بنية الحاسوب
+- اللغة الفرنسية التقنية
+
+For علوم الحاسوب / السنة الثانية:
+- البرمجة الكائنية
+- قواعد البيانات
+- أنظمة التشغيل
+- الشبكات
+- الإحصاء
+
+For إدارة الأعمال:
+- مبادئ الإدارة
+- المحاسبة العامة
+- الاقتصاد الجزئي
+- التسويق
+- رياضيات مالية
+
+For الطب العام:
+- التشريح
+- الفيزيولوجيا
+- الكيمياء الحيوية
+- علم الأنسجة
+
+Each course should have:
+- title
+- code if schema supports it
+- description
+- department/faculty/university link
+- level link
+- semester if supported
+- professor assignment if supported
+
+After onboarding, if the student selected matching university/department/level, Courses page must show relevant courses.
+
+============================================================
+4. Seed timetable sessions
+============================================================
+
+Create weekly timetable sessions for seeded courses.
+
+Each session:
+- course_id
+- day_of_week
+- start_time
+- end_time
+- type:
+  - lecture
+  - td
+  - tp
+- room
+- professor if supported
+- group_id if supported
+
+Home must show today’s sessions if any.
+Timetable screen must show sessions across the week.
+
+If there are no sessions today, the empty state is okay, but another day must show classes.
+
+============================================================
+5. Seed announcements
+============================================================
+
+Create realistic Arabic announcements.
+
+Examples:
+- إعلان عن بداية التسجيلات
+- تغيير قاعة محاضرة البرمجة
+- فتح باب التسجيل في نادي التكنولوجيا
+- تذكير بموعد الامتحان النصفي
+- إضافة ملفات جديدة لمادة قواعد البيانات
+
+Announcements must have:
+- title
+- body
+- priority:
+  - normal
+  - important
+  - urgent
+- scope:
+  - university
+  - faculty
+  - department
+  - course
+- target IDs where relevant
+- created_by if required
+- publish date
+
+Home must show relevant announcements for the student after onboarding.
+Announcements screen must not be empty.
+
+============================================================
+6. Seed files
+============================================================
+
+Create file metadata records. Do not need real PDF files if storage is not configured, but the UI must show realistic file cards.
+
+Examples:
+- محاضرة 1 - مقدمة في البرمجة
+- TD 1 - الخوارزميات
+- ملخص قواعد البيانات
+- امتحان سابق في الرياضيات
+- تصحيح امتحان البرمجة
+
+Each file metadata:
+- title
+- type/category:
+  - lecture
+  - td
+  - tp
+  - summary
+  - exam
+  - correction
+- course_id
+- uploader_id
+- status approved
+- size if supported
+- created_at
+
+Files screen must show data.
+Course detail must show course files if that screen exists.
+
+If actual file opening is not configured, show a clear Arabic message:
+"معاينة الملف غير مفعلة بعد في بيئة التطوير"
+Do not crash.
+
+============================================================
+7. Seed assignments and exams
+============================================================
+
+Assignments:
+- واجب البرمجة 1
+- تمرين قواعد البيانات
+- بحث قصير في التسويق
+
+Each:
+- course_id
+- title
+- description
+- due date
+- status active
+
+Exams:
+- امتحان نصفي في البرمجة
+- امتحان قواعد البيانات
+- اختبار الرياضيات
+
+Each:
+- course_id
+- exam type
+- date/time
+- room
+- description
+
+Assignments and Exams screens must show real seeded data where relevant.
+
+============================================================
+8. Seed community posts
+============================================================
+
+Create academic community posts.
+
+Examples:
+- من لديه ملخص جيد لمادة الخوارزميات؟
+- هل تم تغيير قاعة محاضرة قواعد البيانات؟
+- هذه بعض النصائح للتحضير لامتحان البرمجة
+- ما أفضل طريقة لمراجعة الرياضيات؟
+
+Each post:
+- author_id
+- body
+- scope:
+  - university
+  - department
+  - course
+  - group
+- status visible
+- created_at
+
+Community page must not be empty after seed.
+
+============================================================
+9. Seed opportunities
+============================================================
+
+Create opportunities relevant to Mauritanian students:
+
+- تدريب صيفي في شركة تقنية
+- ورشة كتابة السيرة الذاتية
+- مسابقة برمجة جامعية
+- منحة تدريبية قصيرة
+- فرصة تطوع في فعالية جامعية
+
+Each:
+- title
+- organization
+- type
+- description
+- deadline
+- location
+- featured flag optional
+- status active
+
+Opportunities screen must show real data.
+
+============================================================
+10. Improve data fetching behavior
+============================================================
+
+For every major screen:
+- Show loading state.
+- Show helpful empty state only if no data exists.
+- Show error state with Arabic message if API fails.
+- Do not silently fail.
+- Do not show English backend enum values.
+- Do not crash if optional fields are missing.
+
+Screens:
+- الرئيسية
+- المواد
+- الجدول
+- المجتمع
+- الملفات
+- الإعلانات
+- الواجبات
+- الامتحانات
+- الفرص
+- الملف الشخصي
+
+============================================================
+11. Verify student-linked data after onboarding
+============================================================
+
+Test flow:
+
+1. Create a new student.
+2. Complete onboarding:
+   - جامعة نواكشوط
+   - كلية العلوم والتقنيات
+   - علوم الحاسوب
+   - السنة الثانية ليسانس
+   - المجموعة A
+
+Expected:
+- Profile shows selected academic info.
+- Courses shows relevant computer science courses.
+- Home shows announcements and maybe today’s classes.
+- Timetable shows weekly sessions.
+- Files shows course files.
+- Assignments shows assignments.
+- Exams shows exams.
+- Community shows posts.
+- Opportunities shows active opportunities.
+
+Also test:
+- ISCAE / إدارة الأعمال / السنة الأولى
+Expected:
+- Business courses and relevant announcements appear.
+
+============================================================
+12. Technical rules
+============================================================
+
+- Keep TypeScript clean.
+- Keep seed idempotent.
+- Do not duplicate rows on repeated seed runs.
+- Do not hardcode UI data if backend data exists.
+- Do not fake frontend-only content where backend records should exist.
+- If a screen is meant to fetch API data, use API data.
+- Do not break login/register.
+- Do not break Phase 2 design components.
+- Run typecheck.
+- Run seed.
+- Test in Expo Go.
+
+============================================================
+13. Done criteria
+============================================================
+
+This phase is done only when:
+
+- University onboarding list has no duplicates.
+- Faculty/department/level/group filtering works.
+- Onboarding saves correct academic profile.
+- Courses page shows relevant courses after onboarding.
+- Home page shows relevant seeded data.
+- Timetable has seeded weekly sessions.
+- Announcements screen has data.
+- Files screen has data.
+- Assignments screen has data.
+- Exams screen has data.
+- Community screen has posts.
+- Opportunities screen has data.
+- Profile shows correct academic info.
+- Seed can be re-run without duplicates.
+- TypeScript passes.
+- Expo Go still works.
+
+When finished, report:
+- Seed files changed
+- API routes touched
+- Mobile screens touched
+- Exact test account used
+- Exact onboarding path tested
+- Which screens now show real data
+- Any remaining empty screen and why

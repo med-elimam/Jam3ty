@@ -5,8 +5,8 @@ import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
-// GET /dashboard/home
-router.get("/dashboard/home", requireAuth, async (req, res) => {
+// GET /home  (mounted at /dashboard by routes/index.ts)
+router.get("/home", requireAuth, async (req, res) => {
   try {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.userId!)).limit(1);
     if (!user) { res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "User not found" } }); return; }

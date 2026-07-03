@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { db, postsTable, usersTable, reactionsTable } from "@workspace/db";
-import { eq, sql, count } from "drizzle-orm";
+import { eq, sql, count, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
-// GET /community/posts
-router.get("/community/posts", requireAuth, async (req, res) => {
+// GET /posts  (mounted at /community by routes/index.ts)
+router.get("/posts", requireAuth, async (req, res) => {
   try {
     const { page = "1", limit = "20" } = req.query as Record<string, string>;
     const pageNum = Math.max(1, parseInt(page));
@@ -39,8 +39,8 @@ router.get("/community/posts", requireAuth, async (req, res) => {
   }
 });
 
-// POST /community/posts
-router.post("/community/posts", requireAuth, async (req, res) => {
+// POST /posts
+router.post("/posts", requireAuth, async (req, res) => {
   try {
     const { content, visibility = "same_university" } = req.body as { content: string; visibility?: string };
     if (!content?.trim()) {
@@ -56,12 +56,12 @@ router.post("/community/posts", requireAuth, async (req, res) => {
   }
 });
 
-// POST /community/posts/:postId/react
-router.post("/community/posts/:postId/react", requireAuth, async (req, res) => {
+// POST /posts/:postId/react
+router.post("/posts/:postId/react", requireAuth, async (req, res) => {
   try {
     const { postId } = req.params as { postId: string };
     const { reaction } = req.body as { reaction: string };
-    const [existing] = await db.select().from(reactionsTable).where(eq(reactionsTable.postId, postId)).limit(1);
+    const [existing] = await db.select().from(reactionsTable).where(and(eq(reactionsTable.postId, postId), eq(reactionsTable.userId, req.userId!))).limit(1);
     if (existing) {
       await db.delete(reactionsTable).where(eq(reactionsTable.id, existing.id));
       await db.update(postsTable).set({ reactionCount: sql`${postsTable.reactionCount} - 1` }).where(eq(postsTable.id, postId));
