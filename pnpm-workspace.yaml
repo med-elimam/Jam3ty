@@ -35,6 +35,8 @@ minimumReleaseAgeExclude:
   - stripe-replit-sync
 
 packages:
+  - student-web
+  - admin-web
   - artifacts/*
   - lib/*
   - lib/integrations/*
