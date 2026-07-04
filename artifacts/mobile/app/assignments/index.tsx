@@ -89,7 +89,14 @@ export default function AssignmentsScreen() {
 
 const s = StyleSheet.create({
   filterRow: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.base, paddingVertical: spacing.md },
-  filterChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.full, borderWidth: 1.5 },
+  filterChip: {
+    paddingHorizontal: spacing.md,
+    height: 32,
+    borderRadius: radius.full,
+    borderWidth: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   filterLabel: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
   list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
   card: { gap: spacing.sm },

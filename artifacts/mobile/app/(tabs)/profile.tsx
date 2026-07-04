@@ -63,7 +63,7 @@ export default function ProfileScreen() {
       <View style={[s.hero, { backgroundColor: colors.navy }]}>
         <Avatar
           name={fullName}
-          size={88}
+          size={72}
           bg={colors.gold + '22'}
           fg={colors.gold}
           style={[s.avatar, { borderColor: colors.gold }]}
@@ -160,12 +160,12 @@ const s = StyleSheet.create({
 
   // Hero
   hero: {
-    paddingTop: spacing.xl,
-    paddingBottom: spacing['2xl'],
+    paddingTop: spacing.base,
+    paddingBottom: spacing.lg,
     alignItems: 'center',
     gap: spacing.sm,
   },
-  avatar: { borderWidth: 3, marginBottom: spacing.sm },
+  avatar: { borderWidth: 3, marginBottom: spacing.xs },
   heroName: { fontSize: fontSize.xl, fontWeight: fontWeight.bold, color: '#fff' },
   heroEmail: { fontSize: fontSize.sm, color: 'rgba(255,255,255,0.65)' },
   acadRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs, flexWrap: 'wrap', justifyContent: 'center' },
@@ -196,11 +196,11 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     paddingHorizontal: spacing.base,
-    paddingVertical: spacing.base,
+    paddingVertical: spacing.md,
   },
   menuIconBox: {
-    width: 38,
-    height: 38,
+    width: 34,
+    height: 34,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',

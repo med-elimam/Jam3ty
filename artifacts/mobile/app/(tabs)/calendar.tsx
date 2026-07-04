@@ -34,39 +34,48 @@ export default function CalendarScreen() {
     return t(`timetable.${key}`);
   };
 
+  // Build a date number for each day-of-week slot relative to this week
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Day chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[s.dayRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
-      >
+      {/* Week day selector */}
+      <View style={[s.weekRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         {daysShort.map((label, i) => {
           const isActive = selectedDay === i;
           const isToday = i === TODAY_DOW;
           const count = dayMap[i]?.length ?? 0;
+          const dayDate = new Date(startOfWeek);
+          dayDate.setDate(startOfWeek.getDate() + i);
+          const dateNum = dayDate.getDate();
           return (
             <TouchableOpacity
               key={i}
               activeOpacity={0.75}
               style={[
-                s.dayPill,
+                s.dayCell,
                 {
-                  backgroundColor: isActive ? colors.navy : colors.card,
-                  borderColor: isToday && !isActive ? colors.gold : isActive ? colors.navy : colors.border,
+                  backgroundColor: isActive ? colors.navy : 'transparent',
+                  borderColor: isToday && !isActive ? colors.gold : 'transparent',
                 },
               ]}
               onPress={() => setSelectedDay(i)}
             >
-              <Text style={[s.dayShort, { color: isActive ? '#fff' : colors.foreground }]}>{label}</Text>
+              <Text style={[s.dayAbbr, { color: isActive ? 'rgba(255,255,255,0.75)' : colors.mutedForeground }]}>
+                {label}
+              </Text>
+              <Text style={[s.dayNum, { color: isActive ? '#fff' : isToday ? colors.gold : colors.foreground }]}>
+                {dateNum}
+              </Text>
               {count > 0 && (
-                <View style={[s.dayDot, { backgroundColor: isActive ? 'rgba(255,255,255,0.7)' : colors.gold }]} />
+                <View style={[s.dayDot, { backgroundColor: isActive ? 'rgba(255,255,255,0.6)' : colors.gold }]} />
               )}
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </View>
 
       <View style={[s.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Text style={[s.dayTitle, { color: colors.foreground }]}>{daysFull[selectedDay]}</Text>
@@ -135,16 +144,24 @@ export default function CalendarScreen() {
 }
 
 const s = StyleSheet.create({
-  dayRow: { paddingHorizontal: spacing.base, paddingVertical: spacing.md, gap: spacing.sm },
-  dayPill: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.full,
-    borderWidth: 1.5,
+  // ── Week day selector ───────────────────────────────────────────────
+  weekRow: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
     alignItems: 'center',
-    minWidth: 52,
+    gap: spacing.xs,
   },
-  dayShort: { fontSize: fontSize.sm, fontWeight: fontWeight.bold },
+  dayCell: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    gap: 2,
+  },
+  dayAbbr: { fontSize: fontSize.xs, fontWeight: fontWeight.medium, textTransform: 'uppercase' },
+  dayNum: { fontSize: fontSize.md, fontWeight: fontWeight.bold },
   dayDot: { width: 4, height: 4, borderRadius: 2, marginTop: 3 },
   headerRow: {
     alignItems: 'center',

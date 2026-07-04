@@ -35,6 +35,7 @@ export default function FilesScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Search bar */}
       <View style={[s.searchBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Feather name="search" size={16} color={colors.mutedForeground} />
         <TextInput
@@ -47,17 +48,33 @@ export default function FilesScreen() {
         />
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.typeRow}>
-        {FILE_TYPES.map((key) => (
-          <TouchableOpacity
-            key={key}
-            activeOpacity={0.75}
-            style={[s.typeChip, { backgroundColor: activeType === key ? colors.navy : colors.card, borderColor: activeType === key ? colors.navy : colors.border }]}
-            onPress={() => setActiveType(key)}
-          >
-            <Text style={[s.typeLabel, { color: activeType === key ? '#fff' : colors.mutedForeground }]}>{t(`fileTypes.${key}`)}</Text>
-          </TouchableOpacity>
-        ))}
+      {/* Horizontal filter chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={[s.chipRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+      >
+        {FILE_TYPES.map((key) => {
+          const active = activeType === key;
+          return (
+            <TouchableOpacity
+              key={key}
+              activeOpacity={0.75}
+              style={[
+                s.chip,
+                {
+                  backgroundColor: active ? colors.navy : colors.card,
+                  borderColor: active ? colors.navy : colors.border,
+                },
+              ]}
+              onPress={() => setActiveType(key)}
+            >
+              <Text style={[s.chipLabel, { color: active ? '#fff' : colors.mutedForeground }]}>
+                {t(`fileTypes.${key}`)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {isLoading ? (
@@ -95,11 +112,29 @@ export default function FilesScreen() {
 }
 
 const s = StyleSheet.create({
-  searchBar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, margin: spacing.base, marginBottom: spacing.sm, padding: spacing.md, borderRadius: radius.lg, borderWidth: 1 },
+  searchBar: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    margin: spacing.base, marginBottom: spacing.sm,
+    padding: spacing.md, borderRadius: radius.lg, borderWidth: 1,
+  },
   searchInput: { flex: 1, fontSize: fontSize.md },
-  typeRow: { paddingHorizontal: spacing.base, paddingBottom: spacing.sm, gap: spacing.sm },
-  typeChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.full, borderWidth: 1.5 },
-  typeLabel: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
+
+  // ── Horizontal filter chips ──────────────────────────────────────────
+  chipRow: {
+    paddingHorizontal: spacing.base,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  chip: {
+    paddingHorizontal: spacing.md,
+    height: 32,
+    borderRadius: radius.full,
+    borderWidth: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chipLabel: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
+
   list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
   fileCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   fileIcon: { width: 48, height: 48, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },

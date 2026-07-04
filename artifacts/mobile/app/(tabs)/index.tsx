@@ -30,12 +30,15 @@ function daysUntil(dateStr: string, t: (key: string, vars?: Record<string, any>)
   return `${d}${t('time.day')}`;
 }
 
-function SectionTitle({ label }: { label: string }) {
+function SectionTitle({ title, icon }: { title: string; icon: string }) {
   const colors = useColors();
+  const { isRTL } = usePreferences();
   return (
-    <View style={s.sectionRow}>
+    <View style={[s.sectionRow, { flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: isRTL ? 'flex-start' : 'flex-start' }]}>
       <View style={[s.sectionAccent, { backgroundColor: colors.navy }]} />
-      <Text style={[s.sectionTitle, { color: colors.foreground }]}>{label}</Text>
+      <Text style={[s.sectionTitle, { color: colors.foreground }]}>
+        {isRTL ? `${title} ${icon}` : `${icon} ${title}`}
+      </Text>
     </View>
   );
 }
@@ -109,7 +112,7 @@ export default function HomeScreen() {
 
       {/* ── Today's Sessions ── */}
       <View style={s.section}>
-        <SectionTitle label={`📅 ${t('home.todayLectures')}`} />
+        <SectionTitle title={t('home.todayLectures')} icon="📅" />
         {(d?.todaysSessions ?? []).length === 0 ? (
           <EmptyState
             icon="calendar"
@@ -142,7 +145,7 @@ export default function HomeScreen() {
 
       {/* ── Announcements ── */}
       <View style={s.section}>
-        <SectionTitle label={`📢 ${t('home.announcements')}`} />
+        <SectionTitle title={t('home.announcements')} icon="📢" />
         {(d?.latestAnnouncements ?? []).length === 0 ? (
           <EmptyState
             icon="bell"
@@ -180,7 +183,7 @@ export default function HomeScreen() {
       {/* ── Upcoming Assignments ── */}
       {(d?.upcomingAssignments ?? []).length > 0 && (
         <View style={s.section}>
-          <SectionTitle label={`📝 ${t('home.upcomingAssignments')}`} />
+          <SectionTitle title={t('home.upcomingAssignments')} icon="📝" />
           {(d?.upcomingAssignments ?? []).slice(0, 3).map((a: any) => (
             <Card
               key={a.id}
@@ -206,7 +209,7 @@ export default function HomeScreen() {
       {/* ── Upcoming Exams ── */}
       {(d?.upcomingExams ?? []).length > 0 && (
         <View style={s.section}>
-          <SectionTitle label={`📊 ${t('home.upcomingExams')}`} />
+          <SectionTitle title={t('home.upcomingExams')} icon="📊" />
           {(d?.upcomingExams ?? []).slice(0, 2).map((e: any) => (
             <Card
               key={e.id}
@@ -263,6 +266,7 @@ const s = StyleSheet.create({
   subPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.xs,
     marginHorizontal: spacing.base,
     marginBottom: spacing.base,
@@ -270,7 +274,7 @@ const s = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radius.full,
   },
-  subPillText: { flex: 1, fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
+  subPillText: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
 
   // Sections
   section: { paddingHorizontal: spacing.base, marginTop: spacing.lg, gap: spacing.sm },

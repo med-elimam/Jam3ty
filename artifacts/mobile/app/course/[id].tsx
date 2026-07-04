@@ -137,7 +137,7 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     section: { padding: 16, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
     desc: { fontSize: 14, color: colors.mutedForeground, lineHeight: 21 },
     tabBar: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-    tabBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+    tabBtn: { paddingHorizontal: 16, height: 32, borderRadius: 20, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, justifyContent: 'center', alignItems: 'center' },
     tabBtnActive: { backgroundColor: colors.navy, borderColor: colors.navy },
     tabText: { fontSize: 14, fontWeight: '600', color: colors.mutedForeground },
     tabTextActive: { color: '#fff' },

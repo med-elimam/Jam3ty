@@ -10,6 +10,9 @@ import {
   levelsTable,
   studentGroupsTable,
   coursesTable,
+  timetableSessionsTable,
+  assignmentsTable,
+  examsTable,
   filesTable,
   subscriptionsTable,
   paymentsTable,
@@ -691,6 +694,194 @@ router.delete("/academic/groups/:groupId", async (req, res) => {
       return;
     }
     req.log.error({ err }, "AdminDeleteGroup error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// ─── COURSES ───────────────────────────────────────────────────────────────
+// coursesTable.isActive is stored as text ("true"/"false") in the DB; the
+// admin API exposes it as a real boolean and converts at the edges.
+
+const COURSE_SEMESTERS = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"] as const;
+
+async function courseWithProfessorName(c: typeof coursesTable.$inferSelect) {
+  let professorName: string | null = null;
+  if (c.professorId) {
+    const [prof] = await db.select({ fullName: usersTable.fullName }).from(usersTable).where(eq(usersTable.id, c.professorId)).limit(1);
+    professorName = prof?.fullName ?? null;
+  }
+  return { ...c, isActive: c.isActive === "true", professorName };
+}
+
+// GET /admin/courses?departmentId=&levelId=
+router.get("/courses", async (req, res) => {
+  try {
+    const { departmentId, levelId } = req.query as { departmentId?: string; levelId?: string };
+    const conditions = [];
+    if (departmentId) conditions.push(eq(coursesTable.departmentId, departmentId));
+    if (levelId) conditions.push(eq(coursesTable.levelId, levelId));
+    const rows = conditions.length > 0
+      ? await db.select().from(coursesTable).where(and(...conditions)).orderBy(coursesTable.name)
+      : await db.select().from(coursesTable).orderBy(coursesTable.name);
+    const data = await Promise.all(rows.map(courseWithProfessorName));
+    res.json({ success: true, data });
+  } catch (err) {
+    req.log.error({ err }, "AdminListCourses error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// POST /admin/courses
+router.post("/courses", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const departmentId = typeof body.departmentId === "string" ? body.departmentId.trim() : "";
+    const levelId = typeof body.levelId === "string" ? body.levelId.trim() : "";
+    if (!name || !departmentId || !levelId) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "departmentId, levelId, and name are required" } });
+      return;
+    }
+    const [department] = await db.select({ id: departmentsTable.id }).from(departmentsTable).where(eq(departmentsTable.id, departmentId)).limit(1);
+    if (!department) {
+      res.status(400).json({ success: false, error: { code: "INVALID_DEPARTMENT", message: "Department not found" } });
+      return;
+    }
+    const [level] = await db.select({ id: levelsTable.id }).from(levelsTable).where(eq(levelsTable.id, levelId)).limit(1);
+    if (!level) {
+      res.status(400).json({ success: false, error: { code: "INVALID_LEVEL", message: "Level not found" } });
+      return;
+    }
+    let semester = "S1";
+    if (body.semester !== undefined) {
+      if (typeof body.semester !== "string" || !(COURSE_SEMESTERS as readonly string[]).includes(body.semester)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_SEMESTER", message: "Invalid semester" } });
+        return;
+      }
+      semester = body.semester;
+    }
+    let professorId: string | null = null;
+    if (body.professorId !== undefined && body.professorId !== null && body.professorId !== "") {
+      const pid = String(body.professorId);
+      const [prof] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, pid)).limit(1);
+      if (!prof) {
+        res.status(400).json({ success: false, error: { code: "INVALID_PROFESSOR", message: "Professor not found" } });
+        return;
+      }
+      professorId = pid;
+    }
+
+    const [created] = await db.insert(coursesTable).values({
+      name,
+      nameAr: cleanOptionalText(body.nameAr) ?? null,
+      nameFr: cleanOptionalText(body.nameFr) ?? null,
+      code: cleanOptionalText(body.code) ?? null,
+      description: cleanOptionalText(body.description) ?? null,
+      departmentId,
+      levelId,
+      semester,
+      professorId,
+      isActive: body.isActive === false ? "false" : "true",
+    }).returning();
+    res.status(201).json({ success: true, data: await courseWithProfessorName(created) });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateCourse error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// PATCH /admin/courses/:courseId
+router.patch("/courses/:courseId", async (req, res) => {
+  try {
+    const { courseId } = req.params as { courseId: string };
+    const [existing] = await db.select().from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Course not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = { updatedAt: new Date() };
+
+    if (body.name !== undefined) {
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name) {
+        res.status(400).json({ success: false, error: { code: "INVALID_NAME", message: "Course name cannot be empty" } });
+        return;
+      }
+      update.name = name;
+    }
+    if (body.nameAr !== undefined) update.nameAr = cleanOptionalText(body.nameAr);
+    if (body.nameFr !== undefined) update.nameFr = cleanOptionalText(body.nameFr);
+    if (body.code !== undefined) update.code = cleanOptionalText(body.code);
+    if (body.description !== undefined) update.description = cleanOptionalText(body.description);
+    if (body.semester !== undefined) {
+      if (typeof body.semester !== "string" || !(COURSE_SEMESTERS as readonly string[]).includes(body.semester)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_SEMESTER", message: "Invalid semester" } });
+        return;
+      }
+      update.semester = body.semester;
+    }
+    if (body.professorId !== undefined) {
+      if (body.professorId === null || body.professorId === "") {
+        update.professorId = null;
+      } else {
+        const pid = String(body.professorId);
+        const [prof] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, pid)).limit(1);
+        if (!prof) {
+          res.status(400).json({ success: false, error: { code: "INVALID_PROFESSOR", message: "Professor not found" } });
+          return;
+        }
+        update.professorId = pid;
+      }
+    }
+    if (body.isActive !== undefined) {
+      if (typeof body.isActive !== "boolean") {
+        res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "isActive must be a boolean" } });
+        return;
+      }
+      update.isActive = body.isActive ? "true" : "false";
+    }
+
+    const [updated] = await db.update(coursesTable).set(update).where(eq(coursesTable.id, courseId)).returning();
+    res.json({ success: true, data: await courseWithProfessorName(updated) });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateCourse error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// DELETE /admin/courses/:courseId
+router.delete("/courses/:courseId", async (req, res) => {
+  try {
+    const { courseId } = req.params as { courseId: string };
+    const [existing] = await db.select().from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Course not found" } });
+      return;
+    }
+    const [sessionRow] = await db.select({ c: count() }).from(timetableSessionsTable).where(eq(timetableSessionsTable.courseId, courseId));
+    if ((sessionRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_SESSIONS", message: "Cannot delete a course that still has timetable sessions." } });
+      return;
+    }
+    const [assignmentRow] = await db.select({ c: count() }).from(assignmentsTable).where(eq(assignmentsTable.courseId, courseId));
+    if ((assignmentRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_ASSIGNMENTS", message: "Cannot delete a course that still has assignments." } });
+      return;
+    }
+    const [examRow] = await db.select({ c: count() }).from(examsTable).where(eq(examsTable.courseId, courseId));
+    if ((examRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_EXAMS", message: "Cannot delete a course that still has exams." } });
+      return;
+    }
+    await db.delete(coursesTable).where(eq(coursesTable.id, courseId));
+    res.json({ success: true, data: { id: courseId } });
+  } catch (err) {
+    if (isForeignKeyViolation(err)) {
+      res.status(409).json({ success: false, error: { code: "REFERENCED", message: "This course is still referenced elsewhere (e.g. a file or post) and cannot be deleted." } });
+      return;
+    }
+    req.log.error({ err }, "AdminDeleteCourse error");
     res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
   }
 });

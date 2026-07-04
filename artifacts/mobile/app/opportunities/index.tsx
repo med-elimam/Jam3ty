@@ -109,7 +109,14 @@ export default function OpportunitiesScreen() {
 
 const s = StyleSheet.create({
   typeRow: { paddingHorizontal: spacing.base, paddingVertical: spacing.md, gap: spacing.sm },
-  typeChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.full, borderWidth: 1.5 },
+  typeChip: {
+    paddingHorizontal: spacing.md,
+    height: 32,
+    borderRadius: radius.full,
+    borderWidth: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   typeLabel: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
   list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
   card: { gap: spacing.sm },

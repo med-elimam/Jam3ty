@@ -1,3 +1,4 @@
+import { LogBox } from 'react-native';
 import React, { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -16,6 +17,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PreferencesProvider, usePreferences } from '@/contexts/PreferencesContext';
 import { useColors } from '@/hooks/useColors';
+
+// Suppress harmless "Codegen didn't run" warnings (expected in Expo Go with newArchEnabled)
+LogBox.ignoreLogs([/Codegen didn't run/]);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,6 +43,7 @@ function RootLayoutNav() {
       options={{
         headerShown: true,
         title: t(titleKey),
+        headerBackTitle: ' ',
         headerStyle: { backgroundColor: colors.navy },
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '700', fontSize: 17 },
