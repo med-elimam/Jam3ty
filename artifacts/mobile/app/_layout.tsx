@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import {
   Inter_400Regular,
@@ -12,6 +13,8 @@ import {
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Feather from '@expo/vector-icons/Feather';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -79,6 +82,8 @@ function Gate() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    ...FontAwesome.font,
+    ...Feather.font,
   });
 
   useEffect(() => {
@@ -100,7 +105,7 @@ export default function RootLayout() {
           <PreferencesProvider>
             <AuthProvider>
               <GestureHandlerRootView style={{ flex: 1 }}>
-                <KeyboardProvider>
+                <KeyboardProvider enabled={Platform.OS !== 'web'}>
                   <Gate />
                 </KeyboardProvider>
               </GestureHandlerRootView>
