@@ -2,22 +2,26 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AdminI18nProvider, useAdminI18n } from "./contexts/AdminI18nContext";
-import { useAdminAuth } from "./hooks/useAdminApi";
+import { AdminAuthProvider, useAdminAuth } from "./contexts/AdminAuthContext";
 
 // Admin pages
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUniversities from "./pages/AdminUniversities";
 import AdminUsers from "./pages/AdminUsers";
+import AdminPayments from "./pages/AdminPayments";
 import { AdminPlaceholder } from "./pages/AdminPlaceholder";
 
-function ProtectedAdminRoute({ component: Component }: { component: React.ComponentType }) {
-  const { isAuthenticated, loading } = useAdminAuth();
+const queryClient = new QueryClient();
 
-  if (loading) {
+function ProtectedAdminRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isAuthenticated, isReady } = useAdminAuth();
+
+  if (!isReady) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
@@ -57,7 +61,7 @@ function Router() {
         <Route path="/admin/events" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Events" icon="🎉" />} />} />
         <Route path="/admin/clubs" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Clubs" icon="🎯" />} />} />
         <Route path="/admin/subscriptions" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Subscriptions" icon="⭐" />} />} />
-        <Route path="/admin/payments" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Payments" icon="💳" />} />} />
+        <Route path="/admin/payments" component={() => <ProtectedAdminRoute component={AdminPayments} />} />
         <Route path="/admin/agents" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Agents" icon="🤝" />} />} />
         <Route path="/admin/settings" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Settings" icon="⚙️" />} />} />
 
@@ -71,16 +75,20 @@ function Router() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <AdminI18nProvider>
-        <ThemeProvider defaultTheme="light">
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </ThemeProvider>
-      </AdminI18nProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AdminAuthProvider>
+        <ErrorBoundary>
+          <AdminI18nProvider>
+            <ThemeProvider defaultTheme="light">
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </ThemeProvider>
+          </AdminI18nProvider>
+        </ErrorBoundary>
+      </AdminAuthProvider>
+    </QueryClientProvider>
   );
 }
 

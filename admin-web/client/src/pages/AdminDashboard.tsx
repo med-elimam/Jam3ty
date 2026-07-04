@@ -1,27 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useAdminI18n } from '@/contexts/AdminI18nContext';
-import { useAdminApi } from '@/hooks/useAdminApi';
+import { useGetAdminDashboardStats } from '@workspace/api-client-react';
 import AdminLayout from '@/components/AdminLayout';
 
 export default function AdminDashboard() {
   const { t } = useAdminI18n();
-  const { getDashboardStats } = useAdminApi();
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadStats = async () => {
-      const result = await getDashboardStats();
-      if (result.success) {
-        setStats(result.data);
-      }
-      setLoading(false);
-    };
-
-    loadStats();
-  }, []);
+  const { data, isLoading: loading } = useGetAdminDashboardStats();
+  const stats = data?.data;
 
   if (loading) {
     return (

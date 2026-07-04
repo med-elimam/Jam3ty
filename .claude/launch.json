@@ -1,0 +1,22 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api-server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "artifacts/api-server", "run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "admin-web",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\HP ZBOOK\\Desktop\\Jam3ty\\admin-web\\node_modules\\vite\\bin\\vite.js",
+        "--host",
+        "--config",
+        "C:\\Users\\HP ZBOOK\\Desktop\\Jam3ty\\admin-web\\vite.config.ts"
+      ],
+      "port": 3001
+    }
+  ]
+}

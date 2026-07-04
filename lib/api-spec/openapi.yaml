@@ -26,6 +26,7 @@ tags:
   - name: notifications
   - name: ai
   - name: dashboard
+  - name: admin
 
 paths:
   /healthz:
@@ -1229,6 +1230,154 @@ paths:
                     $ref: "#/components/schemas/DashboardHome"
                 required: [success, data]
 
+  # ─── ADMIN (super_admin only) ─────────────────────────────────────────────────
+  /admin/dashboard/stats:
+    get:
+      operationId: getAdminDashboardStats
+      tags: [admin]
+      summary: Get aggregate platform stats (super_admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Aggregate stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminDashboardStats"
+                required: [success, data]
+
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      summary: List all users (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [student, professor, club_manager, department_admin, faculty_admin, university_admin, moderator, agent, finance_admin, super_admin]
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+                required: [success, data]
+
+  /admin/payments:
+    get:
+      operationId: listAdminPayments
+      tags: [admin]
+      summary: List all payments across all users (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, under_review, approved, rejected, expired, refunded]
+      responses:
+        "200":
+          description: Payments list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Payment"
+                required: [success, data]
+
+  /admin/payments/{paymentId}/approve:
+    post:
+      operationId: approveAdminPayment
+      tags: [admin]
+      summary: Approve a pending payment and activate the subscription (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      payment:
+                        $ref: "#/components/schemas/Payment"
+                      subscription:
+                        $ref: "#/components/schemas/Subscription"
+                    required: [payment, subscription]
+                required: [success, data]
+
+  /admin/payments/{paymentId}/reject:
+    post:
+      operationId: rejectAdminPayment
+      tags: [admin]
+      summary: Reject a pending payment (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rejectionReason:
+                  type: string
+      responses:
+        "200":
+          description: Payment rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Payment"
+                required: [success, data]
+
 components:
   securitySchemes:
     bearerAuth:
@@ -2046,10 +2195,43 @@ components:
         transactionRef:
           type: string
           nullable: true
+        reviewedBy:
+          type: string
+          nullable: true
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        rejectionReason:
+          type: string
+          nullable: true
+        userEmail:
+          type: string
+          nullable: true
+        userFullName:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
       required: [id, userId, planId, planName, amountMru, method, status, createdAt]
+
+    AdminDashboardStats:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        totalStudents:
+          type: integer
+        totalUniversities:
+          type: integer
+        totalCourses:
+          type: integer
+        totalFiles:
+          type: integer
+        activeSubscriptions:
+          type: integer
+      required: [totalUsers, totalStudents, totalUniversities, totalCourses, totalFiles, activeSubscriptions]
 
     # ─── NOTIFICATION SCHEMAS ─────────────────────────────────────────────────
     Notification:

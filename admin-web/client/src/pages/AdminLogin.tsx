@@ -6,34 +6,41 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useAdminI18n } from '@/contexts/AdminI18nContext';
-import { useAdminApi } from '@/hooks/useAdminApi';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { useLogin } from '@workspace/api-client-react';
 import { toast } from 'sonner';
 
 export default function AdminLogin() {
   const [, navigate] = useLocation();
   const { t } = useAdminI18n();
-  const { login } = useAdminApi();
+  const { signIn } = useAdminAuth();
+  const loginMutation = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const loading = loginMutation.isPending;
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error(t('common.error'));
       return;
     }
 
-    setLoading(true);
-    const result = await login(email, password);
-    setLoading(false);
-
-    if (result.success) {
-      toast.success(t('common.success'));
-      navigate('/admin/dashboard');
-    } else {
-      toast.error(result.error);
-    }
+    loginMutation.mutate(
+      { data: { email, password } },
+      {
+        onSuccess: (result) => {
+          if (result.data.user.role !== 'super_admin') {
+            toast.error(t('auth.adminOnly'));
+            return;
+          }
+          signIn(result.data.tokens.accessToken, result.data.tokens.refreshToken);
+          toast.success(t('common.success'));
+          navigate('/admin/dashboard');
+        },
+        onError: () => toast.error(t('auth.loginFailed')),
+      },
+    );
   };
 
   return (

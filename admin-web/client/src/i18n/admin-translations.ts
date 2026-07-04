@@ -132,7 +132,7 @@ const ar = {
     title: 'الإعلانات',
     create: 'إنشاء إعلان',
     edit: 'تعديل إعلان',
-    title: 'العنوان',
+    fieldTitle: 'العنوان',
     content: 'المحتوى',
     priority: 'الأولوية',
     urgent: 'عاجل',
@@ -160,7 +160,7 @@ const ar = {
   assignments: {
     title: 'الواجبات',
     course: 'المادة',
-    title: 'العنوان',
+    fieldTitle: 'العنوان',
     description: 'الوصف',
     dueDate: 'تاريخ الاستحقاق',
     create: 'إنشاء واجب',
@@ -188,7 +188,7 @@ const ar = {
   opportunities: {
     title: 'الفرص',
     type: 'النوع',
-    title: 'العنوان',
+    fieldTitle: 'العنوان',
     description: 'الوصف',
     deadline: 'آخر موعد',
     featured: 'مميز',
@@ -389,7 +389,7 @@ const fr = {
     title: 'Annonces',
     create: 'Créer une annonce',
     edit: 'Modifier une annonce',
-    title: 'Titre',
+    fieldTitle: 'Titre',
     content: 'Contenu',
     priority: 'Priorité',
     urgent: 'Urgent',
@@ -417,7 +417,7 @@ const fr = {
   assignments: {
     title: 'Devoirs',
     course: 'Cours',
-    title: 'Titre',
+    fieldTitle: 'Titre',
     description: 'Description',
     dueDate: 'Date limite',
     create: 'Créer un devoir',
@@ -445,7 +445,7 @@ const fr = {
   opportunities: {
     title: 'Opportunités',
     type: 'Type',
-    title: 'Titre',
+    fieldTitle: 'Titre',
     description: 'Description',
     deadline: 'Date limite',
     featured: 'Mis en avant',

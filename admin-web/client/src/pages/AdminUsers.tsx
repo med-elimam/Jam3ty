@@ -1,27 +1,14 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useAdminI18n } from '@/contexts/AdminI18nContext';
-import { useAdminApi } from '@/hooks/useAdminApi';
+import { useListAdminUsers } from '@workspace/api-client-react';
 import AdminLayout from '@/components/AdminLayout';
 
 export default function AdminUsers() {
   const { t } = useAdminI18n();
-  const { getUsers } = useAdminApi();
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const result = await getUsers();
-      if (result.success) {
-        setUsers(result.data || []);
-      }
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const { data, isLoading: loading } = useListAdminUsers();
+  const users = data?.data ?? [];
 
   if (loading) {
     return (

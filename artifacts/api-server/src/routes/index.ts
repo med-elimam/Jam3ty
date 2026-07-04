@@ -17,6 +17,7 @@ import subscriptionsRouter from "./subscriptions";
 import notificationsRouter from "./notifications";
 import aiRouter from "./ai";
 import dashboardRouter from "./dashboard";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -38,5 +39,6 @@ router.use("/subscriptions", subscriptionsRouter);
 router.use(notificationsRouter);
 router.use("/ai", aiRouter);
 router.use("/dashboard", dashboardRouter);
+router.use("/admin", adminRouter);
 
 export default router;

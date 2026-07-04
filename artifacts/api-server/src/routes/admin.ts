@@ -1,0 +1,188 @@
+import { Router } from "express";
+import {
+  db,
+  usersTable,
+  universitiesTable,
+  coursesTable,
+  filesTable,
+  subscriptionsTable,
+  paymentsTable,
+  plansTable,
+  userRoleEnum,
+  paymentStatusEnum,
+} from "@workspace/db";
+import { eq, and, gt, count, sql } from "drizzle-orm";
+import { requireAuth, requireRole } from "../middlewares/auth";
+
+const router = Router();
+
+router.use(requireAuth, requireRole("super_admin"));
+
+function safeUser(user: typeof usersTable.$inferSelect) {
+  const { passwordHash: _, ...safe } = user;
+  return safe;
+}
+
+const paymentMethodToSubscriptionSource = {
+  bankily: "bankily_manual",
+  masrvi: "masrvi_manual",
+  sedad: "sedad_manual",
+  cash_agent: "cash_agent",
+} as const;
+
+// GET /admin/dashboard/stats
+router.get("/dashboard/stats", async (req, res) => {
+  try {
+    const [[totalUsers], [totalStudents], [totalUniversities], [totalCourses], [totalFiles], [activeSubscriptions]] = await Promise.all([
+      db.select({ count: count() }).from(usersTable),
+      db.select({ count: count() }).from(usersTable).where(eq(usersTable.role, "student")),
+      db.select({ count: count() }).from(universitiesTable),
+      db.select({ count: count() }).from(coursesTable),
+      db.select({ count: count() }).from(filesTable).where(eq(filesTable.isDeleted, false)),
+      db.select({ count: count() }).from(subscriptionsTable).where(and(eq(subscriptionsTable.status, "active"), gt(subscriptionsTable.expiresAt, new Date()))),
+    ]);
+    res.json({
+      success: true,
+      data: {
+        totalUsers: totalUsers?.count ?? 0,
+        totalStudents: totalStudents?.count ?? 0,
+        totalUniversities: totalUniversities?.count ?? 0,
+        totalCourses: totalCourses?.count ?? 0,
+        totalFiles: totalFiles?.count ?? 0,
+        activeSubscriptions: activeSubscriptions?.count ?? 0,
+      },
+    });
+  } catch (err) {
+    req.log.error({ err }, "AdminDashboardStats error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// GET /admin/users
+router.get("/users", async (req, res) => {
+  try {
+    const { role } = req.query as { role?: string };
+    const validRoles = userRoleEnum.enumValues;
+    if (role && !(validRoles as readonly string[]).includes(role)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_ROLE", message: "Unknown role filter" } });
+      return;
+    }
+    const users = role
+      ? await db.select().from(usersTable).where(eq(usersTable.role, role as (typeof validRoles)[number])).orderBy(usersTable.createdAt)
+      : await db.select().from(usersTable).orderBy(usersTable.createdAt);
+    res.json({ success: true, data: users.map(safeUser) });
+  } catch (err) {
+    req.log.error({ err }, "AdminListUsers error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// GET /admin/payments
+router.get("/payments", async (req, res) => {
+  try {
+    const { status } = req.query as { status?: string };
+    const validStatuses = paymentStatusEnum.enumValues;
+    if (status && !(validStatuses as readonly string[]).includes(status)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Unknown status filter" } });
+      return;
+    }
+    const payments = status
+      ? await db.select().from(paymentsTable).where(eq(paymentsTable.status, status as (typeof validStatuses)[number])).orderBy(sql`${paymentsTable.createdAt} DESC`)
+      : await db.select().from(paymentsTable).orderBy(sql`${paymentsTable.createdAt} DESC`);
+
+    const enriched = await Promise.all(payments.map(async (p) => {
+      const [plan] = await db.select({ name: plansTable.name }).from(plansTable).where(eq(plansTable.id, p.planId)).limit(1);
+      const [user] = await db.select({ email: usersTable.email, fullName: usersTable.fullName }).from(usersTable).where(eq(usersTable.id, p.userId)).limit(1);
+      return { ...p, planName: plan?.name ?? "Plan", userEmail: user?.email ?? null, userFullName: user?.fullName ?? null };
+    }));
+
+    res.json({ success: true, data: enriched });
+  } catch (err) {
+    req.log.error({ err }, "AdminListPayments error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// POST /admin/payments/:paymentId/approve
+router.post("/payments/:paymentId/approve", async (req, res) => {
+  try {
+    const { paymentId } = req.params as { paymentId: string };
+    const [payment] = await db.select().from(paymentsTable).where(eq(paymentsTable.id, paymentId)).limit(1);
+    if (!payment) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Payment not found" } });
+      return;
+    }
+    if (payment.status !== "pending" && payment.status !== "under_review") {
+      res.status(400).json({ success: false, error: { code: "INVALID_STATE", message: `Payment already ${payment.status}` } });
+      return;
+    }
+
+    const [plan] = await db.select().from(plansTable).where(eq(plansTable.id, payment.planId)).limit(1);
+    if (!plan) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Plan not found" } });
+      return;
+    }
+
+    const [updatedPayment] = await db.update(paymentsTable).set({
+      status: "approved",
+      reviewedBy: req.userId!,
+      reviewedAt: new Date(),
+    }).where(eq(paymentsTable.id, paymentId)).returning();
+
+    const expiresAt = new Date(Date.now() + plan.durationDays * 24 * 60 * 60 * 1000);
+    const [subscription] = await db.insert(subscriptionsTable).values({
+      userId: payment.userId,
+      planId: payment.planId,
+      status: "active",
+      source: paymentMethodToSubscriptionSource[payment.method],
+      startsAt: new Date(),
+      expiresAt,
+    }).returning();
+
+    const daysRemaining = Math.max(0, Math.ceil((subscription.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+
+    res.json({
+      success: true,
+      data: {
+        payment: { ...updatedPayment, planName: plan.name },
+        subscription: { ...subscription, planName: plan.name, daysRemaining },
+      },
+    });
+  } catch (err) {
+    req.log.error({ err }, "AdminApprovePayment error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// POST /admin/payments/:paymentId/reject
+router.post("/payments/:paymentId/reject", async (req, res) => {
+  try {
+    const { paymentId } = req.params as { paymentId: string };
+    const { rejectionReason } = req.body as { rejectionReason?: string };
+    const [payment] = await db.select().from(paymentsTable).where(eq(paymentsTable.id, paymentId)).limit(1);
+    if (!payment) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Payment not found" } });
+      return;
+    }
+    if (payment.status !== "pending" && payment.status !== "under_review") {
+      res.status(400).json({ success: false, error: { code: "INVALID_STATE", message: `Payment already ${payment.status}` } });
+      return;
+    }
+
+    const [updatedPayment] = await db.update(paymentsTable).set({
+      status: "rejected",
+      reviewedBy: req.userId!,
+      reviewedAt: new Date(),
+      rejectionReason: rejectionReason ?? null,
+    }).where(eq(paymentsTable.id, paymentId)).returning();
+
+    const [plan] = await db.select({ name: plansTable.name }).from(plansTable).where(eq(plansTable.id, payment.planId)).limit(1);
+
+    res.json({ success: true, data: { ...updatedPayment, planName: plan?.name ?? "Plan" } });
+  } catch (err) {
+    req.log.error({ err }, "AdminRejectPayment error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+export default router;

@@ -56,6 +56,13 @@ export default defineConfig({
       prettier: true,
       override: {
         zod: {
+          // Force v3 output: orval's `getZodImportSource` always emits
+          // `import { z as zod } from 'zod'` (never the `zod/v4` subpath), and
+          // pnpm-workspace.yaml's catalog pins `zod: ^3.25.76`. Leaving this on
+          // "auto" makes orval default to Zod 4 syntax (e.g. `zod.email()`,
+          // unavailable on the plain v3 "zod" entrypoint) whenever it can't
+          // parse the "catalog:" version string, breaking the build.
+          version: 3,
           coerce: {
             query: ['boolean', 'number', 'string'],
             param: ['boolean', 'number', 'string'],

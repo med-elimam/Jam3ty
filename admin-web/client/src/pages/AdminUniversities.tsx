@@ -1,27 +1,14 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useAdminI18n } from '@/contexts/AdminI18nContext';
-import { useAdminApi } from '@/hooks/useAdminApi';
+import { useListUniversities } from '@workspace/api-client-react';
 import AdminLayout from '@/components/AdminLayout';
 
 export default function AdminUniversities() {
   const { t } = useAdminI18n();
-  const { getUniversities } = useAdminApi();
-  const [universities, setUniversities] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const result = await getUniversities();
-      if (result.success) {
-        setUniversities(result.data || []);
-      }
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const { data, isLoading: loading } = useListUniversities();
+  const universities = data?.data ?? [];
 
   if (loading) {
     return (

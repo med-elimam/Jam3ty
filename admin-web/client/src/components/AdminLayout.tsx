@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { Menu, X, LogOut, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAdminI18n } from '@/contexts/AdminI18nContext';
-import { useAdminApi } from '@/hooks/useAdminApi';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -40,11 +40,11 @@ const navItems = [
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location, navigate] = useLocation();
   const { t, lang, setLang, isRTL } = useAdminI18n();
-  const { logout } = useAdminApi();
+  const { signOut } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-    logout();
+    signOut();
     navigate('/admin/login');
     toast.success('Logged out');
   };

@@ -1,0 +1,172 @@
+[07:14:30.398] [32mINFO[39m (11632): [36mServer listening[39m
+    [35mport[39m: 3000
+[07:14:39.796] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 1,
+      "method": "GET",
+      "url": "/api/healthz"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 15
+[07:14:46.389] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 2,
+      "method": "GET",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 1406
+[07:15:34.533] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3,
+      "method": "POST",
+      "url": "/api/auth/register"
+    }
+    [35mres[39m: {
+      "statusCode": 201
+    }
+    [35mresponseTime[39m: 3379
+[07:20:32.509] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 4,
+      "method": "POST",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 1239
+[07:21:16.540] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 5,
+      "method": "POST",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 1271
+[07:24:02.864] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 6,
+      "method": "POST",
+      "url": "/api/auth/register"
+    }
+    [35mres[39m: {
+      "statusCode": 400
+    }
+    [35mresponseTime[39m: 2
+[07:24:36.621] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 7,
+      "method": "POST",
+      "url": "/api/auth/register"
+    }
+    [35mres[39m: {
+      "statusCode": 400
+    }
+    [35mresponseTime[39m: 2
+[07:25:47.149] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 8,
+      "method": "POST",
+      "url": "/api/auth/register"
+    }
+    [35mres[39m: {
+      "statusCode": 201
+    }
+    [35mresponseTime[39m: 3199
+[07:26:35.193] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 9,
+      "method": "POST",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 2324
+[07:30:28.946] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 10,
+      "method": "OPTIONS",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 3
+[07:30:31.162] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 11,
+      "method": "POST",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 2210
+[07:30:31.401] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 12,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[07:30:31.866] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 13,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 461
+[07:30:52.903] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 14,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[07:30:54.509] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 15,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1602
+[07:30:54.555] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 16,
+      "method": "OPTIONS",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[07:30:55.873] [32mINFO[39m (11632): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 17,
+      "method": "GET",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 1315

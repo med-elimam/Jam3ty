@@ -70,7 +70,7 @@ if (process.env.NODE_ENV === "production") {
       if (req.path.includes('.') && !req.path.endsWith('.html')) {
         return res.status(404).end();
       }
-      res.sendFile(path.join(adminPath, "index.html"));
+      return res.sendFile(path.join(adminPath, "index.html"));
     });
     logger.info("Admin dashboard served at /admin");
   }
