@@ -11,6 +11,31 @@ import * as SecureStore from 'expo-secure-store';
 import { setAuthTokenGetter, setBaseUrl } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSegments } from 'expo-router';
+import { Platform } from 'react-native';
+
+const setToken = async (key: string, value: string) => {
+  if (Platform.OS === 'web') {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
+  } else {
+    await SecureStore.setItemAsync(key, value);
+  }
+};
+
+const getToken = async (key: string) => {
+  if (Platform.OS === 'web') {
+    if (typeof localStorage !== 'undefined') return localStorage.getItem(key);
+    return null;
+  }
+  return await SecureStore.getItemAsync(key);
+};
+
+const deleteToken = async (key: string) => {
+  if (Platform.OS === 'web') {
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(key);
+  } else {
+    await SecureStore.deleteItemAsync(key);
+  }
+};
 
 // ─── API base URL ────────────────────────────────────────────────────────────
 const API_BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').replace(/\/+$/, '');
@@ -73,7 +98,7 @@ function isTokenExpired(token: string): boolean {
 }
 
 async function refreshAccessToken(): Promise<{ accessToken: string; refreshToken: string } | null> {
-  const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
+  const refreshToken = await getToken(REFRESH_KEY);
   if (!refreshToken) return null;
   try {
     const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
@@ -131,16 +156,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthTokenGetter(async () => {
       let token = accessTokenRef.current;
       if (!token) {
-        // Try to restore from SecureStore
-        token = await SecureStore.getItemAsync(ACCESS_KEY);
+        // Try to restore from SecureStore/localStorage
+        token = await getToken(ACCESS_KEY);
       }
       if (!token) return null;
       if (isTokenExpired(token)) {
         // Try refresh
         const refreshed = await refreshAccessToken();
         if (!refreshed) return null;
-        await SecureStore.setItemAsync(ACCESS_KEY, refreshed.accessToken);
-        await SecureStore.setItemAsync(REFRESH_KEY, refreshed.refreshToken);
+        await setToken(ACCESS_KEY, refreshed.accessToken);
+        await setToken(REFRESH_KEY, refreshed.refreshToken);
         accessTokenRef.current = refreshed.accessToken;
         setState((s) => ({ ...s, accessToken: refreshed.accessToken }));
         return refreshed.accessToken;
@@ -156,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     (async () => {
       try {
-        let token = await SecureStore.getItemAsync(ACCESS_KEY);
+        let token = await getToken(ACCESS_KEY);
         if (!token) {
           setState({ user: null, accessToken: null, isLoading: false, isAuthenticated: false });
           return;
@@ -165,13 +190,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (isTokenExpired(token)) {
           const refreshed = await refreshAccessToken();
           if (!refreshed) {
-            await SecureStore.deleteItemAsync(ACCESS_KEY);
-            await SecureStore.deleteItemAsync(REFRESH_KEY);
+            await deleteToken(ACCESS_KEY);
+            await deleteToken(REFRESH_KEY);
             setState({ user: null, accessToken: null, isLoading: false, isAuthenticated: false });
             return;
           }
-          await SecureStore.setItemAsync(ACCESS_KEY, refreshed.accessToken);
-          await SecureStore.setItemAsync(REFRESH_KEY, refreshed.refreshToken);
+          await setToken(ACCESS_KEY, refreshed.accessToken);
+          await setToken(REFRESH_KEY, refreshed.refreshToken);
           token = refreshed.accessToken;
         }
 
@@ -220,8 +245,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ── Auth methods ──
   const login = useCallback(async (user: AuthUser, accessToken: string, refreshToken: string) => {
-    await SecureStore.setItemAsync(ACCESS_KEY, accessToken);
-    await SecureStore.setItemAsync(REFRESH_KEY, refreshToken);
+    await setToken(ACCESS_KEY, accessToken);
+    await setToken(REFRESH_KEY, refreshToken);
     accessTokenRef.current = accessToken;
     setState({ user, accessToken, isLoading: false, isAuthenticated: true });
   }, []);
@@ -233,8 +258,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync(ACCESS_KEY);
-      const refresh = await SecureStore.getItemAsync(REFRESH_KEY);
+      const token = await getToken(ACCESS_KEY);
+      const refresh = await getToken(REFRESH_KEY);
       if (token) {
         await fetch(`${API_BASE_URL}/api/auth/logout`, {
           method: 'POST',
@@ -243,8 +268,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }).catch(() => {});
       }
     } finally {
-      await SecureStore.deleteItemAsync(ACCESS_KEY);
-      await SecureStore.deleteItemAsync(REFRESH_KEY);
+      await deleteToken(ACCESS_KEY);
+      await deleteToken(REFRESH_KEY);
       accessTokenRef.current = null;
       qc.clear();
       setState({ user: null, accessToken: null, isLoading: false, isAuthenticated: false });
