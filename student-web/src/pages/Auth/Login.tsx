@@ -6,16 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLogin } from '@workspace/api-client-react';
 import { toast } from 'sonner';
 
 export default function Login() {
   const [, navigate] = useLocation();
   const { t } = useI18n();
-  const { login } = useApi();
+  const { signIn } = useAuth();
+  const { mutateAsync: loginMutate, isPending } = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,15 +25,15 @@ export default function Login() {
       return;
     }
 
-    setLoading(true);
-    const result = await login(email, password);
-    setLoading(false);
-
-    if (result.success) {
+    try {
+      // AuthResponse shape: { success, data: { user, tokens: { accessToken, refreshToken, expiresIn } } }
+      const result = await loginMutate({ data: { email, password } });
+      const { accessToken, refreshToken } = result.data.tokens;
+      signIn(accessToken, refreshToken);
       toast.success('Login successful');
       navigate('/');
-    } else {
-      toast.error(result.error);
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message ?? err?.message ?? 'Login failed');
     }
   };
 
@@ -54,7 +55,7 @@ export default function Login() {
                 placeholder="student@university.edu"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
+                disabled={isPending}
               />
             </div>
 
@@ -66,16 +67,12 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
+                disabled={isPending}
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? <Spinner className="mr-2 h-4 w-4" /> : null}
               {t('auth.login')}
             </Button>
           </form>
@@ -84,7 +81,7 @@ export default function Login() {
             <p className="text-gray-600 text-sm">
               {t('auth.noAccount')}{' '}
               <button
-                onClick={() => navigate('/auth/register')}
+                onClick={() => navigate('/register')}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 {t('auth.createAccount')}

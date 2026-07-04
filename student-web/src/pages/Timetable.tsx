@@ -1,27 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useGetTimetable } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Timetable() {
   const { t } = useI18n();
-  const { getTimetable } = useApi();
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadTimetable = async () => {
-      const result = await getTimetable();
-      if (result.success) {
-        setSessions(result.timetable || []);
-      }
-      setLoading(false);
-    };
-
-    loadTimetable();
-  }, []);
+  const { data: timetableData, isLoading: loading } = useGetTimetable();
+  const sessions = Array.isArray(timetableData) ? timetableData : (timetableData as any)?.data ?? [];
 
   if (loading) {
     return (

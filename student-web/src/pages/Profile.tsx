@@ -1,28 +1,17 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi, useAuth } from '@/hooks/useApi';
+import { useGetProfile, useGetMe } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Profile() {
   const { t } = useI18n();
-  const { user: authUser } = useAuth();
-  const { getUser } = useApi();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: profileData, isLoading: loadingProfile } = useGetProfile();
+  const { data: meData, isLoading: loadingMe } = useGetMe();
 
-  useEffect(() => {
-    const loadUser = async () => {
-      const result = await getUser();
-      if (result.success) {
-        setUser(result.user);
-      }
-      setLoading(false);
-    };
-
-    loadUser();
-  }, []);
+  const loading = loadingProfile || loadingMe;
+  // Prefer full profile; fall back to /me data
+  const userData = (profileData as any) ?? (meData as any);
 
   if (loading) {
     return (
@@ -33,8 +22,6 @@ export default function Profile() {
       </Layout>
     );
   }
-
-  const userData = user || authUser;
 
   return (
     <Layout>

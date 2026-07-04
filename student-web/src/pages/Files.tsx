@@ -1,28 +1,14 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useListFiles } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 import { Download } from 'lucide-react';
 
 export default function Files() {
   const { t } = useI18n();
-  const { getFiles } = useApi();
-  const [files, setFiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadFiles = async () => {
-      const result = await getFiles();
-      if (result.success) {
-        setFiles(result.files || []);
-      }
-      setLoading(false);
-    };
-
-    loadFiles();
-  }, []);
+  const { data: filesData, isLoading: loading } = useListFiles();
+  const files = Array.isArray(filesData) ? filesData : (filesData as any)?.data ?? [];
 
   if (loading) {
     return (

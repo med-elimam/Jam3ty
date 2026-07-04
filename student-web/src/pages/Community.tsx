@@ -1,27 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useListPosts } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Community() {
   const { t } = useI18n();
-  const { getCommunityPosts } = useApi();
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadPosts = async () => {
-      const result = await getCommunityPosts();
-      if (result.success) {
-        setPosts(result.posts || []);
-      }
-      setLoading(false);
-    };
-
-    loadPosts();
-  }, []);
+  const { data: postsData, isLoading: loading } = useListPosts();
+  const posts = Array.isArray(postsData) ? postsData : (postsData as any)?.data ?? [];
 
   if (loading) {
     return (

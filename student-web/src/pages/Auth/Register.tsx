@@ -6,17 +6,18 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRegister } from '@workspace/api-client-react';
 import { toast } from 'sonner';
 
 export default function Register() {
   const [, navigate] = useLocation();
   const { t } = useI18n();
-  const { register } = useApi();
+  const { signIn } = useAuth();
+  const { mutateAsync: registerMutate, isPending } = useRegister();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,15 +31,15 @@ export default function Register() {
       return;
     }
 
-    setLoading(true);
-    const result = await register(email, password, fullName);
-    setLoading(false);
-
-    if (result.success) {
+    try {
+      // AuthResponse shape: { success, data: { user, tokens: { accessToken, refreshToken, expiresIn } } }
+      const result = await registerMutate({ data: { fullName, email, password } });
+      const { accessToken, refreshToken } = result.data.tokens;
+      signIn(accessToken, refreshToken);
       toast.success('Registration successful');
       navigate('/');
-    } else {
-      toast.error(result.error);
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message ?? err?.message ?? 'Registration failed');
     }
   };
 
@@ -60,7 +61,7 @@ export default function Register() {
                 placeholder={t('auth.fullNamePlaceholder')}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                disabled={loading}
+                disabled={isPending}
               />
             </div>
 
@@ -72,7 +73,7 @@ export default function Register() {
                 placeholder="student@university.edu"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
+                disabled={isPending}
               />
             </div>
 
@@ -84,17 +85,13 @@ export default function Register() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
+                disabled={isPending}
               />
               <p className="text-xs text-gray-500 mt-1">{t('auth.passwordMin')}</p>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? <Spinner className="mr-2 h-4 w-4" /> : null}
               {t('auth.createAccountBtn')}
             </Button>
           </form>
@@ -103,7 +100,7 @@ export default function Register() {
             <p className="text-gray-600 text-sm">
               {t('auth.haveAccount')}{' '}
               <button
-                onClick={() => navigate('/auth/login')}
+                onClick={() => navigate('/login')}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 {t('auth.login')}

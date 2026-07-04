@@ -5,6 +5,10 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { I18nProvider, useI18n } from "./contexts/I18nContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "./contexts/AuthContext";
+
+const queryClient = new QueryClient();
 
 // Student pages (reusing components)
 import Home from "./pages/Home";
@@ -62,16 +66,20 @@ function Router() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <I18nProvider>
-        <ThemeProvider defaultTheme="light">
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </ThemeProvider>
-      </I18nProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ErrorBoundary>
+          <I18nProvider>
+            <ThemeProvider defaultTheme="light">
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </ThemeProvider>
+          </I18nProvider>
+        </ErrorBoundary>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

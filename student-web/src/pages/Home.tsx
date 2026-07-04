@@ -1,36 +1,24 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi, useAuth } from '@/hooks/useApi';
+import { useAuth } from '@/contexts/AuthContext';
+import { useListCourses, useGetTimetable, useListAnnouncements } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Home() {
   const { t } = useI18n();
   const { user } = useAuth();
-  const { getCourses, getTimetable, getAnnouncements } = useApi();
-  const [courses, setCourses] = useState<any[]>([]);
-  const [timetable, setTimetable] = useState<any[]>([]);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      const [coursesRes, timetableRes, announcementsRes] = await Promise.all([
-        getCourses(),
-        getTimetable(),
-        getAnnouncements(),
-      ]);
 
-      if (coursesRes.success) setCourses(coursesRes.courses || []);
-      if (timetableRes.success) setTimetable(timetableRes.timetable || []);
-      if (announcementsRes.success) setAnnouncements(announcementsRes.announcements || []);
-      setLoading(false);
-    };
+  const { data: coursesData, isLoading: loadingCourses } = useListCourses();
+  const { data: timetableData, isLoading: loadingTimetable } = useGetTimetable();
+  const { data: announcementsData, isLoading: loadingAnnouncements } = useListAnnouncements();
 
-    loadData();
-  }, []);
+  const loading = loadingCourses || loadingTimetable || loadingAnnouncements;
+
+  const courses = Array.isArray(coursesData) ? coursesData : (coursesData as any)?.data ?? [];
+  const timetable = Array.isArray(timetableData) ? timetableData : (timetableData as any)?.data ?? [];
+  const announcements = Array.isArray(announcementsData) ? announcementsData : (announcementsData as any)?.data ?? [];
 
   if (loading) {
     return (

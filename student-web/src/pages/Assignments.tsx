@@ -1,24 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useListAssignments } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Assignments() {
   const { t } = useI18n();
-  const { getAssignments } = useApi();
-  const [assignments, setAssignments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const result = await getAssignments();
-      if (result.success) setAssignments(result.assignments || []);
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const { data: assignmentsData, isLoading: loading } = useListAssignments();
+  const assignments = Array.isArray(assignmentsData) ? assignmentsData : (assignmentsData as any)?.data ?? [];
 
   if (loading) {
     return (

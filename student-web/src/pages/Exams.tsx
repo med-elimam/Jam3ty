@@ -1,24 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useListExams } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Exams() {
   const { t } = useI18n();
-  const { getExams } = useApi();
-  const [exams, setExams] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const result = await getExams();
-      if (result.success) setExams(result.exams || []);
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const { data: examsData, isLoading: loading } = useListExams();
+  const exams = Array.isArray(examsData) ? examsData : (examsData as any)?.data ?? [];
 
   if (loading) {
     return (

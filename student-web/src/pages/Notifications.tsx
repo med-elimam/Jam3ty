@@ -1,24 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useListNotifications } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Notifications() {
   const { t } = useI18n();
-  const { getNotifications } = useApi();
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const result = await getNotifications();
-      if (result.success) setNotifications(result.notifications || []);
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const { data: notificationsData, isLoading: loading } = useListNotifications();
+  const notifications = Array.isArray(notificationsData) ? notificationsData : (notificationsData as any)?.data ?? [];
 
   if (loading) {
     return (

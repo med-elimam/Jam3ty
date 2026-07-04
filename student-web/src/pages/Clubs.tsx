@@ -1,24 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useListClubs } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Clubs() {
   const { t } = useI18n();
-  const { getClubs } = useApi();
-  const [clubs, setClubs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const result = await getClubs();
-      if (result.success) setClubs(result.clubs || []);
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const { data: clubsData, isLoading: loading } = useListClubs();
+  const clubs = Array.isArray(clubsData) ? clubsData : (clubsData as any)?.data ?? [];
 
   if (loading) {
     return (

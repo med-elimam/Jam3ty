@@ -3,7 +3,8 @@ import { useLocation } from 'wouter';
 import { Menu, X, LogOut, Settings, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useLogout } from '@workspace/api-client-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -28,12 +29,14 @@ const navItems = [
 export default function Layout({ children }: LayoutProps) {
   const [location, navigate] = useLocation();
   const { t, lang, setLang, isRTL } = useI18n();
-  const { logout } = useApi();
+  const { mutate: logoutMutate } = useLogout();
+  const { signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-    logout();
-    navigate('/auth/login');
+    signOut();
+    logoutMutate({});
+    navigate('/login');
     toast.success('Logged out successfully');
   };
 

@@ -1,27 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
-import { useApi } from '@/hooks/useApi';
+import { useListCourses } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
 
 export default function Courses() {
   const { t } = useI18n();
-  const { getCourses } = useApi();
-  const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadCourses = async () => {
-      const result = await getCourses();
-      if (result.success) {
-        setCourses(result.courses || []);
-      }
-      setLoading(false);
-    };
-
-    loadCourses();
-  }, []);
+  const { data: coursesData, isLoading: loading } = useListCourses();
+  const courses = Array.isArray(coursesData) ? coursesData : (coursesData as any)?.data ?? [];
 
   if (loading) {
     return (
