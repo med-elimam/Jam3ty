@@ -243,6 +243,42 @@ export interface OnboardingInput {
   language?: OnboardingInputLanguage;
 }
 
+export type CreateUniversityInputStatus = typeof CreateUniversityInputStatus[keyof typeof CreateUniversityInputStatus];
+
+
+export const CreateUniversityInputStatus = {
+  community_created: 'community_created',
+  verified: 'verified',
+  official_partner: 'official_partner',
+} as const;
+
+export interface CreateUniversityInput {
+  name: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+  city?: string | null;
+  logoUrl?: string | null;
+  status?: CreateUniversityInputStatus;
+}
+
+export type UpdateUniversityInputStatus = typeof UpdateUniversityInputStatus[keyof typeof UpdateUniversityInputStatus];
+
+
+export const UpdateUniversityInputStatus = {
+  community_created: 'community_created',
+  verified: 'verified',
+  official_partner: 'official_partner',
+} as const;
+
+export interface UpdateUniversityInput {
+  name?: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+  city?: string | null;
+  logoUrl?: string | null;
+  status?: UpdateUniversityInputStatus;
+}
+
 export interface Course {
   id: string;
   name: string;
@@ -987,6 +1023,44 @@ export const ListAdminUsersRole = {
 export type ListAdminUsers200 = {
   success: boolean;
   data: User[];
+};
+
+export type ListAdminUniversitiesParams = {
+search?: string;
+status?: ListAdminUniversitiesStatus;
+};
+
+export type ListAdminUniversitiesStatus = typeof ListAdminUniversitiesStatus[keyof typeof ListAdminUniversitiesStatus];
+
+
+export const ListAdminUniversitiesStatus = {
+  community_created: 'community_created',
+  verified: 'verified',
+  official_partner: 'official_partner',
+} as const;
+
+export type ListAdminUniversities200 = {
+  success: boolean;
+  data: University[];
+};
+
+export type CreateAdminUniversity201 = {
+  success: boolean;
+  data: University;
+};
+
+export type UpdateAdminUniversity200 = {
+  success: boolean;
+  data: University;
+};
+
+export type DeleteAdminUniversity200Data = {
+  id: string;
+};
+
+export type DeleteAdminUniversity200 = {
+  success: boolean;
+  data: DeleteAdminUniversity200Data;
 };
 
 export type ListAdminPaymentsParams = {

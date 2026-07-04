@@ -1281,6 +1281,126 @@ paths:
                       $ref: "#/components/schemas/User"
                 required: [success, data]
 
+  /admin/universities:
+    get:
+      operationId: listAdminUniversities
+      tags: [admin]
+      summary: List universities with faculty counts (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [community_created, verified, official_partner]
+      responses:
+        "200":
+          description: Universities list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/University"
+                required: [success, data]
+    post:
+      operationId: createAdminUniversity
+      tags: [admin]
+      summary: Create a university (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUniversityInput"
+      responses:
+        "201":
+          description: University created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/University"
+                required: [success, data]
+
+  /admin/universities/{universityId}:
+    patch:
+      operationId: updateAdminUniversity
+      tags: [admin]
+      summary: Update a university (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: universityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUniversityInput"
+      responses:
+        "200":
+          description: University updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/University"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminUniversity
+      tags: [admin]
+      summary: Delete a university when it has no faculties or members (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: universityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: University deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
   /admin/payments:
     get:
       operationId: listAdminPayments
@@ -1658,6 +1778,49 @@ components:
           type: integer
           nullable: true
       required: [id, name, city, status]
+
+    CreateUniversityInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [community_created, verified, official_partner]
+      required: [name]
+
+    UpdateUniversityInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [community_created, verified, official_partner]
 
     Faculty:
       type: object

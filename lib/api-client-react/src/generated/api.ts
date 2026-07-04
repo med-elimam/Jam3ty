@@ -25,8 +25,11 @@ import type {
   ApproveAdminPayment200,
   AuthResponse,
   CompleteOnboarding200,
+  CreateAdminUniversity201,
   CreatePost201,
   CreatePostInput,
+  CreateUniversityInput,
+  DeleteAdminUniversity200,
   ErrorResponse,
   ForgotPasswordBody,
   GetAdminDashboardStats200,
@@ -40,6 +43,8 @@ import type {
   HealthStatus,
   ListAdminPayments200,
   ListAdminPaymentsParams,
+  ListAdminUniversities200,
+  ListAdminUniversitiesParams,
   ListAdminUsers200,
   ListAdminUsersParams,
   ListAnnouncements200,
@@ -84,8 +89,10 @@ import type {
   SuccessResponse,
   ToggleFileFavorite200,
   TokenPairResponse,
+  UpdateAdminUniversity200,
   UpdateProfile200,
   UpdateProfileInput,
+  UpdateUniversityInput,
   UserResponse
 } from './api.schemas';
 
@@ -3556,6 +3563,304 @@ export function useListAdminUsers<TData = Awaited<ReturnType<typeof listAdminUse
 
 
 
+
+export const getListAdminUniversitiesUrl = (params?: ListAdminUniversitiesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/universities?${stringifiedParams}` : `/api/admin/universities`
+}
+
+/**
+ * @summary List universities with faculty counts (super_admin only)
+ */
+export const listAdminUniversities = async (params?: ListAdminUniversitiesParams, options?: RequestInit): Promise<ListAdminUniversities200> => {
+
+  return customFetch<ListAdminUniversities200>(getListAdminUniversitiesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdminUniversitiesQueryKey = (params?: ListAdminUniversitiesParams,) => {
+    return [
+    `/api/admin/universities`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAdminUniversitiesQueryOptions = <TData = Awaited<ReturnType<typeof listAdminUniversities>>, TError = ErrorType<unknown>>(params?: ListAdminUniversitiesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminUniversities>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminUniversitiesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminUniversities>>> = ({ signal }) => listAdminUniversities(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminUniversities>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminUniversitiesQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminUniversities>>>
+export type ListAdminUniversitiesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List universities with faculty counts (super_admin only)
+ */
+
+export function useListAdminUniversities<TData = Awaited<ReturnType<typeof listAdminUniversities>>, TError = ErrorType<unknown>>(
+ params?: ListAdminUniversitiesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminUniversities>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminUniversitiesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateAdminUniversityUrl = () => {
+
+
+
+
+  return `/api/admin/universities`
+}
+
+/**
+ * @summary Create a university (super_admin only)
+ */
+export const createAdminUniversity = async (createUniversityInput: CreateUniversityInput, options?: RequestInit): Promise<CreateAdminUniversity201> => {
+
+  return customFetch<CreateAdminUniversity201>(getCreateAdminUniversityUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createUniversityInput)
+  }
+);}
+
+
+
+
+
+export const getCreateAdminUniversityMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdminUniversity>>, TError,{data: BodyType<CreateUniversityInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAdminUniversity>>, TError,{data: BodyType<CreateUniversityInput>}, TContext> => {
+
+const mutationKey = ['createAdminUniversity'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAdminUniversity>>, {data: BodyType<CreateUniversityInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createAdminUniversity(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAdminUniversityMutationResult = NonNullable<Awaited<ReturnType<typeof createAdminUniversity>>>
+    export type CreateAdminUniversityMutationBody = BodyType<CreateUniversityInput>
+    export type CreateAdminUniversityMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a university (super_admin only)
+ */
+export const useCreateAdminUniversity = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdminUniversity>>, TError,{data: BodyType<CreateUniversityInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAdminUniversity>>,
+        TError,
+        {data: BodyType<CreateUniversityInput>},
+        TContext
+      > => {
+      return useMutation(getCreateAdminUniversityMutationOptions(options));
+    }
+
+export const getUpdateAdminUniversityUrl = (universityId: string,) => {
+
+
+
+
+  return `/api/admin/universities/${universityId}`
+}
+
+/**
+ * @summary Update a university (super_admin only)
+ */
+export const updateAdminUniversity = async (universityId: string,
+    updateUniversityInput: UpdateUniversityInput, options?: RequestInit): Promise<UpdateAdminUniversity200> => {
+
+  return customFetch<UpdateAdminUniversity200>(getUpdateAdminUniversityUrl(universityId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateUniversityInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateAdminUniversityMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminUniversity>>, TError,{universityId: string;data: BodyType<UpdateUniversityInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdminUniversity>>, TError,{universityId: string;data: BodyType<UpdateUniversityInput>}, TContext> => {
+
+const mutationKey = ['updateAdminUniversity'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdminUniversity>>, {universityId: string;data: BodyType<UpdateUniversityInput>}> = (props) => {
+          const {universityId,data} = props ?? {};
+
+          return  updateAdminUniversity(universityId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdminUniversityMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdminUniversity>>>
+    export type UpdateAdminUniversityMutationBody = BodyType<UpdateUniversityInput>
+    export type UpdateAdminUniversityMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a university (super_admin only)
+ */
+export const useUpdateAdminUniversity = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminUniversity>>, TError,{universityId: string;data: BodyType<UpdateUniversityInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdminUniversity>>,
+        TError,
+        {universityId: string;data: BodyType<UpdateUniversityInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateAdminUniversityMutationOptions(options));
+    }
+
+export const getDeleteAdminUniversityUrl = (universityId: string,) => {
+
+
+
+
+  return `/api/admin/universities/${universityId}`
+}
+
+/**
+ * @summary Delete a university when it has no faculties or members (super_admin only)
+ */
+export const deleteAdminUniversity = async (universityId: string, options?: RequestInit): Promise<DeleteAdminUniversity200> => {
+
+  return customFetch<DeleteAdminUniversity200>(getDeleteAdminUniversityUrl(universityId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteAdminUniversityMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminUniversity>>, TError,{universityId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAdminUniversity>>, TError,{universityId: string}, TContext> => {
+
+const mutationKey = ['deleteAdminUniversity'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAdminUniversity>>, {universityId: string}> = (props) => {
+          const {universityId} = props ?? {};
+
+          return  deleteAdminUniversity(universityId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAdminUniversityMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAdminUniversity>>>
+
+    export type DeleteAdminUniversityMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a university when it has no faculties or members (super_admin only)
+ */
+export const useDeleteAdminUniversity = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminUniversity>>, TError,{universityId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAdminUniversity>>,
+        TError,
+        {universityId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteAdminUniversityMutationOptions(options));
+    }
 
 export const getListAdminPaymentsUrl = (params?: ListAdminPaymentsParams,) => {
   const normalizedParams = new URLSearchParams();

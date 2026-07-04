@@ -1510,6 +1510,102 @@ export const ListAdminUsersResponse = zod.object({
 
 
 /**
+ * @summary List universities with faculty counts (super_admin only)
+ */
+export const ListAdminUniversitiesQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "status": zod.enum(['community_created', 'verified', 'official_partner']).optional()
+})
+
+export const ListAdminUniversitiesResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "city": zod.string(),
+  "logoUrl": zod.string().nullish(),
+  "status": zod.enum(['community_created', 'verified', 'official_partner']),
+  "facultyCount": zod.number().nullish()
+}))
+})
+
+
+/**
+ * @summary Create a university (super_admin only)
+ */
+export const CreateAdminUniversityBody = zod.object({
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "logoUrl": zod.string().nullish(),
+  "status": zod.enum(['community_created', 'verified', 'official_partner']).optional()
+})
+
+export const CreateAdminUniversityResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "city": zod.string(),
+  "logoUrl": zod.string().nullish(),
+  "status": zod.enum(['community_created', 'verified', 'official_partner']),
+  "facultyCount": zod.number().nullish()
+})
+})
+
+
+/**
+ * @summary Update a university (super_admin only)
+ */
+export const UpdateAdminUniversityParams = zod.object({
+  "universityId": zod.coerce.string()
+})
+
+export const UpdateAdminUniversityBody = zod.object({
+  "name": zod.string().optional(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "logoUrl": zod.string().nullish(),
+  "status": zod.enum(['community_created', 'verified', 'official_partner']).optional()
+})
+
+export const UpdateAdminUniversityResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "city": zod.string(),
+  "logoUrl": zod.string().nullish(),
+  "status": zod.enum(['community_created', 'verified', 'official_partner']),
+  "facultyCount": zod.number().nullish()
+})
+})
+
+
+/**
+ * @summary Delete a university when it has no faculties or members (super_admin only)
+ */
+export const DeleteAdminUniversityParams = zod.object({
+  "universityId": zod.coerce.string()
+})
+
+export const DeleteAdminUniversityResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
  * @summary List all payments across all users (super_admin only)
  */
 export const ListAdminPaymentsQueryParams = zod.object({

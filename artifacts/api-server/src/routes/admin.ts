@@ -2,7 +2,10 @@ import { Router } from "express";
 import {
   db,
   usersTable,
+  profilesTable,
   universitiesTable,
+  universityStatusEnum,
+  facultiesTable,
   coursesTable,
   filesTable,
   subscriptionsTable,
@@ -11,7 +14,7 @@ import {
   userRoleEnum,
   paymentStatusEnum,
 } from "@workspace/db";
-import { eq, and, gt, count, sql } from "drizzle-orm";
+import { eq, and, gt, count, sql, ilike } from "drizzle-orm";
 import { requireAuth, requireRole } from "../middlewares/auth";
 
 const router = Router();
@@ -73,6 +76,154 @@ router.get("/users", async (req, res) => {
     res.json({ success: true, data: users.map(safeUser) });
   } catch (err) {
     req.log.error({ err }, "AdminListUsers error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// ─── UNIVERSITIES ──────────────────────────────────────────────────────────
+
+const UNIVERSITY_STATUSES = universityStatusEnum.enumValues;
+type UniversityStatus = (typeof UNIVERSITY_STATUSES)[number];
+
+function cleanOptionalText(value: unknown): string | null | undefined {
+  // undefined => field omitted (leave unchanged on PATCH); null/"" => explicit clear
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed === "" ? null : trimmed;
+}
+
+async function universityWithFacultyCount(u: typeof universitiesTable.$inferSelect) {
+  const [row] = await db.select({ c: count() }).from(facultiesTable).where(eq(facultiesTable.universityId, u.id));
+  return { ...u, facultyCount: row?.c ?? 0 };
+}
+
+// GET /admin/universities
+router.get("/universities", async (req, res) => {
+  try {
+    const { search, status } = req.query as { search?: string; status?: string };
+    if (status && !(UNIVERSITY_STATUSES as readonly string[]).includes(status)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Unknown status filter" } });
+      return;
+    }
+    const conditions = [];
+    if (search) conditions.push(ilike(universitiesTable.name, `%${search}%`));
+    if (status) conditions.push(eq(universitiesTable.status, status as UniversityStatus));
+    const rows = conditions.length > 0
+      ? await db.select().from(universitiesTable).where(and(...conditions)).orderBy(universitiesTable.name)
+      : await db.select().from(universitiesTable).orderBy(universitiesTable.name);
+    const data = await Promise.all(rows.map(universityWithFacultyCount));
+    res.json({ success: true, data });
+  } catch (err) {
+    req.log.error({ err }, "AdminListUniversities error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// POST /admin/universities
+router.post("/universities", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    if (!name) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "University name is required" } });
+      return;
+    }
+    let status: UniversityStatus = "community_created";
+    if (body.status !== undefined) {
+      if (typeof body.status !== "string" || !(UNIVERSITY_STATUSES as readonly string[]).includes(body.status)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Invalid university status" } });
+        return;
+      }
+      status = body.status as UniversityStatus;
+    }
+    const city = cleanOptionalText(body.city);
+    const [created] = await db.insert(universitiesTable).values({
+      name,
+      nameAr: cleanOptionalText(body.nameAr) ?? null,
+      nameFr: cleanOptionalText(body.nameFr) ?? null,
+      city: city && city.length > 0 ? city : "Nouakchott",
+      logoUrl: cleanOptionalText(body.logoUrl) ?? null,
+      status,
+    }).returning();
+    res.status(201).json({ success: true, data: await universityWithFacultyCount(created) });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateUniversity error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// PATCH /admin/universities/:universityId
+router.patch("/universities/:universityId", async (req, res) => {
+  try {
+    const { universityId } = req.params as { universityId: string };
+    const [existing] = await db.select().from(universitiesTable).where(eq(universitiesTable.id, universityId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "University not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = { updatedAt: new Date() };
+
+    if (body.name !== undefined) {
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name) {
+        res.status(400).json({ success: false, error: { code: "INVALID_NAME", message: "University name cannot be empty" } });
+        return;
+      }
+      update.name = name;
+    }
+    if (body.status !== undefined) {
+      if (typeof body.status !== "string" || !(UNIVERSITY_STATUSES as readonly string[]).includes(body.status)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Invalid university status" } });
+        return;
+      }
+      update.status = body.status as UniversityStatus;
+    }
+    if (body.city !== undefined) {
+      const city = cleanOptionalText(body.city);
+      update.city = city && city.length > 0 ? city : "Nouakchott";
+    }
+    if (body.nameAr !== undefined) update.nameAr = cleanOptionalText(body.nameAr);
+    if (body.nameFr !== undefined) update.nameFr = cleanOptionalText(body.nameFr);
+    if (body.logoUrl !== undefined) update.logoUrl = cleanOptionalText(body.logoUrl);
+
+    const [updated] = await db.update(universitiesTable).set(update).where(eq(universitiesTable.id, universityId)).returning();
+    res.json({ success: true, data: await universityWithFacultyCount(updated) });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateUniversity error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// DELETE /admin/universities/:universityId
+// Safe delete: refuse when the university still has faculties (which would
+// cascade-wipe the whole academic tree) or is referenced by any student profile.
+router.delete("/universities/:universityId", async (req, res) => {
+  try {
+    const { universityId } = req.params as { universityId: string };
+    const [existing] = await db.select().from(universitiesTable).where(eq(universitiesTable.id, universityId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "University not found" } });
+      return;
+    }
+
+    const [facultyRow] = await db.select({ c: count() }).from(facultiesTable).where(eq(facultiesTable.universityId, universityId));
+    if ((facultyRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_FACULTIES", message: "Cannot delete a university that still has faculties. Remove its faculties first." } });
+      return;
+    }
+    const [profileRow] = await db.select({ c: count() }).from(profilesTable).where(eq(profilesTable.universityId, universityId));
+    if ((profileRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_MEMBERS", message: "Cannot delete a university that still has members." } });
+      return;
+    }
+
+    await db.delete(universitiesTable).where(eq(universitiesTable.id, universityId));
+    res.json({ success: true, data: { id: universityId } });
+  } catch (err) {
+    req.log.error({ err }, "AdminDeleteUniversity error");
     res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
   }
 });
