@@ -6,6 +6,9 @@ import {
   universitiesTable,
   universityStatusEnum,
   facultiesTable,
+  departmentsTable,
+  levelsTable,
+  studentGroupsTable,
   coursesTable,
   filesTable,
   subscriptionsTable,
@@ -224,6 +227,422 @@ router.delete("/universities/:universityId", async (req, res) => {
     res.json({ success: true, data: { id: universityId } });
   } catch (err) {
     req.log.error({ err }, "AdminDeleteUniversity error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// ─── ACADEMIC STRUCTURE (faculties → departments → levels → groups) ───────────
+
+// A DB-level foreign-key violation (e.g. deleting a faculty/department/level
+// still referenced by an announcement, post, or timetable session scope)
+// surfaces as Postgres error code 23503. Turn that into a clean 409 instead
+// of a raw 500 for every delete route below.
+function isForeignKeyViolation(err: unknown): boolean {
+  return typeof err === "object" && err !== null && (err as { code?: string }).code === "23503";
+}
+
+// GET /admin/academic/faculties?universityId=
+router.get("/academic/faculties", async (req, res) => {
+  try {
+    const { universityId } = req.query as { universityId?: string };
+    const rows = universityId
+      ? await db.select().from(facultiesTable).where(eq(facultiesTable.universityId, universityId)).orderBy(facultiesTable.name)
+      : await db.select().from(facultiesTable).orderBy(facultiesTable.name);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    req.log.error({ err }, "AdminListFaculties error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// POST /admin/academic/faculties
+router.post("/academic/faculties", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const universityId = typeof body.universityId === "string" ? body.universityId.trim() : "";
+    if (!name || !universityId) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "universityId and name are required" } });
+      return;
+    }
+    const [university] = await db.select({ id: universitiesTable.id }).from(universitiesTable).where(eq(universitiesTable.id, universityId)).limit(1);
+    if (!university) {
+      res.status(400).json({ success: false, error: { code: "INVALID_UNIVERSITY", message: "University not found" } });
+      return;
+    }
+    const [created] = await db.insert(facultiesTable).values({
+      universityId,
+      name,
+      nameAr: cleanOptionalText(body.nameAr) ?? null,
+      nameFr: cleanOptionalText(body.nameFr) ?? null,
+    }).returning();
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateFaculty error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// PATCH /admin/academic/faculties/:facultyId
+router.patch("/academic/faculties/:facultyId", async (req, res) => {
+  try {
+    const { facultyId } = req.params as { facultyId: string };
+    const [existing] = await db.select().from(facultiesTable).where(eq(facultiesTable.id, facultyId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Faculty not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = {};
+    if (body.name !== undefined) {
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name) {
+        res.status(400).json({ success: false, error: { code: "INVALID_NAME", message: "Faculty name cannot be empty" } });
+        return;
+      }
+      update.name = name;
+    }
+    if (body.nameAr !== undefined) update.nameAr = cleanOptionalText(body.nameAr);
+    if (body.nameFr !== undefined) update.nameFr = cleanOptionalText(body.nameFr);
+
+    const [updated] = await db.update(facultiesTable).set(update).where(eq(facultiesTable.id, facultyId)).returning();
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateFaculty error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// DELETE /admin/academic/faculties/:facultyId
+router.delete("/academic/faculties/:facultyId", async (req, res) => {
+  try {
+    const { facultyId } = req.params as { facultyId: string };
+    const [existing] = await db.select().from(facultiesTable).where(eq(facultiesTable.id, facultyId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Faculty not found" } });
+      return;
+    }
+    const [deptRow] = await db.select({ c: count() }).from(departmentsTable).where(eq(departmentsTable.facultyId, facultyId));
+    if ((deptRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_DEPARTMENTS", message: "Cannot delete a faculty that still has departments. Remove its departments first." } });
+      return;
+    }
+    const [profileRow] = await db.select({ c: count() }).from(profilesTable).where(eq(profilesTable.facultyId, facultyId));
+    if ((profileRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_MEMBERS", message: "Cannot delete a faculty that still has members." } });
+      return;
+    }
+    await db.delete(facultiesTable).where(eq(facultiesTable.id, facultyId));
+    res.json({ success: true, data: { id: facultyId } });
+  } catch (err) {
+    if (isForeignKeyViolation(err)) {
+      res.status(409).json({ success: false, error: { code: "REFERENCED", message: "This faculty is still referenced elsewhere (e.g. an announcement or post scope) and cannot be deleted." } });
+      return;
+    }
+    req.log.error({ err }, "AdminDeleteFaculty error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// GET /admin/academic/departments?facultyId=
+router.get("/academic/departments", async (req, res) => {
+  try {
+    const { facultyId } = req.query as { facultyId?: string };
+    const rows = facultyId
+      ? await db.select().from(departmentsTable).where(eq(departmentsTable.facultyId, facultyId)).orderBy(departmentsTable.name)
+      : await db.select().from(departmentsTable).orderBy(departmentsTable.name);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    req.log.error({ err }, "AdminListDepartments error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// POST /admin/academic/departments
+router.post("/academic/departments", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const facultyId = typeof body.facultyId === "string" ? body.facultyId.trim() : "";
+    if (!name || !facultyId) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "facultyId and name are required" } });
+      return;
+    }
+    const [faculty] = await db.select({ id: facultiesTable.id }).from(facultiesTable).where(eq(facultiesTable.id, facultyId)).limit(1);
+    if (!faculty) {
+      res.status(400).json({ success: false, error: { code: "INVALID_FACULTY", message: "Faculty not found" } });
+      return;
+    }
+    const [created] = await db.insert(departmentsTable).values({
+      facultyId,
+      name,
+      nameAr: cleanOptionalText(body.nameAr) ?? null,
+      nameFr: cleanOptionalText(body.nameFr) ?? null,
+    }).returning();
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateDepartment error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// PATCH /admin/academic/departments/:departmentId
+router.patch("/academic/departments/:departmentId", async (req, res) => {
+  try {
+    const { departmentId } = req.params as { departmentId: string };
+    const [existing] = await db.select().from(departmentsTable).where(eq(departmentsTable.id, departmentId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Department not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = {};
+    if (body.name !== undefined) {
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name) {
+        res.status(400).json({ success: false, error: { code: "INVALID_NAME", message: "Department name cannot be empty" } });
+        return;
+      }
+      update.name = name;
+    }
+    if (body.nameAr !== undefined) update.nameAr = cleanOptionalText(body.nameAr);
+    if (body.nameFr !== undefined) update.nameFr = cleanOptionalText(body.nameFr);
+
+    const [updated] = await db.update(departmentsTable).set(update).where(eq(departmentsTable.id, departmentId)).returning();
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateDepartment error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// DELETE /admin/academic/departments/:departmentId
+router.delete("/academic/departments/:departmentId", async (req, res) => {
+  try {
+    const { departmentId } = req.params as { departmentId: string };
+    const [existing] = await db.select().from(departmentsTable).where(eq(departmentsTable.id, departmentId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Department not found" } });
+      return;
+    }
+    const [levelRow] = await db.select({ c: count() }).from(levelsTable).where(eq(levelsTable.departmentId, departmentId));
+    if ((levelRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_LEVELS", message: "Cannot delete a department that still has levels. Remove its levels first." } });
+      return;
+    }
+    const [courseRow] = await db.select({ c: count() }).from(coursesTable).where(eq(coursesTable.departmentId, departmentId));
+    if ((courseRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_COURSES", message: "Cannot delete a department that still has courses." } });
+      return;
+    }
+    const [profileRow] = await db.select({ c: count() }).from(profilesTable).where(eq(profilesTable.departmentId, departmentId));
+    if ((profileRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_MEMBERS", message: "Cannot delete a department that still has members." } });
+      return;
+    }
+    await db.delete(departmentsTable).where(eq(departmentsTable.id, departmentId));
+    res.json({ success: true, data: { id: departmentId } });
+  } catch (err) {
+    if (isForeignKeyViolation(err)) {
+      res.status(409).json({ success: false, error: { code: "REFERENCED", message: "This department is still referenced elsewhere and cannot be deleted." } });
+      return;
+    }
+    req.log.error({ err }, "AdminDeleteDepartment error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// GET /admin/academic/levels?departmentId=
+router.get("/academic/levels", async (req, res) => {
+  try {
+    const { departmentId } = req.query as { departmentId?: string };
+    const rows = departmentId
+      ? await db.select().from(levelsTable).where(eq(levelsTable.departmentId, departmentId)).orderBy(levelsTable.yearNumber)
+      : await db.select().from(levelsTable).orderBy(levelsTable.yearNumber);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    req.log.error({ err }, "AdminListLevels error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// POST /admin/academic/levels
+router.post("/academic/levels", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const departmentId = typeof body.departmentId === "string" ? body.departmentId.trim() : "";
+    const yearNumber = typeof body.yearNumber === "number" ? body.yearNumber : Number(body.yearNumber);
+    if (!name || !departmentId || !Number.isFinite(yearNumber)) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "departmentId, name, and yearNumber are required" } });
+      return;
+    }
+    const [department] = await db.select({ id: departmentsTable.id }).from(departmentsTable).where(eq(departmentsTable.id, departmentId)).limit(1);
+    if (!department) {
+      res.status(400).json({ success: false, error: { code: "INVALID_DEPARTMENT", message: "Department not found" } });
+      return;
+    }
+    const [created] = await db.insert(levelsTable).values({ departmentId, name, yearNumber }).returning();
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateLevel error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// PATCH /admin/academic/levels/:levelId
+router.patch("/academic/levels/:levelId", async (req, res) => {
+  try {
+    const { levelId } = req.params as { levelId: string };
+    const [existing] = await db.select().from(levelsTable).where(eq(levelsTable.id, levelId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Level not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = {};
+    if (body.name !== undefined) {
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name) {
+        res.status(400).json({ success: false, error: { code: "INVALID_NAME", message: "Level name cannot be empty" } });
+        return;
+      }
+      update.name = name;
+    }
+    if (body.yearNumber !== undefined) {
+      const yearNumber = typeof body.yearNumber === "number" ? body.yearNumber : Number(body.yearNumber);
+      if (!Number.isFinite(yearNumber)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_YEAR", message: "yearNumber must be a number" } });
+        return;
+      }
+      update.yearNumber = yearNumber;
+    }
+    const [updated] = await db.update(levelsTable).set(update).where(eq(levelsTable.id, levelId)).returning();
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateLevel error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// DELETE /admin/academic/levels/:levelId
+router.delete("/academic/levels/:levelId", async (req, res) => {
+  try {
+    const { levelId } = req.params as { levelId: string };
+    const [existing] = await db.select().from(levelsTable).where(eq(levelsTable.id, levelId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Level not found" } });
+      return;
+    }
+    const [groupRow] = await db.select({ c: count() }).from(studentGroupsTable).where(eq(studentGroupsTable.levelId, levelId));
+    if ((groupRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_GROUPS", message: "Cannot delete a level that still has groups. Remove its groups first." } });
+      return;
+    }
+    const [courseRow] = await db.select({ c: count() }).from(coursesTable).where(eq(coursesTable.levelId, levelId));
+    if ((courseRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_COURSES", message: "Cannot delete a level that still has courses." } });
+      return;
+    }
+    const [profileRow] = await db.select({ c: count() }).from(profilesTable).where(eq(profilesTable.levelId, levelId));
+    if ((profileRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_MEMBERS", message: "Cannot delete a level that still has members." } });
+      return;
+    }
+    await db.delete(levelsTable).where(eq(levelsTable.id, levelId));
+    res.json({ success: true, data: { id: levelId } });
+  } catch (err) {
+    if (isForeignKeyViolation(err)) {
+      res.status(409).json({ success: false, error: { code: "REFERENCED", message: "This level is still referenced elsewhere and cannot be deleted." } });
+      return;
+    }
+    req.log.error({ err }, "AdminDeleteLevel error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// GET /admin/academic/groups?levelId=
+router.get("/academic/groups", async (req, res) => {
+  try {
+    const { levelId } = req.query as { levelId?: string };
+    const rows = levelId
+      ? await db.select().from(studentGroupsTable).where(eq(studentGroupsTable.levelId, levelId)).orderBy(studentGroupsTable.name)
+      : await db.select().from(studentGroupsTable).orderBy(studentGroupsTable.name);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    req.log.error({ err }, "AdminListGroups error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// POST /admin/academic/groups
+router.post("/academic/groups", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const levelId = typeof body.levelId === "string" ? body.levelId.trim() : "";
+    if (!name || !levelId) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "levelId and name are required" } });
+      return;
+    }
+    const [level] = await db.select({ id: levelsTable.id }).from(levelsTable).where(eq(levelsTable.id, levelId)).limit(1);
+    if (!level) {
+      res.status(400).json({ success: false, error: { code: "INVALID_LEVEL", message: "Level not found" } });
+      return;
+    }
+    const [created] = await db.insert(studentGroupsTable).values({ levelId, name }).returning();
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateGroup error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// PATCH /admin/academic/groups/:groupId
+router.patch("/academic/groups/:groupId", async (req, res) => {
+  try {
+    const { groupId } = req.params as { groupId: string };
+    const [existing] = await db.select().from(studentGroupsTable).where(eq(studentGroupsTable.id, groupId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Group not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    if (!name) {
+      res.status(400).json({ success: false, error: { code: "INVALID_NAME", message: "Group name cannot be empty" } });
+      return;
+    }
+    const [updated] = await db.update(studentGroupsTable).set({ name }).where(eq(studentGroupsTable.id, groupId)).returning();
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateGroup error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// DELETE /admin/academic/groups/:groupId
+router.delete("/academic/groups/:groupId", async (req, res) => {
+  try {
+    const { groupId } = req.params as { groupId: string };
+    const [existing] = await db.select().from(studentGroupsTable).where(eq(studentGroupsTable.id, groupId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Group not found" } });
+      return;
+    }
+    const [profileRow] = await db.select({ c: count() }).from(profilesTable).where(eq(profilesTable.groupId, groupId));
+    if ((profileRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_MEMBERS", message: "Cannot delete a group that still has members." } });
+      return;
+    }
+    await db.delete(studentGroupsTable).where(eq(studentGroupsTable.id, groupId));
+    res.json({ success: true, data: { id: groupId } });
+  } catch (err) {
+    if (isForeignKeyViolation(err)) {
+      res.status(409).json({ success: false, error: { code: "REFERENCED", message: "This group is still referenced elsewhere and cannot be deleted." } });
+      return;
+    }
+    req.log.error({ err }, "AdminDeleteGroup error");
     res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
   }
 });

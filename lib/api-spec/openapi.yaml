@@ -1401,6 +1401,466 @@ paths:
                     required: [id]
                 required: [success, data]
 
+  /admin/academic/faculties:
+    get:
+      operationId: listAdminFaculties
+      tags: [admin]
+      summary: List faculties, optionally filtered by university (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: universityId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Faculties list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Faculty"
+                required: [success, data]
+    post:
+      operationId: createAdminFaculty
+      tags: [admin]
+      summary: Create a faculty (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFacultyInput"
+      responses:
+        "201":
+          description: Faculty created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Faculty"
+                required: [success, data]
+
+  /admin/academic/faculties/{facultyId}:
+    patch:
+      operationId: updateAdminFaculty
+      tags: [admin]
+      summary: Update a faculty (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: facultyId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFacultyInput"
+      responses:
+        "200":
+          description: Faculty updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Faculty"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminFaculty
+      tags: [admin]
+      summary: Delete a faculty when it has no departments or members (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: facultyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Faculty deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
+  /admin/academic/departments:
+    get:
+      operationId: listAdminDepartments
+      tags: [admin]
+      summary: List departments, optionally filtered by faculty (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: facultyId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Departments list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Department"
+                required: [success, data]
+    post:
+      operationId: createAdminDepartment
+      tags: [admin]
+      summary: Create a department (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDepartmentInput"
+      responses:
+        "201":
+          description: Department created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Department"
+                required: [success, data]
+
+  /admin/academic/departments/{departmentId}:
+    patch:
+      operationId: updateAdminDepartment
+      tags: [admin]
+      summary: Update a department (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDepartmentInput"
+      responses:
+        "200":
+          description: Department updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Department"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminDepartment
+      tags: [admin]
+      summary: Delete a department when it has no levels, courses, or members (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Department deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
+  /admin/academic/levels:
+    get:
+      operationId: listAdminLevels
+      tags: [admin]
+      summary: List levels, optionally filtered by department (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Levels list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Level"
+                required: [success, data]
+    post:
+      operationId: createAdminLevel
+      tags: [admin]
+      summary: Create a level (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLevelInput"
+      responses:
+        "201":
+          description: Level created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Level"
+                required: [success, data]
+
+  /admin/academic/levels/{levelId}:
+    patch:
+      operationId: updateAdminLevel
+      tags: [admin]
+      summary: Update a level (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: levelId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLevelInput"
+      responses:
+        "200":
+          description: Level updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Level"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminLevel
+      tags: [admin]
+      summary: Delete a level when it has no groups, courses, or members (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: levelId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Level deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
+  /admin/academic/groups:
+    get:
+      operationId: listAdminGroups
+      tags: [admin]
+      summary: List student groups, optionally filtered by level (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: levelId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Groups list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Group"
+                required: [success, data]
+    post:
+      operationId: createAdminGroup
+      tags: [admin]
+      summary: Create a student group (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroupInput"
+      responses:
+        "201":
+          description: Group created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Group"
+                required: [success, data]
+
+  /admin/academic/groups/{groupId}:
+    patch:
+      operationId: updateAdminGroup
+      tags: [admin]
+      summary: Update a student group (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGroupInput"
+      responses:
+        "200":
+          description: Group updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Group"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminGroup
+      tags: [admin]
+      summary: Delete a student group when it has no members (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
   /admin/payments:
     get:
       operationId: listAdminPayments
@@ -1879,6 +2339,94 @@ components:
         name:
           type: string
       required: [id, levelId, name]
+
+    CreateFacultyInput:
+      type: object
+      properties:
+        universityId:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+      required: [universityId, name]
+
+    UpdateFacultyInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+
+    CreateDepartmentInput:
+      type: object
+      properties:
+        facultyId:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+      required: [facultyId, name]
+
+    UpdateDepartmentInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+
+    CreateLevelInput:
+      type: object
+      properties:
+        departmentId:
+          type: string
+        name:
+          type: string
+        yearNumber:
+          type: integer
+      required: [departmentId, name, yearNumber]
+
+    UpdateLevelInput:
+      type: object
+      properties:
+        name:
+          type: string
+        yearNumber:
+          type: integer
+
+    CreateGroupInput:
+      type: object
+      properties:
+        levelId:
+          type: string
+        name:
+          type: string
+      required: [levelId, name]
+
+    UpdateGroupInput:
+      type: object
+      properties:
+        name:
+          type: string
 
     # ─── COURSE SCHEMAS ───────────────────────────────────────────────────────
     Course:

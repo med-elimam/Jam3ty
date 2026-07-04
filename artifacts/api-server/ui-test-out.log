@@ -1,0 +1,462 @@
+[10:34:26.386] [32mINFO[39m (18168): [36mServer listening[39m
+    [35mport[39m: 3000
+[10:35:12.105] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 1,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 9
+[10:35:12.116] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 2,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 9
+[10:35:35.563] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:35:35.570] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 4,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 4
+[10:35:36.092] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 5,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 2
+[10:36:01.775] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 6,
+      "method": "OPTIONS",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:36:04.593] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 7,
+      "method": "POST",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 2813
+[10:36:04.610] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 8,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:36:04.966] [32mINFO[39m (18168): [36mrequest aborted[39m
+    [35mreq[39m: {
+      "id": 9,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": null
+    }
+    [35mresponseTime[39m: 337
+[10:36:06.592] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 10,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 1529
+[10:36:10.685] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 11,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 2
+[10:36:11.170] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 12,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 479
+[10:36:11.268] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 13,
+      "method": "OPTIONS",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:36:11.497] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 14,
+      "method": "GET",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 226
+[10:36:33.102] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 15,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:36:34.566] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 16,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1461
+[10:36:34.627] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 17,
+      "method": "OPTIONS",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:36:35.928] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 18,
+      "method": "GET",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 1297
+[10:36:40.735] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 19,
+      "method": "OPTIONS",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:36:40.973] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 20,
+      "method": "GET",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 227
+[10:36:46.349] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 21,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:36:46.579] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 22,
+      "method": "GET",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 226
+[10:37:19.275] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 23,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:37:20.655] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 24,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1377
+[10:37:20.730] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 25,
+      "method": "OPTIONS",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:37:21.989] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 26,
+      "method": "GET",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1256
+[10:38:01.355] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 27,
+      "method": "OPTIONS",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:38:03.281] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 28,
+      "method": "GET",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 1923
+[10:38:03.673] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 29,
+      "method": "OPTIONS",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:38:04.097] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 30,
+      "method": "GET",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 420
+[10:38:17.574] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 31,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:38:18.928] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 32,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1350
+[10:38:18.957] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 33,
+      "method": "OPTIONS",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:38:20.273] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 34,
+      "method": "GET",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1313
+[10:39:03.195] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 35,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:39:04.984] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 36,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1785
+[10:39:05.055] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 37,
+      "method": "OPTIONS",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:39:05.275] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 38,
+      "method": "GET",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 217
+[10:39:27.213] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 39,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[10:39:28.617] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 40,
+      "method": "GET",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1401
+[10:39:40.091] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 41,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:39:41.817] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 42,
+      "method": "POST",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 201
+    }
+    [35mresponseTime[39m: 1723
+[10:39:41.826] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 43,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:39:42.133] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 44,
+      "method": "GET",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 304
+[10:39:49.191] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 45,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/departments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[10:39:49.470] [32mINFO[39m (18168): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 46,
+      "method": "GET",
+      "url": "/api/admin/academic/departments"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 274

@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-04T10:00:00.000Z",
+  "title": "Design System: Jam3ty Admin",
+  "extensions": {
+    "colorMeta": {
+      "bridge-indigo": {
+        "role": "primary",
+        "displayName": "Bridge Indigo",
+        "canonical": "oklch(0.42 0.16 264)",
+        "tonalRamp": [
+          "oklch(0.15 0.10 264)",
+          "oklch(0.25 0.13 264)",
+          "oklch(0.34 0.15 264)",
+          "oklch(0.42 0.16 264)",
+          "oklch(0.52 0.19 264)",
+          "oklch(0.65 0.15 264)",
+          "oklch(0.80 0.08 264)",
+          "oklch(0.94 0.02 264)"
+        ]
+      },
+      "bridge-indigo-deep": {
+        "role": "primary-hover",
+        "displayName": "Bridge Indigo Deep",
+        "canonical": "oklch(0.34 0.15 264)",
+        "tonalRamp": [
+          "oklch(0.15 0.10 264)",
+          "oklch(0.25 0.13 264)",
+          "oklch(0.34 0.15 264)",
+          "oklch(0.42 0.16 264)",
+          "oklch(0.52 0.19 264)",
+          "oklch(0.65 0.15 264)",
+          "oklch(0.80 0.08 264)",
+          "oklch(0.94 0.02 264)"
+        ]
+      },
+      "bridge-blue": {
+        "role": "accent",
+        "displayName": "Bridge Blue",
+        "canonical": "oklch(0.52 0.19 264)",
+        "tonalRamp": [
+          "oklch(0.15 0.10 264)",
+          "oklch(0.25 0.13 264)",
+          "oklch(0.34 0.15 264)",
+          "oklch(0.42 0.16 264)",
+          "oklch(0.52 0.19 264)",
+          "oklch(0.65 0.15 264)",
+          "oklch(0.80 0.08 264)",
+          "oklch(0.94 0.02 264)"
+        ]
+      },
+      "bridge-blue-tint": {
+        "role": "accent-tint",
+        "displayName": "Bridge Blue Tint",
+        "canonical": "oklch(0.94 0.02 264)",
+        "tonalRamp": [
+          "oklch(0.15 0.10 264)",
+          "oklch(0.25 0.13 264)",
+          "oklch(0.34 0.15 264)",
+          "oklch(0.42 0.16 264)",
+          "oklch(0.52 0.19 264)",
+          "oklch(0.65 0.15 264)",
+          "oklch(0.80 0.08 264)",
+          "oklch(0.94 0.02 264)"
+        ]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Console White",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0.02 264)",
+          "oklch(0.22 0.02 264)",
+          "oklch(0.32 0.02 264)",
+          "oklch(0.45 0.02 264)",
+          "oklch(0.55 0.02 264)",
+          "oklch(0.70 0.015 264)",
+          "oklch(0.85 0.01 264)",
+          "oklch(1 0 0)"
+        ]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Console White (surface)",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0.02 264)",
+          "oklch(0.22 0.02 264)",
+          "oklch(0.32 0.02 264)",
+          "oklch(0.45 0.02 264)",
+          "oklch(0.55 0.02 264)",
+          "oklch(0.70 0.015 264)",
+          "oklch(0.85 0.01 264)",
+          "oklch(1 0 0)"
+        ]
+      },
+      "neutral-ink": {
+        "role": "neutral",
+        "displayName": "Bridge Ink",
+        "canonical": "oklch(0.22 0.02 264)",
+        "tonalRamp": [
+          "oklch(0.15 0.02 264)",
+          "oklch(0.22 0.02 264)",
+          "oklch(0.32 0.02 264)",
+          "oklch(0.45 0.02 264)",
+          "oklch(0.55 0.02 264)",
+          "oklch(0.70 0.015 264)",
+          "oklch(0.85 0.01 264)",
+          "oklch(0.97 0.008 264)"
+        ]
+      },
+      "neutral-muted": {
+        "role": "neutral",
+        "displayName": "Bridge Mist",
+        "canonical": "oklch(0.97 0.008 264)",
+        "tonalRamp": [
+          "oklch(0.15 0.02 264)",
+          "oklch(0.22 0.02 264)",
+          "oklch(0.32 0.02 264)",
+          "oklch(0.45 0.02 264)",
+          "oklch(0.55 0.02 264)",
+          "oklch(0.70 0.015 264)",
+          "oklch(0.85 0.01 264)",
+          "oklch(0.97 0.008 264)"
+        ]
+      },
+      "neutral-muted-foreground": {
+        "role": "neutral",
+        "displayName": "Bridge Mist Ink",
+        "canonical": "oklch(0.55 0.02 264)",
+        "tonalRamp": [
+          "oklch(0.15 0.02 264)",
+          "oklch(0.22 0.02 264)",
+          "oklch(0.32 0.02 264)",
+          "oklch(0.45 0.02 264)",
+          "oklch(0.55 0.02 264)",
+          "oklch(0.70 0.015 264)",
+          "oklch(0.85 0.01 264)",
+          "oklch(0.97 0.008 264)"
+        ]
+      },
+      "neutral-border": {
+        "role": "neutral",
+        "displayName": "Bridge Line",
+        "canonical": "oklch(0.91 0.01 264)",
+        "tonalRamp": [
+          "oklch(0.15 0.02 264)",
+          "oklch(0.22 0.02 264)",
+          "oklch(0.32 0.02 264)",
+          "oklch(0.45 0.02 264)",
+          "oklch(0.55 0.02 264)",
+          "oklch(0.70 0.015 264)",
+          "oklch(0.85 0.01 264)",
+          "oklch(0.97 0.008 264)"
+        ]
+      },
+      "destructive": {
+        "role": "destructive",
+        "displayName": "Destructive Red",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "oklch(0.25 0.15 27)",
+          "oklch(0.35 0.18 27)",
+          "oklch(0.45 0.20 27)",
+          "oklch(0.577 0.245 27.325)",
+          "oklch(0.65 0.22 27)",
+          "oklch(0.75 0.18 27)",
+          "oklch(0.85 0.10 27)",
+          "oklch(0.95 0.03 27)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page-level titles only, one per screen." },
+      "title": { "displayName": "Title", "purpose": "Dialog titles, section and card headings." },
+      "body": { "displayName": "Body", "purpose": "Table rows, form values, descriptions." },
+      "label": { "displayName": "Label", "purpose": "Form labels, table column headers, badges." }
+    },
+    "shadows": [
+      { "name": "ambient", "value": "0 1px 2px 0 oklch(0 0 0 / 0.05)", "purpose": "Default card/panel shadow. Lifts a surface off the console plane, never implies importance." },
+      { "name": "field", "value": "0 1px 2px 0 oklch(0 0 0 / 0.03)", "purpose": "Subtler shadow for inputs and outline buttons." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default easing for every color/border/box-shadow state transition on the console." },
+      { "name": "duration-standard", "value": "150ms", "purpose": "Default transition duration used across buttons, inputs, and nav items." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action per screen that matters most: submit, create, save.",
+      "html": "<button class=\"ds-btn-primary\">حفظ</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; border: none; border-radius: 8px; background: oklch(0.42 0.16 264); color: oklch(1 0 0); font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: oklch(0.34 0.15 264); } .ds-btn-primary:focus-visible { outline: none; border: 1px solid oklch(0.42 0.16 264); box-shadow: 0 0 0 3px oklch(0.52 0.19 264 / 0.5); } .ds-btn-primary:disabled { opacity: 0.5; pointer-events: none; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions (Cancel, Edit) placed next to a Primary button.",
+      "html": "<button class=\"ds-btn-outline\">إلغاء</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; border: 1px solid oklch(0.91 0.01 264); border-radius: 8px; background: transparent; color: oklch(0.22 0.02 264); font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; box-shadow: 0 1px 2px 0 oklch(0 0 0 / 0.03); cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-outline:hover { background: oklch(0.97 0.008 264); } .ds-btn-outline:focus-visible { outline: none; border-color: oklch(0.42 0.16 264); box-shadow: 0 0 0 3px oklch(0.52 0.19 264 / 0.5); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The console's one container shape — a list row, a stat tile, a form wrapper.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">جامعة نواكشوط</h3><p class=\"ds-card-body\">الحالة: موثقة</p></div>",
+      "css": ".ds-card { background: oklch(1 0 0); color: oklch(0.22 0.02 264); border: 1px solid oklch(0.91 0.01 264); border-radius: 10px; box-shadow: 0 1px 2px 0 oklch(0 0 0 / 0.05); padding: 24px; display: flex; flex-direction: column; gap: 12px; font-family: Inter, system-ui, sans-serif; } .ds-card-title { font-size: 1.25rem; font-weight: 600; line-height: 1.3; margin: 0; } .ds-card-body { font-size: 0.875rem; color: oklch(0.55 0.02 264); margin: 0; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text entry inside create/edit dialogs; height-matched to Primary/Outline buttons so forms and actions align on one baseline.",
+      "html": "<input class=\"ds-input\" placeholder=\"اسم الجامعة\" />",
+      "css": ".ds-input { display: block; width: 100%; height: 36px; padding: 4px 12px; border: 1px solid oklch(0.91 0.01 264); border-radius: 8px; background: transparent; color: oklch(0.22 0.02 264); font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; box-shadow: 0 1px 2px 0 oklch(0 0 0 / 0.03); transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-input::placeholder { color: oklch(0.55 0.02 264); } .ds-input:focus-visible { outline: none; border-color: oklch(0.42 0.16 264); box-shadow: 0 0 0 3px oklch(0.52 0.19 264 / 0.5); } .ds-input:disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed; }"
+    },
+    {
+      "name": "Sidebar Nav Item",
+      "kind": "nav",
+      "refersTo": "sidebar-nav-item",
+      "description": "Signature component: the console's fixed rail. Mirrors fully in RTL (the rail flips sides, not just the text).",
+      "html": "<a href=\"#\" class=\"ds-nav-item ds-nav-item--active\"><svg class=\"ds-nav-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/></svg><span>الجامعات</span></a>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 16px; border-radius: 8px; color: oklch(0.55 0.02 264); font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-nav-item:hover { background: oklch(0.97 0.008 264); color: oklch(0.22 0.02 264); } .ds-nav-item--active { background: oklch(0.94 0.02 264); color: oklch(0.42 0.16 264); } .ds-nav-icon { width: 18px; height: 18px; flex-shrink: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Command Bridge",
+    "overview": "Jam3ty Admin is the bridge, not the ship. A small crew runs the entire platform from here for hours at a time, every day — universities, people, courses, payments — so the room has to stay calm and legible under sustained use, never showy, never in the way. Every instrument reads clearly at a glance; nothing on the console exists to be admired, everything exists to be trusted and acted on immediately. The palette centers on a deep, deliberate indigo-blue — not the stock Tailwind blue-700 this system started from, but a richer, more particular shade that reads as confident rather than default. The rest of the surface stays quiet: near-white panels, a single warm-neutral ink, and one accent color used with discipline. This is not a dashboard dressed up to impress a first-time visitor; it explicitly rejects the generic 'SaaS admin template' look — dated card grids, timid gray-on-gray hierarchies, decoration for its own sake. Arabic is the primary reading direction here, French secondary; the console has to feel exactly as native and confident mirrored right-to-left as it does left-to-right — RTL is not a retrofit.",
+    "keyCharacteristics": [
+      "One deliberate accent (Bridge Indigo), used with restraint against a near-white console",
+      "Flat surfaces with a whisper of ambient shadow, never a lifted, showy card",
+      "Confident, calm interaction: definite hover/focus states, no timidity, no flourish",
+      "Fully bidirectional: every layout, icon, and alignment decision is mirrored correctly in RTL"
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Bridge Indigo (and its Deep/Blue/Tint siblings) is the only saturated color on the console outside of the destructive red. If a screen needs a second 'important' color, that's a sign the hierarchy is wrong, not that the palette needs a new entry.", "section": "colors" },
+      { "name": "The One Voice Rule", "body": "Every weight and size on the console maps to Display/Title/Body/Label. No ad hoc text-lg font-semibold invented per-component.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Nothing on the console lifts on hover. State changes are communicated through color and border, never through a growing shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep Bridge Indigo as the only saturated accent on any given screen; everything else is neutral or destructive red.",
+      "Do give every interactive element a definite hover and focus state — calm does not mean inert.",
+      "Do test every screen mirrored in RTL before shipping it; a layout that only works LTR is not done.",
+      "Do use the Ambient/Field shadow pair for all elevation — nothing on the console should ever look like it's floating above the page."
+    ],
+    "donts": [
+      "Don't introduce a second saturated 'important' color without checking the One Accent Rule first.",
+      "Don't use border-left/border-right colored stripes as a status indicator on cards or list rows.",
+      "Don't add hover states that lift, scale, or grow a shadow — that's marketing-site motion vocabulary, not console vocabulary.",
+      "Don't ship a screen that shows an 'API not enabled yet' message or a dead button — every visible action must work, or must not be visible.",
+      "Don't let a dated 2014-admin-template feeling creep in: no dense unstyled tables, no gray-on-gray hierarchy, no decoration that doesn't aid comprehension."
+    ]
+  }
+}

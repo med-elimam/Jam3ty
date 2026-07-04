@@ -1606,6 +1606,315 @@ export const DeleteAdminUniversityResponse = zod.object({
 
 
 /**
+ * @summary List faculties, optionally filtered by university (super_admin only)
+ */
+export const ListAdminFacultiesQueryParams = zod.object({
+  "universityId": zod.coerce.string().optional()
+})
+
+export const ListAdminFacultiesResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "universityId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Create a faculty (super_admin only)
+ */
+export const CreateAdminFacultyBody = zod.object({
+  "universityId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+})
+
+export const CreateAdminFacultyResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "universityId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+})
+})
+
+
+/**
+ * @summary Update a faculty (super_admin only)
+ */
+export const UpdateAdminFacultyParams = zod.object({
+  "facultyId": zod.coerce.string()
+})
+
+export const UpdateAdminFacultyBody = zod.object({
+  "name": zod.string().optional(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+})
+
+export const UpdateAdminFacultyResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "universityId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+})
+})
+
+
+/**
+ * @summary Delete a faculty when it has no departments or members (super_admin only)
+ */
+export const DeleteAdminFacultyParams = zod.object({
+  "facultyId": zod.coerce.string()
+})
+
+export const DeleteAdminFacultyResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
+ * @summary List departments, optionally filtered by faculty (super_admin only)
+ */
+export const ListAdminDepartmentsQueryParams = zod.object({
+  "facultyId": zod.coerce.string().optional()
+})
+
+export const ListAdminDepartmentsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "facultyId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Create a department (super_admin only)
+ */
+export const CreateAdminDepartmentBody = zod.object({
+  "facultyId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+})
+
+export const CreateAdminDepartmentResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "facultyId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+})
+})
+
+
+/**
+ * @summary Update a department (super_admin only)
+ */
+export const UpdateAdminDepartmentParams = zod.object({
+  "departmentId": zod.coerce.string()
+})
+
+export const UpdateAdminDepartmentBody = zod.object({
+  "name": zod.string().optional(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+})
+
+export const UpdateAdminDepartmentResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "facultyId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+})
+})
+
+
+/**
+ * @summary Delete a department when it has no levels, courses, or members (super_admin only)
+ */
+export const DeleteAdminDepartmentParams = zod.object({
+  "departmentId": zod.coerce.string()
+})
+
+export const DeleteAdminDepartmentResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
+ * @summary List levels, optionally filtered by department (super_admin only)
+ */
+export const ListAdminLevelsQueryParams = zod.object({
+  "departmentId": zod.coerce.string().optional()
+})
+
+export const ListAdminLevelsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "departmentId": zod.string(),
+  "name": zod.string(),
+  "yearNumber": zod.number()
+}))
+})
+
+
+/**
+ * @summary Create a level (super_admin only)
+ */
+export const CreateAdminLevelBody = zod.object({
+  "departmentId": zod.string(),
+  "name": zod.string(),
+  "yearNumber": zod.number()
+})
+
+export const CreateAdminLevelResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "departmentId": zod.string(),
+  "name": zod.string(),
+  "yearNumber": zod.number()
+})
+})
+
+
+/**
+ * @summary Update a level (super_admin only)
+ */
+export const UpdateAdminLevelParams = zod.object({
+  "levelId": zod.coerce.string()
+})
+
+export const UpdateAdminLevelBody = zod.object({
+  "name": zod.string().optional(),
+  "yearNumber": zod.number().optional()
+})
+
+export const UpdateAdminLevelResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "departmentId": zod.string(),
+  "name": zod.string(),
+  "yearNumber": zod.number()
+})
+})
+
+
+/**
+ * @summary Delete a level when it has no groups, courses, or members (super_admin only)
+ */
+export const DeleteAdminLevelParams = zod.object({
+  "levelId": zod.coerce.string()
+})
+
+export const DeleteAdminLevelResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
+ * @summary List student groups, optionally filtered by level (super_admin only)
+ */
+export const ListAdminGroupsQueryParams = zod.object({
+  "levelId": zod.coerce.string().optional()
+})
+
+export const ListAdminGroupsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "levelId": zod.string(),
+  "name": zod.string()
+}))
+})
+
+
+/**
+ * @summary Create a student group (super_admin only)
+ */
+export const CreateAdminGroupBody = zod.object({
+  "levelId": zod.string(),
+  "name": zod.string()
+})
+
+export const CreateAdminGroupResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "levelId": zod.string(),
+  "name": zod.string()
+})
+})
+
+
+/**
+ * @summary Update a student group (super_admin only)
+ */
+export const UpdateAdminGroupParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const UpdateAdminGroupBody = zod.object({
+  "name": zod.string().optional()
+})
+
+export const UpdateAdminGroupResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "levelId": zod.string(),
+  "name": zod.string()
+})
+})
+
+
+/**
+ * @summary Delete a student group when it has no members (super_admin only)
+ */
+export const DeleteAdminGroupParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const DeleteAdminGroupResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
  * @summary List all payments across all users (super_admin only)
  */
 export const ListAdminPaymentsQueryParams = zod.object({

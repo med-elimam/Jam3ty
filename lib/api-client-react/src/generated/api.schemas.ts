@@ -279,6 +279,52 @@ export interface UpdateUniversityInput {
   status?: UpdateUniversityInputStatus;
 }
 
+export interface CreateFacultyInput {
+  universityId: string;
+  name: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+}
+
+export interface UpdateFacultyInput {
+  name?: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+}
+
+export interface CreateDepartmentInput {
+  facultyId: string;
+  name: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+}
+
+export interface UpdateDepartmentInput {
+  name?: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+}
+
+export interface CreateLevelInput {
+  departmentId: string;
+  name: string;
+  yearNumber: number;
+}
+
+export interface UpdateLevelInput {
+  name?: string;
+  yearNumber?: number;
+}
+
+export interface CreateGroupInput {
+  levelId: string;
+  name: string;
+}
+
+export interface UpdateGroupInput {
+  name?: string;
+}
+
 export interface Course {
   id: string;
   name: string;
@@ -1061,6 +1107,118 @@ export type DeleteAdminUniversity200Data = {
 export type DeleteAdminUniversity200 = {
   success: boolean;
   data: DeleteAdminUniversity200Data;
+};
+
+export type ListAdminFacultiesParams = {
+universityId?: string;
+};
+
+export type ListAdminFaculties200 = {
+  success: boolean;
+  data: Faculty[];
+};
+
+export type CreateAdminFaculty201 = {
+  success: boolean;
+  data: Faculty;
+};
+
+export type UpdateAdminFaculty200 = {
+  success: boolean;
+  data: Faculty;
+};
+
+export type DeleteAdminFaculty200Data = {
+  id: string;
+};
+
+export type DeleteAdminFaculty200 = {
+  success: boolean;
+  data: DeleteAdminFaculty200Data;
+};
+
+export type ListAdminDepartmentsParams = {
+facultyId?: string;
+};
+
+export type ListAdminDepartments200 = {
+  success: boolean;
+  data: Department[];
+};
+
+export type CreateAdminDepartment201 = {
+  success: boolean;
+  data: Department;
+};
+
+export type UpdateAdminDepartment200 = {
+  success: boolean;
+  data: Department;
+};
+
+export type DeleteAdminDepartment200Data = {
+  id: string;
+};
+
+export type DeleteAdminDepartment200 = {
+  success: boolean;
+  data: DeleteAdminDepartment200Data;
+};
+
+export type ListAdminLevelsParams = {
+departmentId?: string;
+};
+
+export type ListAdminLevels200 = {
+  success: boolean;
+  data: Level[];
+};
+
+export type CreateAdminLevel201 = {
+  success: boolean;
+  data: Level;
+};
+
+export type UpdateAdminLevel200 = {
+  success: boolean;
+  data: Level;
+};
+
+export type DeleteAdminLevel200Data = {
+  id: string;
+};
+
+export type DeleteAdminLevel200 = {
+  success: boolean;
+  data: DeleteAdminLevel200Data;
+};
+
+export type ListAdminGroupsParams = {
+levelId?: string;
+};
+
+export type ListAdminGroups200 = {
+  success: boolean;
+  data: Group[];
+};
+
+export type CreateAdminGroup201 = {
+  success: boolean;
+  data: Group;
+};
+
+export type UpdateAdminGroup200 = {
+  success: boolean;
+  data: Group;
+};
+
+export type DeleteAdminGroup200Data = {
+  id: string;
+};
+
+export type DeleteAdminGroup200 = {
+  success: boolean;
+  data: DeleteAdminGroup200Data;
 };
 
 export type ListAdminPaymentsParams = {
