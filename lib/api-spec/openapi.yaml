@@ -1281,6 +1281,39 @@ paths:
                       $ref: "#/components/schemas/User"
                 required: [success, data]
 
+  /admin/users/{userId}:
+    patch:
+      operationId: updateAdminUser
+      tags: [admin]
+      summary: Update a user's role or active status (super_admin only; cannot demote or deactivate self)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminUserInput"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/User"
+                required: [success, data]
+
   /admin/universities:
     get:
       operationId: listAdminUniversities
@@ -2238,6 +2271,15 @@ components:
           type: integer
           nullable: true
       required: [id, name, city, status]
+
+    UpdateAdminUserInput:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [student, professor, club_manager, department_admin, faculty_admin, university_admin, moderator, agent, finance_admin, super_admin]
+        isActive:
+          type: boolean
 
     CreateUniversityInput:
       type: object

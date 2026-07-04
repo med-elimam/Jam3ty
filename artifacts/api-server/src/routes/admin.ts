@@ -83,6 +83,54 @@ router.get("/users", async (req, res) => {
   }
 });
 
+// PATCH /admin/users/:userId — update role and/or isActive.
+// A super_admin cannot demote or deactivate their own account: that could
+// lock the last admin out of the console with no API path back in.
+router.patch("/users/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params as { userId: string };
+    const [existing] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "User not found" } });
+      return;
+    }
+
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = { updatedAt: new Date() };
+
+    if (body.role !== undefined) {
+      const validRoles = userRoleEnum.enumValues;
+      if (typeof body.role !== "string" || !(validRoles as readonly string[]).includes(body.role)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_ROLE", message: "Unknown role" } });
+        return;
+      }
+      if (userId === req.userId && body.role !== "super_admin") {
+        res.status(400).json({ success: false, error: { code: "SELF_DEMOTE", message: "You cannot remove your own super_admin role" } });
+        return;
+      }
+      update.role = body.role as (typeof validRoles)[number];
+    }
+
+    if (body.isActive !== undefined) {
+      if (typeof body.isActive !== "boolean") {
+        res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "isActive must be a boolean" } });
+        return;
+      }
+      if (userId === req.userId && body.isActive === false) {
+        res.status(400).json({ success: false, error: { code: "SELF_DEACTIVATE", message: "You cannot deactivate your own account" } });
+        return;
+      }
+      update.isActive = body.isActive;
+    }
+
+    const [updated] = await db.update(usersTable).set(update).where(eq(usersTable.id, userId)).returning();
+    res.json({ success: true, data: safeUser(updated) });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateUser error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
 // ─── UNIVERSITIES ──────────────────────────────────────────────────────────
 
 const UNIVERSITY_STATUSES = universityStatusEnum.enumValues;

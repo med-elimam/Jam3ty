@@ -114,6 +114,8 @@ import type {
   UpdateAdminGroup200,
   UpdateAdminLevel200,
   UpdateAdminUniversity200,
+  UpdateAdminUser200,
+  UpdateAdminUserInput,
   UpdateDepartmentInput,
   UpdateFacultyInput,
   UpdateGroupInput,
@@ -3591,6 +3593,78 @@ export function useListAdminUsers<TData = Awaited<ReturnType<typeof listAdminUse
 
 
 
+
+export const getUpdateAdminUserUrl = (userId: string,) => {
+
+
+
+
+  return `/api/admin/users/${userId}`
+}
+
+/**
+ * @summary Update a user's role or active status (super_admin only; cannot demote or deactivate self)
+ */
+export const updateAdminUser = async (userId: string,
+    updateAdminUserInput: UpdateAdminUserInput, options?: RequestInit): Promise<UpdateAdminUser200> => {
+
+  return customFetch<UpdateAdminUser200>(getUpdateAdminUserUrl(userId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateAdminUserInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateAdminUserMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminUser>>, TError,{userId: string;data: BodyType<UpdateAdminUserInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdminUser>>, TError,{userId: string;data: BodyType<UpdateAdminUserInput>}, TContext> => {
+
+const mutationKey = ['updateAdminUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdminUser>>, {userId: string;data: BodyType<UpdateAdminUserInput>}> = (props) => {
+          const {userId,data} = props ?? {};
+
+          return  updateAdminUser(userId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdminUserMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdminUser>>>
+    export type UpdateAdminUserMutationBody = BodyType<UpdateAdminUserInput>
+    export type UpdateAdminUserMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a user's role or active status (super_admin only; cannot demote or deactivate self)
+ */
+export const useUpdateAdminUser = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminUser>>, TError,{userId: string;data: BodyType<UpdateAdminUserInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdminUser>>,
+        TError,
+        {userId: string;data: BodyType<UpdateAdminUserInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateAdminUserMutationOptions(options));
+    }
 
 export const getListAdminUniversitiesUrl = (params?: ListAdminUniversitiesParams,) => {
   const normalizedParams = new URLSearchParams();

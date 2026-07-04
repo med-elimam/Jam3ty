@@ -243,6 +243,27 @@ export interface OnboardingInput {
   language?: OnboardingInputLanguage;
 }
 
+export type UpdateAdminUserInputRole = typeof UpdateAdminUserInputRole[keyof typeof UpdateAdminUserInputRole];
+
+
+export const UpdateAdminUserInputRole = {
+  student: 'student',
+  professor: 'professor',
+  club_manager: 'club_manager',
+  department_admin: 'department_admin',
+  faculty_admin: 'faculty_admin',
+  university_admin: 'university_admin',
+  moderator: 'moderator',
+  agent: 'agent',
+  finance_admin: 'finance_admin',
+  super_admin: 'super_admin',
+} as const;
+
+export interface UpdateAdminUserInput {
+  role?: UpdateAdminUserInputRole;
+  isActive?: boolean;
+}
+
 export type CreateUniversityInputStatus = typeof CreateUniversityInputStatus[keyof typeof CreateUniversityInputStatus];
 
 
@@ -1069,6 +1090,11 @@ export const ListAdminUsersRole = {
 export type ListAdminUsers200 = {
   success: boolean;
   data: User[];
+};
+
+export type UpdateAdminUser200 = {
+  success: boolean;
+  data: User;
 };
 
 export type ListAdminUniversitiesParams = {

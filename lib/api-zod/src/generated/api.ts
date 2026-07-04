@@ -1510,6 +1510,83 @@ export const ListAdminUsersResponse = zod.object({
 
 
 /**
+ * @summary Update a user's role or active status (super_admin only; cannot demote or deactivate self)
+ */
+export const UpdateAdminUserParams = zod.object({
+  "userId": zod.coerce.string()
+})
+
+export const UpdateAdminUserBody = zod.object({
+  "role": zod.enum(['student', 'professor', 'club_manager', 'department_admin', 'faculty_admin', 'university_admin', 'moderator', 'agent', 'finance_admin', 'super_admin']).optional(),
+  "isActive": zod.boolean().optional()
+})
+
+export const UpdateAdminUserResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "email": zod.string(),
+  "fullName": zod.string(),
+  "phone": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "role": zod.enum(['student', 'professor', 'club_manager', 'department_admin', 'faculty_admin', 'university_admin', 'moderator', 'agent', 'finance_admin', 'super_admin']),
+  "emailVerified": zod.boolean(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "profile": zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "levelId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "skills": zod.array(zod.string()).optional(),
+  "privacy": zod.enum(['private', 'same_university', 'public']),
+  "language": zod.enum(['ar', 'fr', 'en']),
+  "university": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "city": zod.string(),
+  "logoUrl": zod.string().nullish(),
+  "status": zod.enum(['community_created', 'verified', 'official_partner']),
+  "facultyCount": zod.number().nullish()
+}).nullish(),
+  "faculty": zod.object({
+  "id": zod.string(),
+  "universityId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+}).nullish(),
+  "department": zod.object({
+  "id": zod.string(),
+  "facultyId": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish()
+}).nullish(),
+  "level": zod.object({
+  "id": zod.string(),
+  "departmentId": zod.string(),
+  "name": zod.string(),
+  "yearNumber": zod.number()
+}).nullish(),
+  "group": zod.object({
+  "id": zod.string(),
+  "levelId": zod.string(),
+  "name": zod.string()
+}).nullish(),
+  "onboardingComplete": zod.boolean()
+}).nullish()
+})
+})
+
+
+/**
  * @summary List universities with faculty counts (super_admin only)
  */
 export const ListAdminUniversitiesQueryParams = zod.object({
