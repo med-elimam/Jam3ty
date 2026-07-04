@@ -264,6 +264,74 @@ export interface UpdateAdminUserInput {
   isActive?: boolean;
 }
 
+export interface AdminCourse {
+  id: string;
+  name: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+  code?: string | null;
+  description?: string | null;
+  departmentId: string;
+  levelId: string;
+  semester: string;
+  professorId?: string | null;
+  professorName?: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export type CreateAdminCourseInputSemester = typeof CreateAdminCourseInputSemester[keyof typeof CreateAdminCourseInputSemester];
+
+
+export const CreateAdminCourseInputSemester = {
+  S1: 'S1',
+  S2: 'S2',
+  S3: 'S3',
+  S4: 'S4',
+  S5: 'S5',
+  S6: 'S6',
+  S7: 'S7',
+  S8: 'S8',
+} as const;
+
+export interface CreateAdminCourseInput {
+  name: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+  code?: string | null;
+  description?: string | null;
+  departmentId: string;
+  levelId: string;
+  semester?: CreateAdminCourseInputSemester;
+  professorId?: string | null;
+  isActive?: boolean;
+}
+
+export type UpdateAdminCourseInputSemester = typeof UpdateAdminCourseInputSemester[keyof typeof UpdateAdminCourseInputSemester];
+
+
+export const UpdateAdminCourseInputSemester = {
+  S1: 'S1',
+  S2: 'S2',
+  S3: 'S3',
+  S4: 'S4',
+  S5: 'S5',
+  S6: 'S6',
+  S7: 'S7',
+  S8: 'S8',
+} as const;
+
+export interface UpdateAdminCourseInput {
+  name?: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+  code?: string | null;
+  description?: string | null;
+  semester?: UpdateAdminCourseInputSemester;
+  professorId?: string | null;
+  isActive?: boolean;
+}
+
 export type CreateUniversityInputStatus = typeof CreateUniversityInputStatus[keyof typeof CreateUniversityInputStatus];
 
 
@@ -1245,6 +1313,35 @@ export type DeleteAdminGroup200Data = {
 export type DeleteAdminGroup200 = {
   success: boolean;
   data: DeleteAdminGroup200Data;
+};
+
+export type ListAdminCoursesParams = {
+departmentId?: string;
+levelId?: string;
+};
+
+export type ListAdminCourses200 = {
+  success: boolean;
+  data: AdminCourse[];
+};
+
+export type CreateAdminCourse201 = {
+  success: boolean;
+  data: AdminCourse;
+};
+
+export type UpdateAdminCourse200 = {
+  success: boolean;
+  data: AdminCourse;
+};
+
+export type DeleteAdminCourse200Data = {
+  id: string;
+};
+
+export type DeleteAdminCourse200 = {
+  success: boolean;
+  data: DeleteAdminCourse200Data;
 };
 
 export type ListAdminPaymentsParams = {

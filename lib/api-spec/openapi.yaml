@@ -1894,6 +1894,125 @@ paths:
                     required: [id]
                 required: [success, data]
 
+  /admin/courses:
+    get:
+      operationId: listAdminCourses
+      tags: [admin]
+      summary: List courses, optionally scoped to a department and level (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: string
+        - name: levelId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Courses list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminCourse"
+                required: [success, data]
+    post:
+      operationId: createAdminCourse
+      tags: [admin]
+      summary: Create a course (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminCourseInput"
+      responses:
+        "201":
+          description: Course created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminCourse"
+                required: [success, data]
+
+  /admin/courses/{courseId}:
+    patch:
+      operationId: updateAdminCourse
+      tags: [admin]
+      summary: Update a course (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminCourseInput"
+      responses:
+        "200":
+          description: Course updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminCourse"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminCourse
+      tags: [admin]
+      summary: Delete a course with no timetable sessions, assignments, or exams (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
   /admin/payments:
     get:
       operationId: listAdminPayments
@@ -2278,6 +2397,101 @@ components:
         role:
           type: string
           enum: [student, professor, club_manager, department_admin, faculty_admin, university_admin, moderator, agent, finance_admin, super_admin]
+        isActive:
+          type: boolean
+
+    AdminCourse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        departmentId:
+          type: string
+        levelId:
+          type: string
+        semester:
+          type: string
+        professorId:
+          type: string
+          nullable: true
+        professorName:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, departmentId, levelId, semester, isActive, createdAt]
+
+    CreateAdminCourseInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        departmentId:
+          type: string
+        levelId:
+          type: string
+        semester:
+          type: string
+          enum: [S1, S2, S3, S4, S5, S6, S7, S8]
+        professorId:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+      required: [name, departmentId, levelId]
+
+    UpdateAdminCourseInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        semester:
+          type: string
+          enum: [S1, S2, S3, S4, S5, S6, S7, S8]
+        professorId:
+          type: string
+          nullable: true
         isActive:
           type: boolean
 

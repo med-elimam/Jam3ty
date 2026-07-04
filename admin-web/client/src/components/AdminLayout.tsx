@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { Menu, X, LogOut, Globe } from 'lucide-react';
+import { Menu, X, LogOut, Globe, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAdminI18n } from '@/contexts/AdminI18nContext';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { toast } from 'sonner';
+import type { Lang } from '@/i18n/admin-translations';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +38,25 @@ const navItems = [
   { path: '/admin/settings', label: 'nav.settings', icon: '⚙️' },
 ];
 
+const LANGUAGES: { code: Lang; label: string }[] = [
+  { code: 'ar', label: 'العربية' },
+  { code: 'fr', label: 'Français' },
+];
+
+function Brand({ t }: { t: (key: string) => string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
+        ج
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-base font-bold leading-tight text-foreground">{t('nav.brand')}</p>
+        <p className="truncate text-xs text-muted-foreground">{t('nav.brandSubtitle')}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location, navigate] = useLocation();
   const { t, lang, setLang, isRTL } = useAdminI18n();
@@ -46,91 +66,103 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const handleLogout = () => {
     signOut();
     navigate('/admin/login');
-    toast.success('Logged out');
+    toast.success(t('common.logout'));
   };
 
-  const toggleLanguage = () => {
-    setLang(lang === 'ar' ? 'fr' : 'ar');
-  };
+  const currentLabel = LANGUAGES.find((l) => l.code === lang)?.label ?? '';
 
   return (
-    <div className={`flex h-screen ${isRTL ? 'flex-row-reverse' : ''}`}>
+    <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <div
+      <aside
         className={`${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed ${isRTL ? 'right-0' : 'left-0'} top-0 z-40 h-screen w-64 bg-white shadow-lg transition-transform duration-300 md:translate-x-0 md:static overflow-y-auto`}
+          sidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')
+        } fixed ${isRTL ? 'right-0 border-s' : 'left-0 border-e'} top-0 z-40 flex h-screen w-64 flex-col border-border bg-card transition-transform duration-300 md:static md:translate-x-0`}
       >
-        <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold text-blue-600">{t('nav.dashboard')}</h1>
+        <div className="border-b border-border p-5">
+          <Brand t={t} />
         </div>
 
-        <nav className="space-y-1 px-4 py-6">
-          {navItems.map((item) => (
-            <button
-              key={item.path}
-              onClick={() => {
-                navigate(item.path);
-                setSidebarOpen(false);
-              }}
-              className={`w-full text-left px-4 py-2 rounded-lg transition-colors text-sm ${
-                location === item.path
-                  ? 'bg-blue-100 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <span className="mr-3">{item.icon}</span>
-              {t(item.label)}
-            </button>
-          ))}
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          {navItems.map((item) => {
+            const active = location === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  setSidebarOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-start text-sm font-medium transition-colors ${
+                  active
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <span className="text-base leading-none">{item.icon}</span>
+                <span className="truncate">{t(item.label)}</span>
+              </button>
+            );
+          })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-white">
+        <div className="space-y-2 border-t border-border p-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-sm">
-                <Globe className="mr-2 h-4 w-4" />
-                {lang === 'ar' ? 'Français' : 'العربية'}
+              <Button variant="outline" className="w-full justify-start">
+                <Globe className="h-4 w-4" />
+                <span className="truncate">{currentLabel}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align={isRTL ? 'end' : 'start'} className="w-56">
-              <DropdownMenuItem onClick={toggleLanguage}>
-                {lang === 'ar' ? 'Français' : 'العربية'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                {t('common.logout')}
-              </DropdownMenuItem>
+            <DropdownMenuContent align={isRTL ? 'end' : 'start'} className="w-[13.5rem]">
+              {LANGUAGES.map((l) => (
+                <DropdownMenuItem
+                  key={l.code}
+                  onClick={() => setLang(l.code)}
+                  className="justify-between"
+                >
+                  <span>{l.label}</span>
+                  {lang === l.code ? <Check className="h-4 w-4 text-primary" /> : null}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Button
+            variant="outline"
+            className="w-full justify-start text-destructive hover:text-destructive"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="truncate">{t('common.logout')}</span>
+          </Button>
         </div>
-      </div>
+      </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between md:hidden">
-          <h1 className="text-xl font-bold text-blue-600">{t('nav.dashboard')}</h1>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Mobile header */}
+        <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
+          <Brand t={t} />
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="rounded-md p-2 text-foreground hover:bg-muted"
+            aria-label="Menu"
           >
-            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </header>
 
         {/* Overlay for mobile */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            className="fixed inset-0 z-30 bg-black/50 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto bg-gray-50">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto bg-background">{children}</main>
       </div>
     </div>
   );

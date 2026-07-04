@@ -1992,6 +1992,123 @@ export const DeleteAdminGroupResponse = zod.object({
 
 
 /**
+ * @summary List courses, optionally scoped to a department and level (super_admin only)
+ */
+export const ListAdminCoursesQueryParams = zod.object({
+  "departmentId": zod.coerce.string().optional(),
+  "levelId": zod.coerce.string().optional()
+})
+
+export const ListAdminCoursesResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "code": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "departmentId": zod.string(),
+  "levelId": zod.string(),
+  "semester": zod.string(),
+  "professorId": zod.string().nullish(),
+  "professorName": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Create a course (super_admin only)
+ */
+export const CreateAdminCourseBody = zod.object({
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "code": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "departmentId": zod.string(),
+  "levelId": zod.string(),
+  "semester": zod.enum(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8']).optional(),
+  "professorId": zod.string().nullish(),
+  "isActive": zod.boolean().optional()
+})
+
+export const CreateAdminCourseResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "code": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "departmentId": zod.string(),
+  "levelId": zod.string(),
+  "semester": zod.string(),
+  "professorId": zod.string().nullish(),
+  "professorName": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Update a course (super_admin only)
+ */
+export const UpdateAdminCourseParams = zod.object({
+  "courseId": zod.coerce.string()
+})
+
+export const UpdateAdminCourseBody = zod.object({
+  "name": zod.string().optional(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "code": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "semester": zod.enum(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8']).optional(),
+  "professorId": zod.string().nullish(),
+  "isActive": zod.boolean().optional()
+})
+
+export const UpdateAdminCourseResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameAr": zod.string().nullish(),
+  "nameFr": zod.string().nullish(),
+  "code": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "departmentId": zod.string(),
+  "levelId": zod.string(),
+  "semester": zod.string(),
+  "professorId": zod.string().nullish(),
+  "professorName": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Delete a course with no timetable sessions, assignments, or exams (super_admin only)
+ */
+export const DeleteAdminCourseParams = zod.object({
+  "courseId": zod.coerce.string()
+})
+
+export const DeleteAdminCourseResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
  * @summary List all payments across all users (super_admin only)
  */
 export const ListAdminPaymentsQueryParams = zod.object({

@@ -15,6 +15,7 @@ import AdminUniversities from "./pages/AdminUniversities";
 import AdminUsers from "./pages/AdminUsers";
 import AdminPayments from "./pages/AdminPayments";
 import AdminAcademicStructure from "./pages/AdminAcademicStructure";
+import AdminCourses from "./pages/AdminCourses";
 import { AdminPlaceholder } from "./pages/AdminPlaceholder";
 
 const queryClient = new QueryClient();
@@ -51,7 +52,7 @@ function Router() {
         <Route path="/admin/universities" component={() => <ProtectedAdminRoute component={AdminUniversities} />} />
         <Route path="/admin/academic-structure" component={() => <ProtectedAdminRoute component={AdminAcademicStructure} />} />
         <Route path="/admin/users" component={() => <ProtectedAdminRoute component={AdminUsers} />} />
-        <Route path="/admin/courses" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Courses" icon="📖" />} />} />
+        <Route path="/admin/courses" component={() => <ProtectedAdminRoute component={AdminCourses} />} />
         <Route path="/admin/files" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Files" icon="📄" />} />} />
         <Route path="/admin/announcements" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Announcements" icon="📢" />} />} />
         <Route path="/admin/timetable" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Timetable" icon="📅" />} />} />
