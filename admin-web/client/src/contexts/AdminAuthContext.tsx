@@ -1,9 +1,9 @@
 import React, {
   createContext,
   useContext,
-  useEffect,
   useMemo,
   useCallback,
+  useState,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGetMe, getGetMeQueryKey } from '@workspace/api-client-react';
@@ -49,9 +49,11 @@ const AdminAuthContext = createContext<AdminAuthContextValue | undefined>(undefi
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
-  const hasToken = Boolean(
-    typeof window !== 'undefined' && localStorage.getItem('admin_token'),
-  );
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('admin_token');
+  });
+  const hasToken = Boolean(accessToken);
 
   const {
     data: meData,
@@ -75,6 +77,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     (accessToken: string, refreshToken: string) => {
       localStorage.setItem('admin_token', accessToken);
       localStorage.setItem('admin_refresh_token', refreshToken);
+      setAccessToken(accessToken);
       queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
     },
     [queryClient],
@@ -83,6 +86,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(() => {
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_refresh_token');
+    setAccessToken(null);
     queryClient.removeQueries({ queryKey: getGetMeQueryKey() });
   }, [queryClient]);
 

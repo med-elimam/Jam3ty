@@ -40,6 +40,7 @@ const ar = {
   nav: {
     brand: 'جامعتي',
     brandSubtitle: 'لوحة الإدارة',
+    dashboard: 'لوحة التحكم',
     overview: 'نظرة عامة',
     universities: 'الجامعات',
     academicStructure: 'الهيكل الأكاديمي',
@@ -379,6 +380,7 @@ const fr = {
   nav: {
     brand: 'Jam3ty',
     brandSubtitle: 'Administration',
+    dashboard: 'Tableau de bord',
     overview: 'Aperçu',
     universities: 'Universités',
     academicStructure: 'Structure académique',
