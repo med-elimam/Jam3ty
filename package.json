@@ -10,7 +10,7 @@
     "build:admin-web": "cd admin-web && pnpm run build",
     "build:web": "pnpm run build:student-web && pnpm run build:admin-web",
     "build:all": "pnpm run build:api && pnpm run build:web && pnpm run copy:builds",
-    "copy:builds": "mkdir -p artifacts/api-server/public && (cp -r student-web/dist/* artifacts/api-server/public/student || cp -r student-web/dist artifacts/api-server/public/student) && (cp -r admin-web/dist/* artifacts/api-server/public/admin || cp -r admin-web/dist artifacts/api-server/public/admin)",
+    "copy:builds": "mkdir -p artifacts/api-server/public && (cp -r student-web/dist/* artifacts/api-server/public/student || cp -r student-web/dist artifacts/api-server/public/student) && (cp -r admin-web/dist/public/* artifacts/api-server/public/admin || cp -r admin-web/dist/public artifacts/api-server/public/admin)",
     "start:prod": "cd artifacts/api-server && NODE_ENV=production node dist/index.mjs",
     "db:migrate": "cd artifacts/api-server && npm run migrate",
     "db:seed": "cd artifacts/api-server && npm run seed",
