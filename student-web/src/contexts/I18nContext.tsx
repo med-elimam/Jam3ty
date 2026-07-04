@@ -4,7 +4,7 @@ import { type Lang, resolveKey, resolveArray } from '@/i18n/translations';
 interface I18nContextType {
   lang: Lang;
   setLang: (lang: Lang) => void;
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
   ta: (key: string) => string[];
   isRTL: boolean;
 }
@@ -32,14 +32,24 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = lang;
-      document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+      // Keep the viewport coordinate system LTR; the app shell applies RTL
+      // direction internally where needed. This avoids horizontal clipping on
+      // mobile browsers with RTL scroll origins.
+      document.documentElement.dir = 'ltr';
     }
   }, [lang, isRTL]);
 
   const value: I18nContextType = {
     lang,
     setLang,
-    t: (key: string) => resolveKey(lang, key),
+    t: (key: string, vars?: Record<string, string | number>) => {
+      const resolved = resolveKey(lang, key);
+      if (!vars) return resolved;
+      return Object.entries(vars).reduce(
+        (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+        resolved,
+      );
+    },
     ta: (key: string) => resolveArray(lang, key),
     isRTL,
   };

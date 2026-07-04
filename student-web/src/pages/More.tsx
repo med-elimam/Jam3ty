@@ -1,19 +1,32 @@
 import { useLocation } from 'wouter';
+import {
+  Bell,
+  Bot,
+  BriefcaseBusiness,
+  CalendarDays,
+  FileText,
+  Megaphone,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/contexts/I18nContext';
 import Layout from '@/components/Layout';
+import { PageHeader, PageShell } from '@/components/student/StudentUI';
 
 const modules = [
-  { path: '/files', label: 'screens.files', icon: '📄' },
-  { path: '/announcements', label: 'screens.announcements', icon: '📢' },
-  { path: '/assignments', label: 'screens.assignments', icon: '✏️' },
-  { path: '/exams', label: 'screens.exams', icon: '📝' },
-  { path: '/events', label: 'screens.events', icon: '🎉' },
-  { path: '/clubs', label: 'screens.clubs', icon: '🎯' },
-  { path: '/opportunities', label: 'screens.opportunities', icon: '🚀' },
-  { path: '/ai', label: 'screens.ai', icon: '🤖' },
-  { path: '/subscription', label: 'screens.subscription', icon: '⭐' },
-  { path: '/notifications', label: 'screens.notifications', icon: '🔔' },
+  { path: '/files', label: 'screens.files', icon: FileText },
+  { path: '/announcements', label: 'screens.announcements', icon: Megaphone },
+  { path: '/assignments', label: 'screens.assignments', icon: Rocket },
+  { path: '/exams', label: 'screens.exams', icon: ShieldCheck },
+  { path: '/events', label: 'screens.events', icon: CalendarDays },
+  { path: '/clubs', label: 'screens.clubs', icon: Users },
+  { path: '/opportunities', label: 'screens.opportunities', icon: BriefcaseBusiness },
+  { path: '/ai', label: 'screens.ai', icon: Bot },
+  { path: '/subscription', label: 'screens.subscription', icon: Sparkles },
+  { path: '/notifications', label: 'screens.notifications', icon: Bell },
 ];
 
 export default function More() {
@@ -22,22 +35,32 @@ export default function More() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('screens.more')}</h1>
+      <PageShell>
+        <PageHeader title={t('screens.more')} description={t('home.allModules')} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {modules.map((module) => (
-            <Card
-              key={module.path}
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => navigate(module.path)}
-            >
-              <div className="text-4xl mb-3">{module.icon}</div>
-              <h3 className="font-bold text-gray-900">{t(module.label)}</h3>
-            </Card>
-          ))}
+        <div className="student-module-grid">
+          {modules.map((module) => {
+            const Icon = module.icon;
+            return (
+              <Card
+                key={module.path}
+                className="student-module-card student-card student-card-hover"
+                onClick={() => navigate(module.path)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') navigate(module.path);
+                }}
+              >
+                <div className="mb-5 flex size-12 items-center justify-center rounded-xl bg-secondary text-primary">
+                  <Icon className="size-6" />
+                </div>
+                <h3 className="font-bold text-foreground">{t(module.label)}</h3>
+              </Card>
+            );
+          })}
         </div>
-      </div>
+      </PageShell>
     </Layout>
   );
 }

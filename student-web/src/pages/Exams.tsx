@@ -1,59 +1,81 @@
+import { CalendarDays, Clock3, MapPin, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
 import { useListExams } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
+import {
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  PageShell,
+  PageSkeleton,
+  formatDate,
+  formatTime,
+  getResponseData,
+} from '@/components/student/StudentUI';
+
+const examTypeKey: Record<string, string> = {
+  midterm: 'midterm',
+  final: 'final',
+  test: 'quiz',
+  makeup: 'other',
+  other: 'other',
+};
 
 export default function Exams() {
-  const { t } = useI18n();
-  const { data: examsData, isLoading: loading } = useListExams();
-  const exams = Array.isArray(examsData) ? examsData : (examsData as any)?.data ?? [];
+  const { t, lang } = useI18n();
+  const { data: examsData, isLoading, isError } = useListExams();
+  const exams = getResponseData<any>(examsData);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-full">
-          <Spinner />
-        </div>
+        <PageSkeleton cards={4} />
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('exams.title')}</h1>
+      <PageShell className="max-w-5xl">
+        <PageHeader title={t('exams.title')} description={t('exams.emptyBody')} />
 
-        {exams.length > 0 ? (
-          <div className="space-y-4">
+        {isError ? (
+          <ErrorState />
+        ) : exams.length > 0 ? (
+          <div className="grid gap-4 lg:grid-cols-2">
             {exams.map((exam: any) => (
-              <Card key={exam.id} className="p-6 border-l-4 border-red-400">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">{exam.courseName}</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <Card key={exam.id} className="student-card student-card-hover rounded-xl p-5 shadow-none">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-gray-600">{t('exams.date')}</p>
-                    <p className="font-medium text-gray-900">{exam.date}</p>
+                    <p className="text-sm font-semibold text-primary">{exam.courseName}</p>
+                    <h3 className="mt-1 text-lg font-bold text-foreground">{exam.title}</h3>
                   </div>
-                  <div>
-                    <p className="text-gray-600">{t('exams.time')}</p>
-                    <p className="font-medium text-gray-900">{exam.time}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">{t('exams.location')}</p>
-                    <p className="font-medium text-gray-900">{exam.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">{t('exams.type')}</p>
-                    <p className="font-medium text-gray-900">{exam.type}</p>
-                  </div>
+                  <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
+                    {t(`exams.${examTypeKey[exam.type] ?? 'other'}`)}
+                  </span>
+                </div>
+                <div className="mt-5 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+                  <span className="flex items-center gap-2">
+                    <CalendarDays className="size-4 text-primary" />
+                    {formatDate(exam.date, lang)}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Clock3 className="size-4 text-primary" />
+                    {formatTime(exam.startTime)}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <MapPin className="size-4 text-primary" />
+                    {exam.room || '—'}
+                  </span>
                 </div>
               </Card>
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-500">{t('exams.noExams')}</p>
+          <EmptyState icon={ShieldCheck} title={t('exams.noExams')} body={t('exams.emptyBody')} />
         )}
-      </div>
+      </PageShell>
     </Layout>
   );
 }

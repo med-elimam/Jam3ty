@@ -1,52 +1,101 @@
+import { Download, FileText, Heart, UserRound } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
+import { Button } from '@/components/ui/button';
 import { useI18n } from '@/contexts/I18nContext';
 import { useListFiles } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
-import { Download } from 'lucide-react';
+import {
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  PageShell,
+  PageSkeleton,
+  formatDate,
+  getResponseData,
+} from '@/components/student/StudentUI';
+
+function formatBytes(bytes?: number) {
+  if (!bytes) return '—';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let value = bytes;
+  let index = 0;
+  while (value >= 1024 && index < units.length - 1) {
+    value /= 1024;
+    index += 1;
+  }
+  return `${value.toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+}
 
 export default function Files() {
-  const { t } = useI18n();
-  const { data: filesData, isLoading: loading } = useListFiles();
-  const files = Array.isArray(filesData) ? filesData : (filesData as any)?.data ?? [];
+  const { t, lang } = useI18n();
+  const { data: filesData, isLoading, isError } = useListFiles();
+  const files = getResponseData<any>(filesData);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-full">
-          <Spinner />
-        </div>
+        <PageSkeleton cards={5} />
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div className="p-6 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('files.title')}</h1>
+      <PageShell>
+        <PageHeader title={t('files.title')} description={t('files.emptyBody')} />
 
-        {files.length > 0 ? (
-          <div className="space-y-3">
+        {isError ? (
+          <ErrorState />
+        ) : files.length > 0 ? (
+          <div className="grid gap-4 lg:grid-cols-2">
             {files.map((file: any) => (
-              <Card key={file.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">{file.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {t('files.uploadedBy')}: {file.uploadedBy} • {file.uploadedAt}
-                  </p>
+              <Card key={file.id} className="student-card student-card-hover rounded-xl p-5 shadow-none">
+                <div className="flex items-start gap-4">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                    <FileText className="size-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="line-clamp-2 font-bold text-foreground">{file.title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{file.courseName || t('courses.title')}</p>
+                      </div>
+                      <a href={file.fileUrl} target="_blank" rel="noreferrer" aria-label={t('files.download')}>
+                        <Button size="icon" variant="outline" className="bg-card">
+                          <Download className="size-4" />
+                        </Button>
+                      </a>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                      <span className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground">
+                        {t(`files.${file.fileType ?? 'other'}`)}
+                      </span>
+                      <span className="rounded-full bg-accent/30 px-3 py-1 text-amber-900">
+                        {formatBytes(file.fileSize)}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-card px-3 py-1 text-muted-foreground ring-1 ring-border">
+                        <Heart className="size-3.5" />
+                        {file.downloadCount ?? 0}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-3 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-2">
+                        <UserRound className="size-4 text-primary" />
+                        {file.uploaderName}
+                      </span>
+                      <span>{formatDate(file.createdAt, lang)}</span>
+                    </div>
+                  </div>
                 </div>
-                <button className="p-2 hover:bg-blue-100 rounded-lg text-blue-600">
-                  <Download size={20} />
-                </button>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">{t('files.noFiles')}</p>
-          </div>
+          <EmptyState icon={FileText} title={t('files.noFiles')} body={t('files.emptyBody')} />
         )}
-      </div>
+      </PageShell>
     </Layout>
   );
 }

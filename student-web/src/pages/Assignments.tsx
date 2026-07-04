@@ -1,50 +1,76 @@
+import { CheckCircle2, Clock3 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
 import { useListAssignments } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
+import {
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  PageShell,
+  PageSkeleton,
+  formatDate,
+  getResponseData,
+} from '@/components/student/StudentUI';
+
+const statusKey: Record<string, string> = {
+  not_submitted: 'notSubmitted',
+  submitted: 'submitted',
+  late: 'late',
+  reviewed: 'reviewed',
+};
 
 export default function Assignments() {
-  const { t } = useI18n();
-  const { data: assignmentsData, isLoading: loading } = useListAssignments();
-  const assignments = Array.isArray(assignmentsData) ? assignmentsData : (assignmentsData as any)?.data ?? [];
+  const { t, lang } = useI18n();
+  const { data: assignmentsData, isLoading, isError } = useListAssignments();
+  const assignments = getResponseData<any>(assignmentsData);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-full">
-          <Spinner />
-        </div>
+        <PageSkeleton cards={5} />
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('assignments.title')}</h1>
+      <PageShell className="max-w-5xl">
+        <PageHeader title={t('assignments.title')} description={t('assignments.emptyBody')} />
 
-        {assignments.length > 0 ? (
-          <div className="space-y-4">
-            {assignments.map((assignment: any) => (
-              <Card key={assignment.id} className="p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-bold text-gray-900">{assignment.title}</h3>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                    {assignment.status}
-                  </span>
-                </div>
-                <p className="text-gray-600 mb-4">{assignment.description}</p>
-                <div className="text-sm text-gray-600">
-                  <p>{t('assignments.dueDate')}: {assignment.dueDate}</p>
-                </div>
-              </Card>
-            ))}
+        {isError ? (
+          <ErrorState />
+        ) : assignments.length > 0 ? (
+          <div className="space-y-3">
+            {assignments.map((assignment: any) => {
+              const status = assignment.submissionStatus ?? 'not_submitted';
+              return (
+                <Card key={assignment.id} className="student-card student-card-hover rounded-xl p-5 shadow-none">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-primary">{assignment.courseName}</p>
+                      <h3 className="mt-1 text-lg font-bold text-foreground">{assignment.title}</h3>
+                      {assignment.description ? (
+                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{assignment.description}</p>
+                      ) : null}
+                    </div>
+                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-bold text-secondary-foreground">
+                      <CheckCircle2 className="size-3.5" />
+                      {t(`assignments.${statusKey[status] ?? 'pending'}`)}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-primary">
+                    <Clock3 className="size-4" />
+                    {t('assignments.dueDate')}: {formatDate(assignment.deadline, lang)}
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         ) : (
-          <p className="text-center text-gray-500">{t('assignments.noAssignments')}</p>
+          <EmptyState icon={CheckCircle2} title={t('assignments.noAssignments')} body={t('assignments.emptyBody')} />
         )}
-      </div>
+      </PageShell>
     </Layout>
   );
 }

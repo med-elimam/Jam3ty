@@ -1,86 +1,107 @@
+import { Building2, GraduationCap, Mail, Phone, UserRound } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/contexts/I18nContext';
 import { useGetProfile, useGetMe } from '@workspace/api-client-react';
 import Layout from '@/components/Layout';
+import {
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  PageShell,
+  PageSkeleton,
+  chooseLocalized,
+} from '@/components/student/StudentUI';
+
+function valueOrDash(value?: string | null) {
+  return value && value.trim() ? value : '—';
+}
 
 export default function Profile() {
-  const { t } = useI18n();
-  const { data: profileData, isLoading: loadingProfile } = useGetProfile();
-  const { data: meData, isLoading: loadingMe } = useGetMe();
+  const { t, lang } = useI18n();
+  const { data: profileData, isLoading: loadingProfile, isError: profileError } = useGetProfile();
+  const { data: meData, isLoading: loadingMe, isError: meError } = useGetMe();
 
-  const loading = loadingProfile || loadingMe;
-  // Prefer full profile; fall back to /me data
-  const userData = (profileData as any) ?? (meData as any);
-
-  if (loading) {
+  if (loadingProfile || loadingMe) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-full">
-          <Spinner />
-        </div>
+        <PageSkeleton cards={3} />
       </Layout>
     );
   }
 
+  const profile = (profileData as any)?.data ?? (meData as any)?.data?.profile;
+  const user = (meData as any)?.data;
+
   return (
     <Layout>
-      <div className="p-6 max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('profile.title')}</h1>
+      <PageShell className="max-w-5xl">
+        <PageHeader title={t('profile.title')} description={t('profile.emptyBody')} />
 
-        <Card className="p-6">
-          <div className="mb-6">
-            <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-3xl mb-4">
-              👤
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">{userData?.fullName}</h2>
-            <p className="text-gray-600">{userData?.email}</p>
+        {profileError && meError ? (
+          <ErrorState />
+        ) : user || profile ? (
+          <div className="grid gap-5 lg:grid-cols-[20rem_1fr]">
+            <Card className="student-card gap-5 rounded-xl p-6 text-center shadow-none">
+              <div className="mx-auto flex size-20 items-center justify-center rounded-2xl bg-primary text-2xl font-black text-primary-foreground">
+                {(user?.fullName || t('home.studentFallback')).slice(0, 1)}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">{valueOrDash(user?.fullName)}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{valueOrDash(user?.email)}</p>
+              </div>
+              <div className="grid gap-2 text-start text-sm">
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="size-4 text-primary" />
+                  {valueOrDash(user?.email)}
+                </span>
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="size-4 text-primary" />
+                  {valueOrDash(user?.phone)}
+                </span>
+              </div>
+            </Card>
+
+            <Card className="student-card rounded-xl p-6 shadow-none">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Info label={t('profile.myUniversity')} value={chooseLocalized(profile?.university, lang, '—')} icon={Building2} />
+                <Info label={t('profile.myFaculty')} value={chooseLocalized(profile?.faculty, lang, '—')} icon={Building2} />
+                <Info label={t('profile.myDepartment')} value={chooseLocalized(profile?.department, lang, '—')} icon={GraduationCap} />
+                <Info label={t('profile.myLevel')} value={chooseLocalized(profile?.level, lang, '—')} icon={GraduationCap} />
+                <Info label={t('profile.myGroup')} value={chooseLocalized(profile?.group, lang, '—')} icon={UserRound} />
+                <Info label={t('common.language')} value={(profile?.language ?? lang).toUpperCase()} icon={UserRound} />
+              </div>
+              {profile?.bio ? (
+                <div className="mt-6 rounded-xl bg-secondary p-4">
+                  <p className="text-sm font-bold text-foreground">{t('profile.bio')}</p>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{profile.bio}</p>
+                </div>
+              ) : null}
+            </Card>
           </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('profile.myUniversity')}
-              </label>
-              <p className="text-gray-900">{userData?.university || '—'}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('profile.myFaculty')}
-              </label>
-              <p className="text-gray-900">{userData?.faculty || '—'}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('profile.myDepartment')}
-              </label>
-              <p className="text-gray-900">{userData?.department || '—'}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('profile.myLevel')}
-              </label>
-              <p className="text-gray-900">{userData?.level || '—'}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('profile.phone')}
-              </label>
-              <p className="text-gray-900">{userData?.phone || '—'}</p>
-            </div>
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              {t('profile.editProfile')}
-            </button>
-          </div>
-        </Card>
-      </div>
+        ) : (
+          <EmptyState icon={UserRound} title={t('profile.title')} body={t('profile.emptyBody')} />
+        )}
+      </PageShell>
     </Layout>
+  );
+}
+
+function Info({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: typeof Building2;
+}) {
+  return (
+    <div className="rounded-xl bg-secondary/70 p-4">
+      <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-card text-primary">
+        <Icon className="size-5" />
+      </div>
+      <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+      <p className="mt-1 font-bold text-foreground">{value}</p>
+    </div>
   );
 }

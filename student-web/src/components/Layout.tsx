@@ -1,29 +1,43 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { Menu, X, LogOut, Settings, Globe } from 'lucide-react';
+import {
+  Bell,
+  BookOpen,
+  CalendarDays,
+  Files,
+  Grid3X3,
+  Home,
+  LogOut,
+  Menu,
+  Settings,
+  UserRound,
+  X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useI18n } from '@/contexts/I18nContext';
-import { useLogout } from '@workspace/api-client-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useI18n } from '@/contexts/I18nContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
+import { useLogout } from '@workspace/api-client-react';
+import { toast } from 'sonner';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const navItems = [
-  { path: '/', label: 'nav.home', icon: '🏠' },
-  { path: '/courses', label: 'nav.courses', icon: '📚' },
-  { path: '/timetable', label: 'nav.timetable', icon: '📅' },
-  { path: '/community', label: 'nav.community', icon: '👥' },
-  { path: '/profile', label: 'nav.profile', icon: '👤' },
-  { path: '/more', label: 'nav.more', icon: '⋯' },
+  { path: '/', label: 'nav.home', icon: Home },
+  { path: '/courses', label: 'nav.courses', icon: BookOpen },
+  { path: '/timetable', label: 'nav.timetable', icon: CalendarDays },
+  { path: '/files', label: 'screens.files', icon: Files },
+  { path: '/announcements', label: 'screens.announcements', icon: Bell },
+  { path: '/profile', label: 'nav.profile', icon: UserRound },
+  { path: '/more', label: 'nav.more', icon: Grid3X3 },
 ];
 
 export default function Layout({ children }: LayoutProps) {
@@ -34,95 +48,99 @@ export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
+    const refreshToken =
+      typeof window !== 'undefined' ? localStorage.getItem('auth_refresh_token') : null;
     signOut();
-    logoutMutate({});
+    if (refreshToken) {
+      logoutMutate({ data: { refreshToken } });
+    }
     navigate('/login');
-    toast.success('Logged out successfully');
+    toast.success(t('auth.loggedOut'));
   };
 
-  const toggleLanguage = () => {
-    setLang(lang === 'ar' ? 'fr' : 'ar');
-  };
+  const toggleLanguage = () => setLang(lang === 'ar' ? 'fr' : 'ar');
 
   return (
-    <div className={`flex h-screen ${isRTL ? 'flex-row-reverse' : ''}`}>
-      {/* Sidebar */}
-      <div
-        className={`${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed ${isRTL ? 'right-0' : 'left-0'} top-0 z-40 h-screen w-64 bg-white shadow-lg transition-transform duration-300 md:translate-x-0 md:static`}
+    <div className="student-surface student-layout" dir={isRTL ? 'rtl' : 'ltr'}>
+      <aside
+        data-open={sidebarOpen ? 'true' : 'false'}
+        data-side={isRTL ? 'right' : 'left'}
+        className="student-sidebar"
       >
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-blue-600">{t('brand.appName')}</h1>
+        <div className="border-b border-sidebar-border p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-lg font-black text-primary-foreground">
+              ج
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-sidebar-foreground">{t('brand.appName')}</h1>
+              <p className="text-xs text-muted-foreground">{t('brand.tagline')}</p>
+            </div>
+          </div>
         </div>
 
-        <nav className="space-y-2 px-4">
-          {navItems.map((item) => (
-            <button
-              key={item.path}
-              onClick={() => {
-                navigate(item.path);
-                setSidebarOpen(false);
-              }}
-              className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                location === item.path
-                  ? 'bg-blue-100 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <span className="mr-3">{item.icon}</span>
-              {t(item.label)}
-            </button>
-          ))}
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = location === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  setSidebarOpen(false);
+                }}
+                className={cn('student-nav-item student-focus', active && 'student-nav-item-active')}
+              >
+                <Icon className="size-5 shrink-0" />
+                <span className="min-w-0 truncate">{t(item.label)}</span>
+              </button>
+            );
+          })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+        <div className="student-sidebar-actions">
+          <Button variant="outline" className="student-language-button" onClick={toggleLanguage}>
+            <span>{t('common.language')}</span>
+            <span className="text-xs font-bold">{lang === 'ar' ? 'FR' : 'AR'}</span>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-start">
-                <Settings className="mr-2 h-4 w-4" />
+              <Button variant="ghost" className="student-settings-button">
+                <Settings className="size-4" />
                 {t('common.settings')}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align={isRTL ? 'end' : 'start'} className="w-56">
-              <DropdownMenuItem onClick={toggleLanguage}>
-                <Globe className="mr-2 h-4 w-4" />
-                {lang === 'ar' ? 'Français' : 'العربية'}
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="size-4" />
                 {t('common.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
+      </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between md:hidden">
-          <h1 className="text-xl font-bold text-blue-600">{t('brand.appName')}</h1>
+      <div className="student-main">
+        <header className="student-mobile-header" data-side={isRTL ? 'right' : 'left'}>
+          <h1 className="text-lg font-bold text-primary">{t('brand.appName')}</h1>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="student-focus rounded-lg p-2 hover:bg-secondary"
+            aria-label={t('nav.more')}
           >
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </header>
 
-        {/* Overlay for mobile */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            className="fixed inset-0 z-30 bg-slate-950/40 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
   );

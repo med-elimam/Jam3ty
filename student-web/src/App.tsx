@@ -33,7 +33,7 @@ import Notifications from "./pages/Notifications";
 function Router() {
   const { isRTL } = useI18n();
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'}>
+    <div dir="ltr" data-content-dir={isRTL ? 'rtl' : 'ltr'}>
       <Switch>
         {/* Auth */}
         <Route path="/login" component={Login} />
