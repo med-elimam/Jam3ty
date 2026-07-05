@@ -830,6 +830,52 @@ export interface UpdateAdminAssignmentInput {
   attachmentUrl?: string | null;
 }
 
+export type AdminExam = Exam & ({
+  courseCode?: string | null;
+  createdBy: string;
+  createdByName: string;
+});
+
+export type CreateAdminExamInputType = typeof CreateAdminExamInputType[keyof typeof CreateAdminExamInputType];
+
+
+export const CreateAdminExamInputType = {
+  midterm: 'midterm',
+  final: 'final',
+  makeup: 'makeup',
+  test: 'test',
+  other: 'other',
+} as const;
+
+export interface CreateAdminExamInput {
+  title: string;
+  courseId: string;
+  date: string;
+  startTime?: string | null;
+  room?: string | null;
+  type?: CreateAdminExamInputType;
+}
+
+export type UpdateAdminExamInputType = typeof UpdateAdminExamInputType[keyof typeof UpdateAdminExamInputType];
+
+
+export const UpdateAdminExamInputType = {
+  midterm: 'midterm',
+  final: 'final',
+  makeup: 'makeup',
+  test: 'test',
+  other: 'other',
+} as const;
+
+export interface UpdateAdminExamInput {
+  title?: string;
+  courseId?: string;
+  date?: string;
+  startTime?: string | null;
+  room?: string | null;
+  type?: UpdateAdminExamInputType;
+}
+
 export type PostVisibility = typeof PostVisibility[keyof typeof PostVisibility];
 
 
@@ -987,6 +1033,85 @@ export interface Event {
   createdAt: string;
 }
 
+export type AdminEventType = typeof AdminEventType[keyof typeof AdminEventType];
+
+
+export const AdminEventType = {
+  university: 'university',
+  club: 'club',
+  training: 'training',
+  competition: 'competition',
+  workshop: 'workshop',
+  conference: 'conference',
+  other: 'other',
+} as const;
+
+export interface AdminEvent {
+  id: string;
+  title: string;
+  description?: string | null;
+  type: AdminEventType;
+  location?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  universityId?: string | null;
+  universityName?: string | null;
+  clubId?: string | null;
+  clubName?: string | null;
+  registrationCount: number;
+  createdBy: string;
+  createdByName: string;
+  createdAt: string;
+}
+
+export type CreateAdminEventInputType = typeof CreateAdminEventInputType[keyof typeof CreateAdminEventInputType];
+
+
+export const CreateAdminEventInputType = {
+  university: 'university',
+  club: 'club',
+  training: 'training',
+  competition: 'competition',
+  workshop: 'workshop',
+  conference: 'conference',
+  other: 'other',
+} as const;
+
+export interface CreateAdminEventInput {
+  title: string;
+  description?: string | null;
+  type?: CreateAdminEventInputType;
+  location?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  universityId?: string | null;
+  clubId?: string | null;
+}
+
+export type UpdateAdminEventInputType = typeof UpdateAdminEventInputType[keyof typeof UpdateAdminEventInputType];
+
+
+export const UpdateAdminEventInputType = {
+  university: 'university',
+  club: 'club',
+  training: 'training',
+  competition: 'competition',
+  workshop: 'workshop',
+  conference: 'conference',
+  other: 'other',
+} as const;
+
+export interface UpdateAdminEventInput {
+  title?: string;
+  description?: string | null;
+  type?: UpdateAdminEventInputType;
+  location?: string | null;
+  startDate?: string;
+  endDate?: string | null;
+  universityId?: string | null;
+  clubId?: string | null;
+}
+
 export interface Club {
   id: string;
   name: string;
@@ -995,6 +1120,62 @@ export interface Club {
   memberCount: number;
   isMember: boolean;
   createdAt: string;
+}
+
+export type AdminClubStatus = typeof AdminClubStatus[keyof typeof AdminClubStatus];
+
+
+export const AdminClubStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface AdminClub {
+  id: string;
+  name: string;
+  description?: string | null;
+  universityId?: string | null;
+  universityName?: string | null;
+  logoUrl?: string | null;
+  presidentId?: string | null;
+  presidentName?: string | null;
+  memberCount: number;
+  status: AdminClubStatus;
+  createdAt: string;
+}
+
+export type CreateAdminClubInputStatus = typeof CreateAdminClubInputStatus[keyof typeof CreateAdminClubInputStatus];
+
+
+export const CreateAdminClubInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface CreateAdminClubInput {
+  name: string;
+  description?: string | null;
+  universityId?: string | null;
+  logoUrl?: string | null;
+  presidentId?: string | null;
+  status?: CreateAdminClubInputStatus;
+}
+
+export type UpdateAdminClubInputStatus = typeof UpdateAdminClubInputStatus[keyof typeof UpdateAdminClubInputStatus];
+
+
+export const UpdateAdminClubInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface UpdateAdminClubInput {
+  name?: string;
+  description?: string | null;
+  universityId?: string | null;
+  logoUrl?: string | null;
+  presidentId?: string | null;
+  status?: UpdateAdminClubInputStatus;
 }
 
 export type OpportunityType = typeof OpportunityType[keyof typeof OpportunityType];
@@ -1211,6 +1392,77 @@ export interface Subscription {
   startsAt: string;
   expiresAt: string;
   daysRemaining: number;
+}
+
+export interface AdminSubscriptionPlan {
+  id: string;
+  name: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+  priceMru: number;
+  durationDays: number;
+  features: string[];
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateAdminSubscriptionPlanInput {
+  name: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+  priceMru: number;
+  durationDays: number;
+  features?: string[];
+  isActive?: boolean;
+}
+
+export interface UpdateAdminSubscriptionPlanInput {
+  name?: string;
+  nameAr?: string | null;
+  nameFr?: string | null;
+  priceMru?: number;
+  durationDays?: number;
+  features?: string[];
+  isActive?: boolean;
+}
+
+export type AdminSubscriptionStatus = typeof AdminSubscriptionStatus[keyof typeof AdminSubscriptionStatus];
+
+
+export const AdminSubscriptionStatus = {
+  active: 'active',
+  expired: 'expired',
+  cancelled: 'cancelled',
+} as const;
+
+export interface AdminSubscription {
+  id: string;
+  userId: string;
+  userFullName?: string | null;
+  userEmail?: string | null;
+  planId: string;
+  planName: string;
+  status: AdminSubscriptionStatus;
+  source: string;
+  startsAt: string;
+  expiresAt: string;
+  daysRemaining: number;
+  createdAt: string;
+}
+
+export type UpdateAdminSubscriptionInputStatus = typeof UpdateAdminSubscriptionInputStatus[keyof typeof UpdateAdminSubscriptionInputStatus];
+
+
+export const UpdateAdminSubscriptionInputStatus = {
+  active: 'active',
+  expired: 'expired',
+  cancelled: 'cancelled',
+} as const;
+
+export interface UpdateAdminSubscriptionInput {
+  status?: UpdateAdminSubscriptionInputStatus;
+  planId?: string;
+  expiresAt?: string;
 }
 
 export type PaymentProofInputMethod = typeof PaymentProofInputMethod[keyof typeof PaymentProofInputMethod];
@@ -2111,6 +2363,141 @@ export type CreateAdminOpportunity201 = {
 export type UpdateAdminOpportunity200 = {
   success: boolean;
   data: AdminOpportunity;
+};
+
+export type ListAdminExamsParams = {
+courseId?: string;
+type?: ListAdminExamsType;
+search?: string;
+};
+
+export type ListAdminExamsType = typeof ListAdminExamsType[keyof typeof ListAdminExamsType];
+
+
+export const ListAdminExamsType = {
+  midterm: 'midterm',
+  final: 'final',
+  makeup: 'makeup',
+  test: 'test',
+  other: 'other',
+} as const;
+
+export type ListAdminExams200 = {
+  success: boolean;
+  data: AdminExam[];
+};
+
+export type CreateAdminExam201 = {
+  success: boolean;
+  data: AdminExam;
+};
+
+export type UpdateAdminExam200 = {
+  success: boolean;
+  data: AdminExam;
+};
+
+export type ListAdminEventsParams = {
+type?: ListAdminEventsType;
+universityId?: string;
+search?: string;
+};
+
+export type ListAdminEventsType = typeof ListAdminEventsType[keyof typeof ListAdminEventsType];
+
+
+export const ListAdminEventsType = {
+  university: 'university',
+  club: 'club',
+  training: 'training',
+  competition: 'competition',
+  workshop: 'workshop',
+  conference: 'conference',
+  other: 'other',
+} as const;
+
+export type ListAdminEvents200 = {
+  success: boolean;
+  data: AdminEvent[];
+};
+
+export type CreateAdminEvent201 = {
+  success: boolean;
+  data: AdminEvent;
+};
+
+export type UpdateAdminEvent200 = {
+  success: boolean;
+  data: AdminEvent;
+};
+
+export type ListAdminClubsParams = {
+status?: ListAdminClubsStatus;
+universityId?: string;
+search?: string;
+};
+
+export type ListAdminClubsStatus = typeof ListAdminClubsStatus[keyof typeof ListAdminClubsStatus];
+
+
+export const ListAdminClubsStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export type ListAdminClubs200 = {
+  success: boolean;
+  data: AdminClub[];
+};
+
+export type CreateAdminClub201 = {
+  success: boolean;
+  data: AdminClub;
+};
+
+export type UpdateAdminClub200 = {
+  success: boolean;
+  data: AdminClub;
+};
+
+export type ListAdminSubscriptionsParams = {
+status?: ListAdminSubscriptionsStatus;
+planId?: string;
+userId?: string;
+};
+
+export type ListAdminSubscriptionsStatus = typeof ListAdminSubscriptionsStatus[keyof typeof ListAdminSubscriptionsStatus];
+
+
+export const ListAdminSubscriptionsStatus = {
+  active: 'active',
+  expired: 'expired',
+  cancelled: 'cancelled',
+} as const;
+
+export type ListAdminSubscriptions200 = {
+  success: boolean;
+  data: AdminSubscription[];
+};
+
+export type UpdateAdminSubscription200 = {
+  success: boolean;
+  data: AdminSubscription;
+};
+
+export type ListAdminSubscriptionPlans200 = {
+  success: boolean;
+  data: AdminSubscriptionPlan[];
+};
+
+export type CreateAdminSubscriptionPlan201 = {
+  success: boolean;
+  data: AdminSubscriptionPlan;
+};
+
+export type UpdateAdminSubscriptionPlan200 = {
+  success: boolean;
+  data: AdminSubscriptionPlan;
 };
 
 export type ListAdminPaymentsParams = {

@@ -19,11 +19,14 @@ import AdminFiles from "./pages/AdminFiles";
 import AdminAnnouncements from "./pages/AdminAnnouncements";
 import AdminTimetable from "./pages/AdminTimetable";
 import AdminAssignments from "./pages/AdminAssignments";
+import AdminExams from "./pages/AdminExams";
 import AdminCommunity from "./pages/AdminCommunity";
 import AdminOpportunities from "./pages/AdminOpportunities";
+import AdminEvents from "./pages/AdminEvents";
+import AdminClubs from "./pages/AdminClubs";
+import AdminSubscriptions from "./pages/AdminSubscriptions";
 import AdminAgents from "./pages/AdminAgents";
 import AdminSettings from "./pages/AdminSettings";
-import { AdminPlaceholder } from "./pages/AdminPlaceholder";
 
 const queryClient = new QueryClient();
 
@@ -61,12 +64,12 @@ function Router() {
         <Route path="/admin/announcements" component={() => <ProtectedAdminRoute component={AdminAnnouncements} />} />
         <Route path="/admin/timetable" component={() => <ProtectedAdminRoute component={AdminTimetable} />} />
         <Route path="/admin/assignments" component={() => <ProtectedAdminRoute component={AdminAssignments} />} />
-        <Route path="/admin/exams" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Exams" icon="EX" />} />} />
+        <Route path="/admin/exams" component={() => <ProtectedAdminRoute component={AdminExams} />} />
         <Route path="/admin/community" component={() => <ProtectedAdminRoute component={AdminCommunity} />} />
         <Route path="/admin/opportunities" component={() => <ProtectedAdminRoute component={AdminOpportunities} />} />
-        <Route path="/admin/events" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Events" icon="EV" />} />} />
-        <Route path="/admin/clubs" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Clubs" icon="CL" />} />} />
-        <Route path="/admin/subscriptions" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Subscriptions" icon="SU" />} />} />
+        <Route path="/admin/events" component={() => <ProtectedAdminRoute component={AdminEvents} />} />
+        <Route path="/admin/clubs" component={() => <ProtectedAdminRoute component={AdminClubs} />} />
+        <Route path="/admin/subscriptions" component={() => <ProtectedAdminRoute component={AdminSubscriptions} />} />
         <Route path="/admin/payments" component={() => <ProtectedAdminRoute component={AdminPayments} />} />
         <Route path="/admin/agents" component={() => <ProtectedAdminRoute component={AdminAgents} />} />
         <Route path="/admin/settings" component={() => <ProtectedAdminRoute component={AdminSettings} />} />

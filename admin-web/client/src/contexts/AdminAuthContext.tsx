@@ -28,7 +28,7 @@ interface AdminAuthContextValue {
    * Store the tokens returned from login, then invalidate the /me query so
    * the context refetches the user automatically.
    */
-  signIn: (accessToken: string, refreshToken: string) => void;
+  signIn: (accessToken: string, refreshToken: string, user?: User) => void;
   /** Clear localStorage tokens and remove /me from the cache. */
   signOut: () => void;
 }
@@ -74,10 +74,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = isAuthenticated && user?.role === 'super_admin';
 
   const signIn = useCallback(
-    (accessToken: string, refreshToken: string) => {
+    (accessToken: string, refreshToken: string, user?: User) => {
       localStorage.setItem('admin_token', accessToken);
       localStorage.setItem('admin_refresh_token', refreshToken);
       setAccessToken(accessToken);
+      if (user) {
+        queryClient.setQueryData(getGetMeQueryKey(), { success: true, data: user });
+      }
       queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
     },
     [queryClient],

@@ -34310,3 +34310,2503 @@
       "statusCode": 200
     }
     [35mresponseTime[39m: 225
+[01:43:40.347] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3432,
+      "method": "OPTIONS",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:43:40.359] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3433,
+      "method": "GET",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:43:41.378] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3434,
+      "method": "GET",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:43:43.170] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3435,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:43:43.173] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3436,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:43:43.174] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3437,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[01:43:43.195] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3438,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:43:43.199] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3439,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[01:43:43.199] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3440,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:43:44.228] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3441,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[01:43:44.228] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3442,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:43:44.228] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3443,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:44:18.826] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3444,
+      "method": "OPTIONS",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:44:20.117] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3445,
+      "method": "GET",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1253
+[01:44:21.035] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3446,
+      "method": "OPTIONS",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 2
+[01:44:21.037] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3447,
+      "method": "OPTIONS",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:44:21.048] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3448,
+      "method": "GET",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:44:21.484] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3449,
+      "method": "GET",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 437
+[01:44:22.076] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3450,
+      "method": "GET",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:44:25.469] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3451,
+      "method": "OPTIONS",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[01:44:25.708] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3452,
+      "method": "GET",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 218
+[01:44:39.312] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3453,
+      "method": "OPTIONS",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:44:39.322] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3454,
+      "method": "GET",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:44:40.349] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3455,
+      "method": "GET",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:44:41.697] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3456,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:44:41.700] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3457,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:44:41.702] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3458,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[01:44:41.719] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3459,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:44:41.725] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3460,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:44:41.727] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3461,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:44:42.755] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3462,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:44:42.758] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3463,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:44:42.763] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3464,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 6
+[01:44:44.788] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3465,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 4
+[01:44:44.790] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3466,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 4
+[01:44:44.830] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3467,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:44:49.903] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3468,
+      "method": "OPTIONS",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[01:44:49.912] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3469,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:44:49.961] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3470,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[01:44:50.974] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3472,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:44:51.269] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3471,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1309
+[01:56:33.962] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3473,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:56:33.963] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3474,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:56:33.973] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3475,
+      "method": "OPTIONS",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:56:33.979] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3476,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 3
+[01:56:33.983] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3477,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 1
+[01:56:34.000] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3478,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 1
+[01:56:35.367] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3479,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 401
+    }
+    [35mresponseTime[39m: 1
+[01:56:56.324] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3480,
+      "method": "OPTIONS",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:56:58.628] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3481,
+      "method": "POST",
+      "url": "/api/auth/login"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 2297
+[01:56:58.697] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3482,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:56:59.168] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3483,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 441
+[01:56:59.198] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3484,
+      "method": "OPTIONS",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:57:00.491] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3485,
+      "method": "GET",
+      "url": "/api/admin/dashboard/stats"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1282
+[01:57:06.606] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3486,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:57:06.610] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3487,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:57:06.611] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3488,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:57:06.636] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3489,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:57:06.640] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3490,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[01:57:06.640] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3491,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:57:07.668] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3492,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:57:07.668] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3493,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:57:07.668] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3494,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:57:08.532] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3495,
+      "method": "OPTIONS",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:57:08.546] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3496,
+      "method": "GET",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:57:09.566] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3497,
+      "method": "GET",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[01:57:16.311] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3498,
+      "method": "OPTIONS",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:57:17.617] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3499,
+      "method": "GET",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1282
+[01:57:18.692] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3500,
+      "method": "OPTIONS",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:57:18.694] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3501,
+      "method": "OPTIONS",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[01:57:18.716] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3502,
+      "method": "GET",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[01:57:19.157] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3503,
+      "method": "GET",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 442
+[01:57:19.758] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3504,
+      "method": "GET",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:57:21.772] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3505,
+      "method": "GET",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[01:57:54.638] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3506,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[01:57:55.945] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3507,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1297
+[02:00:09.980] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3508,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:00:09.982] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3509,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:00:09.982] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3510,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:00:10.008] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3511,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 4
+[02:00:10.008] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3512,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:00:10.008] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3513,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:00:11.031] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3514,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:00:11.032] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3515,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:00:11.062] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3516,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:00:29.248] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3517,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:00:30.716] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3518,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1460
+[02:01:37.556] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3519,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:01:37.560] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3520,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:01:37.564] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3521,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:01:37.586] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3522,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[02:01:37.586] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3523,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:01:37.586] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3524,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:01:38.619] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3525,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:01:38.619] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3526,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:01:38.619] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3527,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:09.812] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3528,
+      "method": "OPTIONS",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:05:09.813] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3529,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:09.831] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3530,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:05:10.860] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3532,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:11.152] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3531,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1318
+[02:05:12.876] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3533,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:16.892] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3534,
+      "method": "OPTIONS",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:05:16.902] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3535,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:05:29.345] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3536,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:29.346] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3537,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:29.350] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3538,
+      "method": "OPTIONS",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:05:29.948] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3539,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 5
+[02:05:29.951] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3540,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 6
+[02:05:29.953] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3541,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 4
+[02:05:30.987] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3542,
+      "method": "GET",
+      "url": "/api/admin/community/comments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[02:05:30.987] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3543,
+      "method": "GET",
+      "url": "/api/admin/community/reports"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:05:30.987] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3544,
+      "method": "GET",
+      "url": "/api/admin/community/posts"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:31.943] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3545,
+      "method": "OPTIONS",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:31.953] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3546,
+      "method": "GET",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:33.615] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3547,
+      "method": "GET",
+      "url": "/api/admin/opportunities"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:34.685] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3548,
+      "method": "OPTIONS",
+      "url": "/api/admin/events"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:05:34.686] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3549,
+      "method": "OPTIONS",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:05:34.686] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3550,
+      "method": "OPTIONS",
+      "url": "/api/admin/clubs"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:34.710] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3551,
+      "method": "GET",
+      "url": "/api/admin/events"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 6
+[02:05:34.712] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3553,
+      "method": "GET",
+      "url": "/api/admin/clubs"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 6
+[02:05:35.732] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3554,
+      "method": "GET",
+      "url": "/api/admin/events"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:05:35.736] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3555,
+      "method": "GET",
+      "url": "/api/admin/clubs"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:36.191] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3552,
+      "method": "GET",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1486
+[02:05:36.349] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3556,
+      "method": "GET",
+      "url": "/api/admin/clubs"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:36.363] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3558,
+      "method": "OPTIONS",
+      "url": "/api/admin/users"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:36.801] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3557,
+      "method": "GET",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 448
+[02:05:37.383] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3560,
+      "method": "GET",
+      "url": "/api/admin/clubs"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:37.845] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3559,
+      "method": "GET",
+      "url": "/api/admin/users"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 1313
+[02:05:39.111] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3561,
+      "method": "OPTIONS",
+      "url": "/api/admin/subscriptions"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:39.147] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3562,
+      "method": "GET",
+      "url": "/api/admin/subscriptions"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:39.149] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3563,
+      "method": "OPTIONS",
+      "url": "/api/admin/subscription-plans"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:39.170] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3564,
+      "method": "GET",
+      "url": "/api/admin/subscription-plans"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:40.177] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3565,
+      "method": "GET",
+      "url": "/api/admin/subscriptions"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:05:40.191] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3566,
+      "method": "GET",
+      "url": "/api/admin/subscription-plans"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 0
+[02:05:42.194] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3567,
+      "method": "GET",
+      "url": "/api/admin/subscriptions"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:42.209] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3568,
+      "method": "GET",
+      "url": "/api/admin/subscription-plans"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:45.295] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3569,
+      "method": "OPTIONS",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:45.565] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3570,
+      "method": "GET",
+      "url": "/api/admin/payments"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 223
+[02:05:47.532] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3571,
+      "method": "OPTIONS",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:05:47.533] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3572,
+      "method": "OPTIONS",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:47.549] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3573,
+      "method": "GET",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:05:47.993] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3574,
+      "method": "GET",
+      "url": "/api/admin/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 445
+[02:05:48.572] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3575,
+      "method": "GET",
+      "url": "/api/admin/agents"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:05:54.426] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3576,
+      "method": "OPTIONS",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:05:54.427] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3577,
+      "method": "OPTIONS",
+      "url": "/api/admin/users"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:54.666] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3578,
+      "method": "GET",
+      "url": "/api/admin/users"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 224
+[02:05:55.595] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3579,
+      "method": "GET",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1151
+[02:05:56.896] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3580,
+      "method": "OPTIONS",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:05:56.897] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3581,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:05:56.919] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3582,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 7
+[02:05:57.139] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3583,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 226
+[02:05:57.941] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3584,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:05:59.955] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3585,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:06:03.970] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3586,
+      "method": "OPTIONS",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:06:03.982] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3587,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 4
+[02:06:30.969] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3588,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:06:30.986] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3589,
+      "method": "OPTIONS",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:06:31.004] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3591,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:06:32.040] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3592,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:06:32.109] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3590,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1108
+[02:06:34.092] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3593,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:06:38.119] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3594,
+      "method": "OPTIONS",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:06:38.134] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3595,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:07:18.378] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3596,
+      "method": "OPTIONS",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:18.380] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3597,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:18.380] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3598,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:18.404] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3599,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:07:19.529] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3600,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1126
+[02:07:19.748] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3601,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1344
+[02:07:28.313] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3602,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:07:28.327] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3603,
+      "method": "OPTIONS",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:28.362] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3605,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:07:28.575] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3604,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 223
+[02:07:30.392] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3606,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:07:34.211] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3607,
+      "method": "OPTIONS",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:34.225] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3608,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:34.245] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3609,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:07:34.469] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3610,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 223
+[02:07:35.381] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3611,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:07:37.406] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3612,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:07:41.420] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3613,
+      "method": "OPTIONS",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:41.431] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3614,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:07:52.523] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3615,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:52.524] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3616,
+      "method": "OPTIONS",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:52.561] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3618,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:07:53.584] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3619,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:07:53.653] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3617,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1096
+[02:07:55.600] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3620,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:07:59.115] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3621,
+      "method": "OPTIONS",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:59.115] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3622,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:07:59.154] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3623,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[02:07:59.372] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3624,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 220
+[02:08:00.179] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3625,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:08:02.196] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3626,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:06.225] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3627,
+      "method": "OPTIONS",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:06.265] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3628,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:08:17.196] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3629,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:08:17.202] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3630,
+      "method": "OPTIONS",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 2
+[02:08:17.219] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3632,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:08:18.239] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3633,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:18.473] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3631,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1261
+[02:08:20.267] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3634,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 0
+[02:08:20.917] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3635,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 3
+[02:08:21.136] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3636,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 221
+[02:08:21.968] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3637,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:08:23.983] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3638,
+      "method": "OPTIONS",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:23.991] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3639,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:28.014] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3640,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:33.321] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3641,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:08:33.328] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3642,
+      "method": "OPTIONS",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:33.366] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3644,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:34.384] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3645,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:34.501] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3643,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1138
+[02:08:36.179] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3646,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:08:36.402] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3647,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 224
+[02:08:37.209] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3648,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:39.225] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3649,
+      "method": "OPTIONS",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:39.233] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3650,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:43.258] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3651,
+      "method": "GET",
+      "url": "/api/admin/assignments"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:45.343] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3652,
+      "method": "OPTIONS",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:08:45.346] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3653,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:45.364] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3654,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:08:45.589] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3655,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 225
+[02:08:46.390] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3656,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:46.586] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3657,
+      "method": "OPTIONS",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:46.587] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3658,
+      "method": "OPTIONS",
+      "url": "/api/admin/users"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:46.827] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3659,
+      "method": "GET",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 226
+[02:08:47.884] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3660,
+      "method": "GET",
+      "url": "/api/admin/users"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1282
+[02:08:49.294] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3661,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:08:49.525] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3662,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 231
+[02:08:50.337] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3663,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:52.356] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3664,
+      "method": "OPTIONS",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:08:52.367] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3665,
+      "method": "GET",
+      "url": "/api/admin/files"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:52.938] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3666,
+      "method": "OPTIONS",
+      "url": "/api/admin/announcements"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:52.938] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3667,
+      "method": "OPTIONS",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:52.941] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3668,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:52.941] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3669,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/departments"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:08:52.944] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3670,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/levels"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:08:52.945] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3671,
+      "method": "OPTIONS",
+      "url": "/api/admin/academic/groups"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:08:52.957] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3672,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:08:52.990] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3673,
+      "method": "GET",
+      "url": "/api/admin/announcements"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1
+[02:08:53.218] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3675,
+      "method": "GET",
+      "url": "/api/admin/academic/faculties"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 225
+[02:08:53.218] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3674,
+      "method": "GET",
+      "url": "/api/universities"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 226
+[02:08:54.021] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3680,
+      "method": "GET",
+      "url": "/api/admin/announcements"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:08:54.123] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3679,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1117
+[02:08:54.135] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3678,
+      "method": "GET",
+      "url": "/api/admin/academic/groups"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1132
+[02:08:54.238] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3677,
+      "method": "GET",
+      "url": "/api/admin/academic/levels"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1238
+[02:08:54.289] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3676,
+      "method": "GET",
+      "url": "/api/admin/academic/departments"
+    }
+    [35mres[39m: {
+      "statusCode": 304
+    }
+    [35mresponseTime[39m: 1294
+[02:08:56.035] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3681,
+      "method": "GET",
+      "url": "/api/admin/announcements"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 1

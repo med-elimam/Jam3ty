@@ -14,6 +14,7 @@ import {
   assignmentsTable,
   assignmentSubmissionsTable,
   examsTable,
+  examTypeEnum,
   filesTable,
   fileTypeEnum,
   fileApprovalEnum,
@@ -28,11 +29,19 @@ import {
   postVisibilityEnum,
   opportunitiesTable,
   opportunityTypeEnum,
+  eventsTable,
+  eventTypeEnum,
+  eventRegistrationsTable,
+  clubsTable,
+  clubStatusEnum,
+  clubMembersTable,
+  clubJoinRequestsTable,
   agentsTable,
   agentStatusEnum,
   activationCodesTable,
   agentCommissionsTable,
   subscriptionsTable,
+  subscriptionStatusEnum,
   paymentsTable,
   plansTable,
   userRoleEnum,
@@ -2174,6 +2183,631 @@ router.delete("/opportunities/:opportunityId", async (req, res) => {
     res.json({ success: true, data: { id: opportunityId } });
   } catch (err) {
     req.log.error({ err }, "AdminDeleteOpportunity error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// ─── EXAMS ───────────────────────────────────────────────────────────────────
+
+const EXAM_TYPES = examTypeEnum.enumValues;
+type ExamType = (typeof EXAM_TYPES)[number];
+
+async function adminExamWithDetails(exam: typeof examsTable.$inferSelect) {
+  const [[course], [creator]] = await Promise.all([
+    db.select({ name: coursesTable.name, code: coursesTable.code }).from(coursesTable).where(eq(coursesTable.id, exam.courseId)).limit(1),
+    db.select({ fullName: usersTable.fullName, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, exam.createdBy)).limit(1),
+  ]);
+  return {
+    ...exam,
+    courseName: course?.name ?? "Unknown Course",
+    courseCode: course?.code ?? null,
+    createdByName: creator?.fullName ?? creator?.email ?? "Admin",
+  };
+}
+
+router.get("/exams", async (req, res) => {
+  try {
+    const { courseId, type, search } = req.query as Record<string, string | undefined>;
+    if (type && !(EXAM_TYPES as readonly string[]).includes(type)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_TYPE", message: "Unknown exam type" } });
+      return;
+    }
+    const conditions = [];
+    if (courseId) conditions.push(eq(examsTable.courseId, courseId));
+    if (type) conditions.push(eq(examsTable.type, type as ExamType));
+    if (search) conditions.push(ilike(examsTable.title, `%${search}%`));
+    const rows = conditions.length > 0
+      ? await db.select().from(examsTable).where(and(...conditions)).orderBy(sql`${examsTable.date} DESC`)
+      : await db.select().from(examsTable).orderBy(sql`${examsTable.date} DESC`);
+    const data = await Promise.all(rows.map(adminExamWithDetails));
+    res.json({ success: true, data });
+  } catch (err) {
+    req.log.error({ err }, "AdminListExams error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.post("/exams", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const title = typeof body.title === "string" ? body.title.trim() : "";
+    const courseId = typeof body.courseId === "string" ? body.courseId.trim() : "";
+    const date = typeof body.date === "string" ? body.date.trim() : "";
+    if (!title || !courseId || !date) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "title, courseId, and date are required" } });
+      return;
+    }
+    const [course] = await db.select({ id: coursesTable.id }).from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
+    if (!course) {
+      res.status(400).json({ success: false, error: { code: "INVALID_COURSE", message: "Course not found" } });
+      return;
+    }
+    const type = body.type === undefined ? "other" : body.type;
+    if (typeof type !== "string" || !(EXAM_TYPES as readonly string[]).includes(type)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_TYPE", message: "Invalid exam type" } });
+      return;
+    }
+    const [created] = await db.insert(examsTable).values({
+      title,
+      courseId,
+      date,
+      startTime: cleanOptionalText(body.startTime) ?? null,
+      room: cleanOptionalText(body.room) ?? null,
+      type: type as ExamType,
+      createdBy: req.userId!,
+    }).returning();
+    res.status(201).json({ success: true, data: await adminExamWithDetails(created) });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateExam error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.patch("/exams/:examId", async (req, res) => {
+  try {
+    const { examId } = req.params as { examId: string };
+    const [existing] = await db.select().from(examsTable).where(eq(examsTable.id, examId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Exam not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = {};
+    if (body.title !== undefined) {
+      const title = typeof body.title === "string" ? body.title.trim() : "";
+      if (!title) {
+        res.status(400).json({ success: false, error: { code: "INVALID_TITLE", message: "Exam title cannot be empty" } });
+        return;
+      }
+      update.title = title;
+    }
+    if (body.courseId !== undefined) {
+      if (typeof body.courseId !== "string" || !body.courseId.trim()) {
+        res.status(400).json({ success: false, error: { code: "INVALID_COURSE", message: "courseId cannot be empty" } });
+        return;
+      }
+      const [course] = await db.select({ id: coursesTable.id }).from(coursesTable).where(eq(coursesTable.id, body.courseId)).limit(1);
+      if (!course) {
+        res.status(400).json({ success: false, error: { code: "INVALID_COURSE", message: "Course not found" } });
+        return;
+      }
+      update.courseId = body.courseId;
+    }
+    if (body.date !== undefined) {
+      const date = typeof body.date === "string" ? body.date.trim() : "";
+      if (!date) {
+        res.status(400).json({ success: false, error: { code: "INVALID_DATE", message: "date cannot be empty" } });
+        return;
+      }
+      update.date = date;
+    }
+    if (body.type !== undefined) {
+      if (typeof body.type !== "string" || !(EXAM_TYPES as readonly string[]).includes(body.type)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_TYPE", message: "Invalid exam type" } });
+        return;
+      }
+      update.type = body.type as ExamType;
+    }
+    if (body.startTime !== undefined) update.startTime = cleanOptionalText(body.startTime) ?? null;
+    if (body.room !== undefined) update.room = cleanOptionalText(body.room) ?? null;
+    const [updated] = await db.update(examsTable).set(update).where(eq(examsTable.id, examId)).returning();
+    res.json({ success: true, data: await adminExamWithDetails(updated) });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateExam error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.delete("/exams/:examId", async (req, res) => {
+  try {
+    const { examId } = req.params as { examId: string };
+    const [existing] = await db.select().from(examsTable).where(eq(examsTable.id, examId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Exam not found" } });
+      return;
+    }
+    await db.delete(examsTable).where(eq(examsTable.id, examId));
+    res.json({ success: true, data: { id: examId } });
+  } catch (err) {
+    req.log.error({ err }, "AdminDeleteExam error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+
+const EVENT_TYPES = eventTypeEnum.enumValues;
+type EventType = (typeof EVENT_TYPES)[number];
+
+async function adminEventWithDetails(event: typeof eventsTable.$inferSelect) {
+  const [[university], [club], [creator]] = await Promise.all([
+    event.universityId ? db.select({ name: universitiesTable.name }).from(universitiesTable).where(eq(universitiesTable.id, event.universityId)).limit(1) : Promise.resolve([null]),
+    event.clubId ? db.select({ name: clubsTable.name }).from(clubsTable).where(eq(clubsTable.id, event.clubId)).limit(1) : Promise.resolve([null]),
+    db.select({ fullName: usersTable.fullName, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, event.createdBy)).limit(1),
+  ]);
+  return { ...event, universityName: university?.name ?? null, clubName: club?.name ?? null, createdByName: creator?.fullName ?? creator?.email ?? "Admin" };
+}
+
+router.get("/events", async (req, res) => {
+  try {
+    const { type, universityId, search } = req.query as Record<string, string | undefined>;
+    if (type && !(EVENT_TYPES as readonly string[]).includes(type)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_TYPE", message: "Unknown event type" } });
+      return;
+    }
+    const conditions = [];
+    if (type) conditions.push(eq(eventsTable.type, type as EventType));
+    if (universityId) conditions.push(eq(eventsTable.universityId, universityId));
+    if (search) conditions.push(ilike(eventsTable.title, `%${search}%`));
+    const rows = conditions.length > 0
+      ? await db.select().from(eventsTable).where(and(...conditions)).orderBy(sql`${eventsTable.startDate} DESC`)
+      : await db.select().from(eventsTable).orderBy(sql`${eventsTable.startDate} DESC`);
+    const data = await Promise.all(rows.map(adminEventWithDetails));
+    res.json({ success: true, data });
+  } catch (err) {
+    req.log.error({ err }, "AdminListEvents error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.post("/events", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const title = typeof body.title === "string" ? body.title.trim() : "";
+    const startDate = typeof body.startDate === "string" ? new Date(body.startDate) : null;
+    if (!title || !startDate || Number.isNaN(startDate.getTime())) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "title and startDate are required" } });
+      return;
+    }
+    const type = body.type === undefined ? "other" : body.type;
+    if (typeof type !== "string" || !(EVENT_TYPES as readonly string[]).includes(type)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_TYPE", message: "Invalid event type" } });
+      return;
+    }
+    const universityId = await validateOptionalUniversityId(body.universityId, res);
+    if (universityId === undefined) return;
+    const clubId = await validateOptionalClubId(body.clubId, res);
+    if (clubId === undefined) return;
+    const endDate = typeof body.endDate === "string" && body.endDate.trim() ? new Date(body.endDate) : null;
+    const [created] = await db.insert(eventsTable).values({
+      title,
+      description: cleanOptionalText(body.description) ?? null,
+      type: type as EventType,
+      location: cleanOptionalText(body.location) ?? null,
+      startDate,
+      endDate: endDate && !Number.isNaN(endDate.getTime()) ? endDate : null,
+      universityId,
+      clubId,
+      createdBy: req.userId!,
+    }).returning();
+    res.status(201).json({ success: true, data: await adminEventWithDetails(created) });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateEvent error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.patch("/events/:eventId", async (req, res) => {
+  try {
+    const { eventId } = req.params as { eventId: string };
+    const [existing] = await db.select().from(eventsTable).where(eq(eventsTable.id, eventId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Event not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = {};
+    if (body.title !== undefined) {
+      const title = typeof body.title === "string" ? body.title.trim() : "";
+      if (!title) {
+        res.status(400).json({ success: false, error: { code: "INVALID_TITLE", message: "Event title cannot be empty" } });
+        return;
+      }
+      update.title = title;
+    }
+    if (body.type !== undefined) {
+      if (typeof body.type !== "string" || !(EVENT_TYPES as readonly string[]).includes(body.type)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_TYPE", message: "Invalid event type" } });
+        return;
+      }
+      update.type = body.type as EventType;
+    }
+    if (body.startDate !== undefined) {
+      const startDate = typeof body.startDate === "string" ? new Date(body.startDate) : null;
+      if (!startDate || Number.isNaN(startDate.getTime())) {
+        res.status(400).json({ success: false, error: { code: "INVALID_DATE", message: "startDate must be a valid date" } });
+        return;
+      }
+      update.startDate = startDate;
+    }
+    if (body.endDate !== undefined) {
+      const endDate = typeof body.endDate === "string" && body.endDate.trim() ? new Date(body.endDate) : null;
+      update.endDate = endDate && !Number.isNaN(endDate.getTime()) ? endDate : null;
+    }
+    if (body.universityId !== undefined) {
+      const universityId = await validateOptionalUniversityId(body.universityId, res);
+      if (universityId === undefined) return;
+      update.universityId = universityId;
+    }
+    if (body.clubId !== undefined) {
+      const clubId = await validateOptionalClubId(body.clubId, res);
+      if (clubId === undefined) return;
+      update.clubId = clubId;
+    }
+    if (body.description !== undefined) update.description = cleanOptionalText(body.description) ?? null;
+    if (body.location !== undefined) update.location = cleanOptionalText(body.location) ?? null;
+    const [updated] = await db.update(eventsTable).set(update).where(eq(eventsTable.id, eventId)).returning();
+    res.json({ success: true, data: await adminEventWithDetails(updated) });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateEvent error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.delete("/events/:eventId", async (req, res) => {
+  try {
+    const { eventId } = req.params as { eventId: string };
+    const [existing] = await db.select().from(eventsTable).where(eq(eventsTable.id, eventId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Event not found" } });
+      return;
+    }
+    const [registrationRow] = await db.select({ c: count() }).from(eventRegistrationsTable).where(eq(eventRegistrationsTable.eventId, eventId));
+    if ((registrationRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "HAS_REGISTRATIONS", message: "Cannot delete an event that has registrations." } });
+      return;
+    }
+    await db.delete(eventsTable).where(eq(eventsTable.id, eventId));
+    res.json({ success: true, data: { id: eventId } });
+  } catch (err) {
+    req.log.error({ err }, "AdminDeleteEvent error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// ─── CLUBS ───────────────────────────────────────────────────────────────────
+
+const CLUB_STATUSES = clubStatusEnum.enumValues;
+type ClubStatus = (typeof CLUB_STATUSES)[number];
+
+async function validateOptionalClubId(value: unknown, res: Response) {
+  if (value === undefined || value === null || value === "") return null;
+  if (typeof value !== "string") {
+    res.status(400).json({ success: false, error: { code: "INVALID_CLUB", message: "clubId must be a string or null" } });
+    return undefined;
+  }
+  const [club] = await db.select({ id: clubsTable.id }).from(clubsTable).where(eq(clubsTable.id, value)).limit(1);
+  if (!club) {
+    res.status(400).json({ success: false, error: { code: "INVALID_CLUB", message: "Club not found" } });
+    return undefined;
+  }
+  return value;
+}
+
+async function validateOptionalUserId(value: unknown, res: Response) {
+  if (value === undefined || value === null || value === "") return null;
+  if (typeof value !== "string") {
+    res.status(400).json({ success: false, error: { code: "INVALID_USER", message: "userId must be a string or null" } });
+    return undefined;
+  }
+  const [user] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, value)).limit(1);
+  if (!user) {
+    res.status(400).json({ success: false, error: { code: "INVALID_USER", message: "User not found" } });
+    return undefined;
+  }
+  return value;
+}
+
+async function adminClubWithDetails(club: typeof clubsTable.$inferSelect) {
+  const [[university], [president]] = await Promise.all([
+    club.universityId ? db.select({ name: universitiesTable.name }).from(universitiesTable).where(eq(universitiesTable.id, club.universityId)).limit(1) : Promise.resolve([null]),
+    club.presidentId ? db.select({ fullName: usersTable.fullName, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, club.presidentId)).limit(1) : Promise.resolve([null]),
+  ]);
+  return { ...club, universityName: university?.name ?? null, presidentName: president?.fullName ?? president?.email ?? null };
+}
+
+router.get("/clubs", async (req, res) => {
+  try {
+    const { status, universityId, search } = req.query as Record<string, string | undefined>;
+    if (status && !(CLUB_STATUSES as readonly string[]).includes(status)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Unknown club status" } });
+      return;
+    }
+    const conditions = [];
+    if (status) conditions.push(eq(clubsTable.status, status as ClubStatus));
+    if (universityId) conditions.push(eq(clubsTable.universityId, universityId));
+    if (search) conditions.push(ilike(clubsTable.name, `%${search}%`));
+    const rows = conditions.length > 0
+      ? await db.select().from(clubsTable).where(and(...conditions)).orderBy(clubsTable.name)
+      : await db.select().from(clubsTable).orderBy(clubsTable.name);
+    const data = await Promise.all(rows.map(adminClubWithDetails));
+    res.json({ success: true, data });
+  } catch (err) {
+    req.log.error({ err }, "AdminListClubs error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.post("/clubs", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    if (!name) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "name is required" } });
+      return;
+    }
+    const universityId = await validateOptionalUniversityId(body.universityId, res);
+    if (universityId === undefined) return;
+    const presidentId = await validateOptionalUserId(body.presidentId, res);
+    if (presidentId === undefined) return;
+    const status = body.status === undefined ? "active" : body.status;
+    if (typeof status !== "string" || !(CLUB_STATUSES as readonly string[]).includes(status)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Invalid club status" } });
+      return;
+    }
+    const [created] = await db.insert(clubsTable).values({
+      name,
+      description: cleanOptionalText(body.description) ?? null,
+      universityId,
+      logoUrl: cleanOptionalText(body.logoUrl) ?? null,
+      presidentId,
+      status: status as ClubStatus,
+    }).returning();
+    res.status(201).json({ success: true, data: await adminClubWithDetails(created) });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateClub error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.patch("/clubs/:clubId", async (req, res) => {
+  try {
+    const { clubId } = req.params as { clubId: string };
+    const [existing] = await db.select().from(clubsTable).where(eq(clubsTable.id, clubId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Club not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = {};
+    if (body.name !== undefined) {
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name) {
+        res.status(400).json({ success: false, error: { code: "INVALID_NAME", message: "Club name cannot be empty" } });
+        return;
+      }
+      update.name = name;
+    }
+    if (body.universityId !== undefined) {
+      const universityId = await validateOptionalUniversityId(body.universityId, res);
+      if (universityId === undefined) return;
+      update.universityId = universityId;
+    }
+    if (body.presidentId !== undefined) {
+      const presidentId = await validateOptionalUserId(body.presidentId, res);
+      if (presidentId === undefined) return;
+      update.presidentId = presidentId;
+    }
+    if (body.status !== undefined) {
+      if (typeof body.status !== "string" || !(CLUB_STATUSES as readonly string[]).includes(body.status)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Invalid club status" } });
+        return;
+      }
+      update.status = body.status as ClubStatus;
+    }
+    if (body.description !== undefined) update.description = cleanOptionalText(body.description) ?? null;
+    if (body.logoUrl !== undefined) update.logoUrl = cleanOptionalText(body.logoUrl) ?? null;
+    const [updated] = await db.update(clubsTable).set(update).where(eq(clubsTable.id, clubId)).returning();
+    res.json({ success: true, data: await adminClubWithDetails(updated) });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateClub error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.delete("/clubs/:clubId", async (req, res) => {
+  try {
+    const { clubId } = req.params as { clubId: string };
+    const [existing] = await db.select().from(clubsTable).where(eq(clubsTable.id, clubId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Club not found" } });
+      return;
+    }
+    const [[memberRow], [requestRow], [eventRow]] = await Promise.all([
+      db.select({ c: count() }).from(clubMembersTable).where(eq(clubMembersTable.clubId, clubId)),
+      db.select({ c: count() }).from(clubJoinRequestsTable).where(eq(clubJoinRequestsTable.clubId, clubId)),
+      db.select({ c: count() }).from(eventsTable).where(eq(eventsTable.clubId, clubId)),
+    ]);
+    if ((memberRow?.c ?? 0) > 0 || (requestRow?.c ?? 0) > 0 || (eventRow?.c ?? 0) > 0) {
+      res.status(409).json({ success: false, error: { code: "CLUB_IN_USE", message: "Cannot delete a club with members, join requests, or events. Set it inactive instead." } });
+      return;
+    }
+    await db.delete(clubsTable).where(eq(clubsTable.id, clubId));
+    res.json({ success: true, data: { id: clubId } });
+  } catch (err) {
+    req.log.error({ err }, "AdminDeleteClub error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+// ─── SUBSCRIPTIONS ───────────────────────────────────────────────────────────
+
+const SUBSCRIPTION_STATUSES = subscriptionStatusEnum.enumValues;
+type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
+
+async function adminSubscriptionWithDetails(subscription: typeof subscriptionsTable.$inferSelect) {
+  const [[user], [plan]] = await Promise.all([
+    db.select({ fullName: usersTable.fullName, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, subscription.userId)).limit(1),
+    db.select({ name: plansTable.name }).from(plansTable).where(eq(plansTable.id, subscription.planId)).limit(1),
+  ]);
+  const daysRemaining = Math.max(0, Math.ceil((subscription.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+  return { ...subscription, userFullName: user?.fullName ?? null, userEmail: user?.email ?? null, planName: plan?.name ?? "Plan", daysRemaining };
+}
+
+router.get("/subscriptions", async (req, res) => {
+  try {
+    const { status, planId, userId } = req.query as Record<string, string | undefined>;
+    if (status && !(SUBSCRIPTION_STATUSES as readonly string[]).includes(status)) {
+      res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Unknown subscription status" } });
+      return;
+    }
+    const conditions = [];
+    if (status) conditions.push(eq(subscriptionsTable.status, status as SubscriptionStatus));
+    if (planId) conditions.push(eq(subscriptionsTable.planId, planId));
+    if (userId) conditions.push(eq(subscriptionsTable.userId, userId));
+    const rows = conditions.length > 0
+      ? await db.select().from(subscriptionsTable).where(and(...conditions)).orderBy(sql`${subscriptionsTable.createdAt} DESC`)
+      : await db.select().from(subscriptionsTable).orderBy(sql`${subscriptionsTable.createdAt} DESC`);
+    const data = await Promise.all(rows.map(adminSubscriptionWithDetails));
+    res.json({ success: true, data });
+  } catch (err) {
+    req.log.error({ err }, "AdminListSubscriptions error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.patch("/subscriptions/:subscriptionId", async (req, res) => {
+  try {
+    const { subscriptionId } = req.params as { subscriptionId: string };
+    const [existing] = await db.select().from(subscriptionsTable).where(eq(subscriptionsTable.id, subscriptionId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Subscription not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = {};
+    if (body.status !== undefined) {
+      if (typeof body.status !== "string" || !(SUBSCRIPTION_STATUSES as readonly string[]).includes(body.status)) {
+        res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Invalid subscription status" } });
+        return;
+      }
+      update.status = body.status as SubscriptionStatus;
+    }
+    if (body.planId !== undefined) {
+      if (typeof body.planId !== "string" || !body.planId.trim()) {
+        res.status(400).json({ success: false, error: { code: "INVALID_PLAN", message: "planId cannot be empty" } });
+        return;
+      }
+      const [plan] = await db.select({ id: plansTable.id }).from(plansTable).where(eq(plansTable.id, body.planId)).limit(1);
+      if (!plan) {
+        res.status(400).json({ success: false, error: { code: "INVALID_PLAN", message: "Plan not found" } });
+        return;
+      }
+      update.planId = body.planId;
+    }
+    if (body.expiresAt !== undefined) {
+      const expiresAt = typeof body.expiresAt === "string" ? new Date(body.expiresAt) : null;
+      if (!expiresAt || Number.isNaN(expiresAt.getTime())) {
+        res.status(400).json({ success: false, error: { code: "INVALID_DATE", message: "expiresAt must be a valid date" } });
+        return;
+      }
+      update.expiresAt = expiresAt;
+    }
+    const [updated] = await db.update(subscriptionsTable).set(update).where(eq(subscriptionsTable.id, subscriptionId)).returning();
+    res.json({ success: true, data: await adminSubscriptionWithDetails(updated) });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateSubscription error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.get("/subscription-plans", async (_req, res) => {
+  try {
+    const plans = await db.select().from(plansTable).orderBy(plansTable.priceMru, plansTable.durationDays);
+    res.json({ success: true, data: plans });
+  } catch (err) {
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.post("/subscription-plans", async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const priceMru = Number(body.priceMru);
+    const durationDays = Number(body.durationDays);
+    if (!name || !Number.isInteger(priceMru) || priceMru < 0 || !Number.isInteger(durationDays) || durationDays <= 0) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "name, priceMru, and durationDays are required" } });
+      return;
+    }
+    const [created] = await db.insert(plansTable).values({
+      name,
+      nameAr: cleanOptionalText(body.nameAr) ?? null,
+      nameFr: cleanOptionalText(body.nameFr) ?? null,
+      priceMru,
+      durationDays,
+      features: Array.isArray(body.features) ? body.features.filter((f): f is string => typeof f === "string") : [],
+      isActive: typeof body.isActive === "boolean" ? body.isActive : true,
+    }).returning();
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    req.log.error({ err }, "AdminCreateSubscriptionPlan error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
+router.patch("/subscription-plans/:planId", async (req, res) => {
+  try {
+    const { planId } = req.params as { planId: string };
+    const [existing] = await db.select().from(plansTable).where(eq(plansTable.id, planId)).limit(1);
+    if (!existing) {
+      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Plan not found" } });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Record<string, unknown> = {};
+    if (body.name !== undefined) {
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name) {
+        res.status(400).json({ success: false, error: { code: "INVALID_NAME", message: "Plan name cannot be empty" } });
+        return;
+      }
+      update.name = name;
+    }
+    if (body.priceMru !== undefined) {
+      const priceMru = Number(body.priceMru);
+      if (!Number.isInteger(priceMru) || priceMru < 0) {
+        res.status(400).json({ success: false, error: { code: "INVALID_PRICE", message: "priceMru must be a positive integer" } });
+        return;
+      }
+      update.priceMru = priceMru;
+    }
+    if (body.durationDays !== undefined) {
+      const durationDays = Number(body.durationDays);
+      if (!Number.isInteger(durationDays) || durationDays <= 0) {
+        res.status(400).json({ success: false, error: { code: "INVALID_DURATION", message: "durationDays must be greater than zero" } });
+        return;
+      }
+      update.durationDays = durationDays;
+    }
+    if (body.nameAr !== undefined) update.nameAr = cleanOptionalText(body.nameAr) ?? null;
+    if (body.nameFr !== undefined) update.nameFr = cleanOptionalText(body.nameFr) ?? null;
+    if (body.features !== undefined) update.features = Array.isArray(body.features) ? body.features.filter((f): f is string => typeof f === "string") : [];
+    if (body.isActive !== undefined) update.isActive = Boolean(body.isActive);
+    const [updated] = await db.update(plansTable).set(update).where(eq(plansTable.id, planId)).returning();
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    req.log.error({ err }, "AdminUpdateSubscriptionPlan error");
     res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
   }
 });

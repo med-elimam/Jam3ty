@@ -2980,6 +2980,499 @@ paths:
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
 
+  /admin/exams:
+    get:
+      operationId: listAdminExams
+      tags: [admin]
+      summary: List exams (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [midterm, final, makeup, test, other]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Exams list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminExam"
+                required: [success, data]
+    post:
+      operationId: createAdminExam
+      tags: [admin]
+      summary: Create an exam (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminExamInput"
+      responses:
+        "201":
+          description: Exam created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminExam"
+                required: [success, data]
+
+  /admin/exams/{examId}:
+    patch:
+      operationId: updateAdminExam
+      tags: [admin]
+      summary: Update an exam (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminExamInput"
+      responses:
+        "200":
+          description: Exam updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminExam"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminExam
+      tags: [admin]
+      summary: Delete an exam (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Exam deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/events:
+    get:
+      operationId: listAdminEvents
+      tags: [admin]
+      summary: List events (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [university, club, training, competition, workshop, conference, other]
+        - name: universityId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Events list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminEvent"
+                required: [success, data]
+    post:
+      operationId: createAdminEvent
+      tags: [admin]
+      summary: Create an event (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminEventInput"
+      responses:
+        "201":
+          description: Event created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminEvent"
+                required: [success, data]
+
+  /admin/events/{eventId}:
+    patch:
+      operationId: updateAdminEvent
+      tags: [admin]
+      summary: Update an event (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminEventInput"
+      responses:
+        "200":
+          description: Event updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminEvent"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminEvent
+      tags: [admin]
+      summary: Delete an event when it has no registrations (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Event deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/clubs:
+    get:
+      operationId: listAdminClubs
+      tags: [admin]
+      summary: List clubs (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive]
+        - name: universityId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Clubs list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminClub"
+                required: [success, data]
+    post:
+      operationId: createAdminClub
+      tags: [admin]
+      summary: Create a club (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminClubInput"
+      responses:
+        "201":
+          description: Club created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminClub"
+                required: [success, data]
+
+  /admin/clubs/{clubId}:
+    patch:
+      operationId: updateAdminClub
+      tags: [admin]
+      summary: Update a club (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminClubInput"
+      responses:
+        "200":
+          description: Club updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminClub"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminClub
+      tags: [admin]
+      summary: Delete an unused club (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Club deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/subscriptions:
+    get:
+      operationId: listAdminSubscriptions
+      tags: [admin]
+      summary: List user subscriptions (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, expired, cancelled]
+        - name: planId
+          in: query
+          schema:
+            type: string
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Subscriptions list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminSubscription"
+                required: [success, data]
+
+  /admin/subscriptions/{subscriptionId}:
+    patch:
+      operationId: updateAdminSubscription
+      tags: [admin]
+      summary: Update subscription status, plan, or expiry (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminSubscriptionInput"
+      responses:
+        "200":
+          description: Subscription updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminSubscription"
+                required: [success, data]
+
+  /admin/subscription-plans:
+    get:
+      operationId: listAdminSubscriptionPlans
+      tags: [admin]
+      summary: List subscription plans (super_admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Plans list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminSubscriptionPlan"
+                required: [success, data]
+    post:
+      operationId: createAdminSubscriptionPlan
+      tags: [admin]
+      summary: Create a subscription plan (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminSubscriptionPlanInput"
+      responses:
+        "201":
+          description: Plan created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminSubscriptionPlan"
+                required: [success, data]
+
+  /admin/subscription-plans/{planId}:
+    patch:
+      operationId: updateAdminSubscriptionPlan
+      tags: [admin]
+      summary: Update a subscription plan (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminSubscriptionPlanInput"
+      responses:
+        "200":
+          description: Plan updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminSubscriptionPlan"
+                required: [success, data]
+
   /admin/payments:
     get:
       operationId: listAdminPayments
@@ -4189,6 +4682,61 @@ components:
           format: date-time
       required: [id, title, courseId, courseName, date, type, createdAt]
 
+    AdminExam:
+      allOf:
+        - $ref: "#/components/schemas/Exam"
+        - type: object
+          properties:
+            courseCode:
+              type: string
+              nullable: true
+            createdBy:
+              type: string
+            createdByName:
+              type: string
+          required: [createdBy, createdByName]
+
+    CreateAdminExamInput:
+      type: object
+      properties:
+        title:
+          type: string
+        courseId:
+          type: string
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          nullable: true
+        room:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [midterm, final, makeup, test, other]
+      required: [title, courseId, date]
+
+    UpdateAdminExamInput:
+      type: object
+      properties:
+        title:
+          type: string
+        courseId:
+          type: string
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          nullable: true
+        room:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [midterm, final, makeup, test, other]
+
     # ─── COMMUNITY SCHEMAS ────────────────────────────────────────────────────
     Post:
       type: object
@@ -4391,6 +4939,109 @@ components:
           format: date-time
       required: [id, title, type, startDate, isRegistered, registrationCount, createdAt]
 
+    AdminEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [university, club, training, competition, workshop, conference, other]
+        location:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        universityName:
+          type: string
+          nullable: true
+        clubId:
+          type: string
+          nullable: true
+        clubName:
+          type: string
+          nullable: true
+        registrationCount:
+          type: integer
+        createdBy:
+          type: string
+        createdByName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, type, startDate, registrationCount, createdBy, createdByName, createdAt]
+
+    CreateAdminEventInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [university, club, training, competition, workshop, conference, other]
+        location:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        clubId:
+          type: string
+          nullable: true
+      required: [title, startDate]
+
+    UpdateAdminEventInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [university, club, training, competition, workshop, conference, other]
+        location:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        clubId:
+          type: string
+          nullable: true
+
     # ─── CLUB SCHEMAS ─────────────────────────────────────────────────────────
     Club:
       type: object
@@ -4413,6 +5064,84 @@ components:
           type: string
           format: date-time
       required: [id, name, memberCount, isMember, createdAt]
+
+    AdminClub:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        universityName:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        presidentId:
+          type: string
+          nullable: true
+        presidentName:
+          type: string
+          nullable: true
+        memberCount:
+          type: integer
+        status:
+          type: string
+          enum: [active, inactive]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, memberCount, status, createdAt]
+
+    CreateAdminClubInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        presidentId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, inactive]
+      required: [name]
+
+    UpdateAdminClubInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        presidentId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, inactive]
 
     # ─── OPPORTUNITY SCHEMAS ──────────────────────────────────────────────────
     Opportunity:
@@ -4678,6 +5407,126 @@ components:
         daysRemaining:
           type: integer
       required: [id, userId, planId, planName, status, source, startsAt, expiresAt, daysRemaining]
+
+    AdminSubscriptionPlan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        priceMru:
+          type: integer
+        durationDays:
+          type: integer
+        features:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, priceMru, durationDays, features, isActive, createdAt]
+
+    CreateAdminSubscriptionPlanInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        priceMru:
+          type: integer
+        durationDays:
+          type: integer
+        features:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+      required: [name, priceMru, durationDays]
+
+    UpdateAdminSubscriptionPlanInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+          nullable: true
+        nameFr:
+          type: string
+          nullable: true
+        priceMru:
+          type: integer
+        durationDays:
+          type: integer
+        features:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+
+    AdminSubscription:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        userFullName:
+          type: string
+          nullable: true
+        userEmail:
+          type: string
+          nullable: true
+        planId:
+          type: string
+        planName:
+          type: string
+        status:
+          type: string
+          enum: [active, expired, cancelled]
+        source:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        daysRemaining:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, userId, planId, planName, status, source, startsAt, expiresAt, daysRemaining, createdAt]
+
+    UpdateAdminSubscriptionInput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [active, expired, cancelled]
+        planId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
 
     PaymentProofInput:
       type: object
