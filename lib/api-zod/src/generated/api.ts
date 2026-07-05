@@ -2109,6 +2109,20 @@ export const DeleteAdminCourseResponse = zod.object({
 
 
 /**
+ * @summary Upload a PDF, image, or video file for admin-managed content (super_admin only)
+ */
+export const UploadAdminFileResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "url": zod.string(),
+  "fileName": zod.string(),
+  "mimeType": zod.enum(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm']),
+  "sizeBytes": zod.number()
+})
+})
+
+
+/**
  * @summary List files across all courses (super_admin only)
  */
 export const ListAdminFilesQueryParams = zod.object({
@@ -2143,7 +2157,7 @@ export const ListAdminFilesResponse = zod.object({
 
 
 /**
- * @summary Create a metadata-only file record (super_admin only)
+ * @summary Create a file/resource record from uploaded or external file data (super_admin only)
  */
 export const CreateAdminFileBody = zod.object({
   "title": zod.string(),

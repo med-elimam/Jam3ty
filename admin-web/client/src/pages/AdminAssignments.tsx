@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@/components/ui/spinner';
+import AdminUploadField from '@/components/AdminUploadField';
+import { inferMimeTypeFromUrl } from '@/lib/admin-upload';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +53,9 @@ const EMPTY_FORM = {
   courseId: '',
   deadline: '',
   attachmentUrl: '',
+  uploadedFileName: '',
+  uploadedMimeType: '',
+  uploadedSizeBytes: 0,
 };
 
 const copy = {
@@ -86,6 +91,29 @@ const copy = {
   },
 } as const;
 
+const uploadCopy = {
+  ar: {
+    label: 'رفع المرفق',
+    description: 'اختر PDF او صورة او فيديو ليتم رفعه وربطه بالواجب.',
+    choose: 'اختيار ملف',
+    uploading: 'جاري الرفع',
+    uploaded: 'تم الرفع',
+    fallback: 'رابط يدوي متقدم',
+    clear: 'مسح الملف',
+    error: 'تعذر رفع الملف',
+  },
+  fr: {
+    label: 'Piece jointe',
+    description: 'Choisissez un PDF, une image ou une video a joindre au devoir.',
+    choose: 'Choisir un fichier',
+    uploading: 'Televersement',
+    uploaded: 'Televerse',
+    fallback: 'URL manuelle avancee',
+    clear: 'Retirer',
+    error: 'Impossible de televerser le fichier',
+  },
+} as const;
+
 function localDateTime(value?: string | null) {
   if (!value) return '';
   const date = new Date(value);
@@ -101,6 +129,7 @@ function errorMessage(err: unknown, fallback: string) {
 export default function AdminAssignments() {
   const { t, lang } = useAdminI18n();
   const c = copy[lang];
+  const uploadText = uploadCopy[lang];
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [courseFilter, setCourseFilter] = useState(ALL);
@@ -138,6 +167,9 @@ export default function AdminAssignments() {
       courseId: item.courseId,
       deadline: localDateTime(item.deadline),
       attachmentUrl: item.attachmentUrl ?? '',
+      uploadedFileName: '',
+      uploadedMimeType: inferMimeTypeFromUrl(item.attachmentUrl ?? ''),
+      uploadedSizeBytes: 0,
     });
     setDialogOpen(true);
   }
@@ -264,10 +296,38 @@ export default function AdminAssignments() {
                 <Label htmlFor="assignment-deadline">{t('assignments.dueDate')}</Label>
                 <Input id="assignment-deadline" type="datetime-local" value={form.deadline} onChange={(event) => setForm((f) => ({ ...f, deadline: event.target.value }))} disabled={saving} dir="ltr" />
               </div>
-              <div>
-                <Label htmlFor="assignment-url">{c.attachmentUrl}</Label>
-                <Input id="assignment-url" value={form.attachmentUrl} onChange={(event) => setForm((f) => ({ ...f, attachmentUrl: event.target.value }))} disabled={saving} dir="ltr" />
-              </div>
+              <AdminUploadField
+                label={uploadText.label}
+                description={uploadText.description}
+                value={{
+                  url: form.attachmentUrl,
+                  fileName: form.uploadedFileName,
+                  mimeType: form.uploadedMimeType,
+                  sizeBytes: form.uploadedSizeBytes || undefined,
+                }}
+                disabled={saving}
+                chooseLabel={uploadText.choose}
+                uploadingLabel={uploadText.uploading}
+                uploadedLabel={uploadText.uploaded}
+                fallbackLabel={uploadText.fallback}
+                clearLabel={uploadText.clear}
+                errorLabel={uploadText.error}
+                onUploaded={(file) => setForm((f) => ({
+                  ...f,
+                  attachmentUrl: file.url,
+                  uploadedFileName: file.fileName,
+                  uploadedMimeType: file.mimeType,
+                  uploadedSizeBytes: file.sizeBytes,
+                }))}
+                onUrlChange={(url) => setForm((f) => ({
+                  ...f,
+                  attachmentUrl: url,
+                  uploadedFileName: '',
+                  uploadedMimeType: inferMimeTypeFromUrl(url),
+                  uploadedSizeBytes: 0,
+                }))}
+                onClear={() => setForm((f) => ({ ...f, attachmentUrl: '', uploadedFileName: '', uploadedMimeType: '', uploadedSizeBytes: 0 }))}
+              />
               <div>
                 <Label htmlFor="assignment-description">{t('assignments.description')}</Label>
                 <Textarea id="assignment-description" value={form.description} onChange={(event) => setForm((f) => ({ ...f, description: event.target.value }))} disabled={saving} />

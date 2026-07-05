@@ -7,6 +7,8 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import AdminUploadField from '@/components/AdminUploadField';
+import { inferMimeTypeFromUrl } from '@/lib/admin-upload';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,12 +38,13 @@ import { toast } from 'sonner';
 import {
   getListAdminExamsQueryKey,
   useCreateAdminExam,
+  useCreateAdminFile,
   useDeleteAdminExam,
   useListAdminCourses,
   useListAdminExams,
   useUpdateAdminExam,
 } from '@workspace/api-client-react';
-import type { AdminExam, CreateAdminExamInput, ListAdminExamsParams } from '@workspace/api-client-react';
+import type { AdminExam, CreateAdminExamInput, CreateAdminFileInput, ListAdminExamsParams } from '@workspace/api-client-react';
 
 const ALL = '__all__';
 const EXAM_TYPES = ['midterm', 'final', 'makeup', 'test', 'other'] as const;
@@ -53,6 +56,10 @@ const EMPTY_FORM = {
   startTime: '',
   room: '',
   type: 'midterm',
+  attachmentUrl: '',
+  uploadedFileName: '',
+  uploadedMimeType: '',
+  uploadedSizeBytes: 0,
 };
 
 const copy = {
@@ -88,6 +95,31 @@ const copy = {
   },
 } as const;
 
+const uploadCopy = {
+  ar: {
+    label: 'مادة الامتحان',
+    description: 'ارفع PDF او صورة او فيديو. سيتم حفظه كمورد مرتبط بالمادة لان جدول الامتحانات لا يحتوي مرفقا مباشرا.',
+    choose: 'اختيار ملف',
+    uploading: 'جاري الرفع',
+    uploaded: 'تم الرفع',
+    fallback: 'رابط يدوي متقدم',
+    clear: 'مسح الملف',
+    error: 'تعذر رفع الملف',
+    unsupportedUrl: 'استخدم رابطا ينتهي بصيغة مدعومة: pdf, jpg, png, webp, mp4, webm.',
+  },
+  fr: {
+    label: 'Document d examen',
+    description: 'Televersez un PDF, une image ou une video. Il sera enregistre comme ressource du cours, car la table exams n a pas de colonne de piece jointe.',
+    choose: 'Choisir un fichier',
+    uploading: 'Televersement',
+    uploaded: 'Televerse',
+    fallback: 'URL manuelle avancee',
+    clear: 'Retirer',
+    error: 'Impossible de televerser le fichier',
+    unsupportedUrl: 'Utilisez une URL finissant par: pdf, jpg, png, webp, mp4, webm.',
+  },
+} as const;
+
 function errorMessage(err: unknown, fallback: string) {
   return (err as { data?: { error?: { message?: string } } })?.data?.error?.message ?? fallback;
 }
@@ -95,6 +127,7 @@ function errorMessage(err: unknown, fallback: string) {
 export default function AdminExams() {
   const { t, lang } = useAdminI18n();
   const c = copy[lang];
+  const uploadText = uploadCopy[lang];
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [courseFilter, setCourseFilter] = useState(ALL);
@@ -116,7 +149,8 @@ export default function AdminExams() {
   const createMutation = useCreateAdminExam();
   const updateMutation = useUpdateAdminExam();
   const deleteMutation = useDeleteAdminExam();
-  const saving = createMutation.isPending || updateMutation.isPending;
+  const createFileMutation = useCreateAdminFile();
+  const saving = createMutation.isPending || updateMutation.isPending || createFileMutation.isPending;
   const invalidate = () => queryClient.invalidateQueries({ queryKey: getListAdminExamsQueryKey(params) });
 
   function openCreate() {
@@ -134,6 +168,10 @@ export default function AdminExams() {
       startTime: exam.startTime ?? '',
       room: exam.room ?? '',
       type: exam.type,
+      attachmentUrl: '',
+      uploadedFileName: '',
+      uploadedMimeType: '',
+      uploadedSizeBytes: 0,
     });
     setDialogOpen(true);
   }
@@ -144,6 +182,12 @@ export default function AdminExams() {
       toast.error(c.required);
       return;
     }
+    const attachmentUrl = form.attachmentUrl.trim();
+    const attachmentMimeType = form.uploadedMimeType || inferMimeTypeFromUrl(attachmentUrl);
+    if (attachmentUrl && !attachmentMimeType) {
+      toast.error(uploadText.unsupportedUrl);
+      return;
+    }
     const payload: CreateAdminExamInput = {
       title: form.title.trim(),
       courseId: form.courseId,
@@ -152,7 +196,27 @@ export default function AdminExams() {
       room: form.room.trim() || null,
       type: form.type as CreateAdminExamInput['type'],
     };
-    const onSuccess = () => {
+    const saveAttachment = async () => {
+      if (!attachmentUrl || !attachmentMimeType) return;
+      const filePayload: CreateAdminFileInput = {
+        title: `${form.title.trim()} - exam material`,
+        fileUrl: attachmentUrl,
+        mimeType: attachmentMimeType,
+        fileType: 'exam',
+        fileSize: form.uploadedSizeBytes || 0,
+        courseId: form.courseId,
+        approvalStatus: 'approved',
+        tags: ['exam'],
+      };
+      await createFileMutation.mutateAsync({ data: filePayload });
+    };
+    const onSuccess = async () => {
+      try {
+        await saveAttachment();
+      } catch (err) {
+        toast.error(errorMessage(err, c.saveError));
+        return;
+      }
       toast.success(c.saved);
       setDialogOpen(false);
       invalidate();
@@ -286,6 +350,38 @@ export default function AdminExams() {
                 <Input id="exam-room" value={form.room} onChange={(event) => setForm((current) => ({ ...current, room: event.target.value }))} />
               </div>
             </div>
+            <AdminUploadField
+              label={uploadText.label}
+              description={uploadText.description}
+              value={{
+                url: form.attachmentUrl,
+                fileName: form.uploadedFileName,
+                mimeType: form.uploadedMimeType,
+                sizeBytes: form.uploadedSizeBytes || undefined,
+              }}
+              disabled={saving}
+              chooseLabel={uploadText.choose}
+              uploadingLabel={uploadText.uploading}
+              uploadedLabel={uploadText.uploaded}
+              fallbackLabel={uploadText.fallback}
+              clearLabel={uploadText.clear}
+              errorLabel={uploadText.error}
+              onUploaded={(file) => setForm((current) => ({
+                ...current,
+                attachmentUrl: file.url,
+                uploadedFileName: file.fileName,
+                uploadedMimeType: file.mimeType,
+                uploadedSizeBytes: file.sizeBytes,
+              }))}
+              onUrlChange={(url) => setForm((current) => ({
+                ...current,
+                attachmentUrl: url,
+                uploadedFileName: '',
+                uploadedMimeType: inferMimeTypeFromUrl(url),
+                uploadedSizeBytes: 0,
+              }))}
+              onClear={() => setForm((current) => ({ ...current, attachmentUrl: '', uploadedFileName: '', uploadedMimeType: '', uploadedSizeBytes: 0 }))}
+            />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel')}</Button>
               <Button type="submit" disabled={saving}>{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}{t('common.save')}</Button>

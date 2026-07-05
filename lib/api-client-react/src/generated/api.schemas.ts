@@ -559,6 +559,25 @@ export type AdminFile = AcademicFile & {
   tags: string[];
 };
 
+export type AdminUploadMimeType = typeof AdminUploadMimeType[keyof typeof AdminUploadMimeType];
+
+
+export const AdminUploadMimeType = {
+  'application/pdf': 'application/pdf',
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+  'image/webp': 'image/webp',
+  'video/mp4': 'video/mp4',
+  'video/webm': 'video/webm',
+} as const;
+
+export interface AdminUpload {
+  url: string;
+  fileName: string;
+  mimeType: AdminUploadMimeType;
+  sizeBytes: number;
+}
+
 export type CreateAdminFileInputFileType = typeof CreateAdminFileInputFileType[keyof typeof CreateAdminFileInputFileType];
 
 
@@ -2068,6 +2087,15 @@ export type DeleteAdminCourse200Data = {
 export type DeleteAdminCourse200 = {
   success: boolean;
   data: DeleteAdminCourse200Data;
+};
+
+export type UploadAdminFileBody = {
+  file: Blob;
+};
+
+export type UploadAdminFile201 = {
+  success: boolean;
+  data: AdminUpload;
 };
 
 export type ListAdminFilesParams = {

@@ -13,6 +13,19 @@ const titleTransformer: InputTransformerFn = (config) => {
   return config;
 };
 
+const zodTransformer: InputTransformerFn = (config) => {
+  titleTransformer(config);
+
+  // The zod package is built for Node and does not include DOM's File type.
+  // The upload route validates multipart files in api-server/src/lib/admin-upload.ts.
+  const uploadPost = config.paths?.["/admin/uploads"]?.post;
+  if (uploadPost) {
+    delete uploadPost.requestBody;
+  }
+
+  return config;
+};
+
 export default defineConfig({
   "api-client-react": {
     input: {
@@ -44,7 +57,7 @@ export default defineConfig({
     input: {
       target: "./openapi.yaml",
       override: {
-        transformer: titleTransformer,
+        transformer: zodTransformer,
       },
     },
     output: {

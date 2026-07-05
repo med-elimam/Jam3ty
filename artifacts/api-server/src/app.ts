@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { getAdminUploadDir } from "./lib/admin-upload";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,6 +50,14 @@ app.use(cors(corsConfig));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+const adminUploadDir = getAdminUploadDir();
+fs.mkdirSync(adminUploadDir, { recursive: true });
+app.use("/uploads/admin", express.static(adminUploadDir, {
+  fallthrough: false,
+  immutable: true,
+  maxAge: process.env.NODE_ENV === "production" ? "30d" : 0,
+}));
 
 // Health check endpoint
 app.get("/api/healthz", (req, res) => {

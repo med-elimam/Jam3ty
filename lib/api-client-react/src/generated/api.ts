@@ -209,6 +209,8 @@ import type {
   UpdateProfile200,
   UpdateProfileInput,
   UpdateUniversityInput,
+  UploadAdminFile201,
+  UploadAdminFileBody,
   UserResponse
 } from './api.schemas';
 
@@ -5540,6 +5542,79 @@ export const useDeleteAdminCourse = <TError = ErrorType<unknown>,
       return useMutation(getDeleteAdminCourseMutationOptions(options));
     }
 
+export const getUploadAdminFileUrl = () => {
+
+
+
+
+  return `/api/admin/uploads`
+}
+
+/**
+ * @summary Upload a PDF, image, or video file for admin-managed content (super_admin only)
+ */
+export const uploadAdminFile = async (uploadAdminFileBody: UploadAdminFileBody, options?: RequestInit): Promise<UploadAdminFile201> => {
+    const formData = new FormData();
+formData.append(`file`, uploadAdminFileBody.file);
+
+  return customFetch<UploadAdminFile201>(getUploadAdminFileUrl(),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+
+export const getUploadAdminFileMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadAdminFile>>, TError,{data: BodyType<UploadAdminFileBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadAdminFile>>, TError,{data: BodyType<UploadAdminFileBody>}, TContext> => {
+
+const mutationKey = ['uploadAdminFile'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadAdminFile>>, {data: BodyType<UploadAdminFileBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadAdminFile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadAdminFileMutationResult = NonNullable<Awaited<ReturnType<typeof uploadAdminFile>>>
+    export type UploadAdminFileMutationBody = BodyType<UploadAdminFileBody>
+    export type UploadAdminFileMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Upload a PDF, image, or video file for admin-managed content (super_admin only)
+ */
+export const useUploadAdminFile = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadAdminFile>>, TError,{data: BodyType<UploadAdminFileBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof uploadAdminFile>>,
+        TError,
+        {data: BodyType<UploadAdminFileBody>},
+        TContext
+      > => {
+      return useMutation(getUploadAdminFileMutationOptions(options));
+    }
+
 export const getListAdminFilesUrl = (params?: ListAdminFilesParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -5633,7 +5708,7 @@ export const getCreateAdminFileUrl = () => {
 }
 
 /**
- * @summary Create a metadata-only file record (super_admin only)
+ * @summary Create a file/resource record from uploaded or external file data (super_admin only)
  */
 export const createAdminFile = async (createAdminFileInput: CreateAdminFileInput, options?: RequestInit): Promise<CreateAdminFile201> => {
 
@@ -5682,7 +5757,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type CreateAdminFileMutationError = ErrorType<unknown>
 
     /**
- * @summary Create a metadata-only file record (super_admin only)
+ * @summary Create a file/resource record from uploaded or external file data (super_admin only)
  */
 export const useCreateAdminFile = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdminFile>>, TError,{data: BodyType<CreateAdminFileInput>}, TContext>, request?: SecondParameter<typeof customFetch>}

@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import AdminUploadField from '@/components/AdminUploadField';
+import { formatUploadBytes, inferMimeTypeFromUrl } from '@/lib/admin-upload';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +60,7 @@ interface FormState {
   courseId: string;
   approvalStatus: CreateAdminFileInput['approvalStatus'];
   tags: string;
+  uploadedFileName: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -69,7 +72,35 @@ const EMPTY_FORM: FormState = {
   courseId: NO_COURSE,
   approvalStatus: 'approved',
   tags: '',
+  uploadedFileName: '',
 };
+
+const uploadCopy = {
+  ar: {
+    label: 'رفع الملف',
+    description: 'اختر PDF او صورة او فيديو. سيتم تعبئة الرابط ونوع الملف والحجم تلقائيا.',
+    choose: 'اختيار ملف',
+    uploading: 'جاري الرفع',
+    uploaded: 'تم الرفع',
+    fallback: 'رابط يدوي متقدم',
+    clear: 'مسح الملف',
+    error: 'تعذر رفع الملف',
+    unknownMime: 'ارفع ملفا او استخدم رابطا ينتهي بصيغة مدعومة: pdf, jpg, png, webp, mp4, webm.',
+    metadata: 'بيانات الملف',
+  },
+  fr: {
+    label: 'Fichier',
+    description: 'Choisissez un PDF, une image ou une video. URL, type MIME et taille seront remplis automatiquement.',
+    choose: 'Choisir un fichier',
+    uploading: 'Televersement',
+    uploaded: 'Televerse',
+    fallback: 'URL manuelle avancee',
+    clear: 'Retirer',
+    error: 'Impossible de televerser le fichier',
+    unknownMime: 'Televersez un fichier ou utilisez une URL finissant par: pdf, jpg, png, webp, mp4, webm.',
+    metadata: 'Metadonnees du fichier',
+  },
+} as const;
 
 function extractErrorMessage(err: unknown, fallback: string): string {
   const data = (err as { data?: { error?: { message?: string } } })?.data;
@@ -84,7 +115,8 @@ function formatBytes(value: number): string {
 }
 
 export default function AdminFiles() {
-  const { t } = useAdminI18n();
+  const { t, lang } = useAdminI18n();
+  const c = uploadCopy[lang];
   const queryClient = useQueryClient();
 
   const [typeFilter, setTypeFilter] = useState(ALL);
@@ -134,6 +166,7 @@ export default function AdminFiles() {
       courseId: file.courseId ?? NO_COURSE,
       approvalStatus: file.approvalStatus,
       tags: file.tags.join(', '),
+      uploadedFileName: '',
     });
     setDialogOpen(true);
   }
@@ -144,7 +177,7 @@ export default function AdminFiles() {
     const fileUrl = form.fileUrl.trim();
     const mimeType = form.mimeType.trim();
     if (!title || !fileUrl || !mimeType) {
-      toast.error(t('files.required'));
+      toast.error(!mimeType ? c.unknownMime : t('files.required'));
       return;
     }
     const fileSize = Number(form.fileSize);
@@ -290,8 +323,38 @@ export default function AdminFiles() {
                 <Input id="file-title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} disabled={saving} />
               </div>
               <div>
-                <Label htmlFor="file-url">{t('files.url')}</Label>
-                <Input id="file-url" value={form.fileUrl} onChange={(e) => setForm((f) => ({ ...f, fileUrl: e.target.value }))} disabled={saving} dir="ltr" />
+                <AdminUploadField
+                  label={c.label}
+                  description={c.description}
+                  value={{
+                    url: form.fileUrl,
+                    fileName: form.uploadedFileName,
+                    mimeType: form.mimeType,
+                    sizeBytes: Number(form.fileSize) || undefined,
+                  }}
+                  disabled={saving}
+                  chooseLabel={c.choose}
+                  uploadingLabel={c.uploading}
+                  uploadedLabel={c.uploaded}
+                  fallbackLabel={c.fallback}
+                  clearLabel={c.clear}
+                  errorLabel={c.error}
+                  onUploaded={(file) => setForm((f) => ({
+                    ...f,
+                    fileUrl: file.url,
+                    uploadedFileName: file.fileName,
+                    mimeType: file.mimeType,
+                    fileSize: String(file.sizeBytes),
+                  }))}
+                  onUrlChange={(url) => setForm((f) => ({
+                    ...f,
+                    fileUrl: url,
+                    uploadedFileName: '',
+                    mimeType: inferMimeTypeFromUrl(url),
+                    fileSize: '0',
+                  }))}
+                  onClear={() => setForm((f) => ({ ...f, fileUrl: '', uploadedFileName: '', mimeType: '', fileSize: '0' }))}
+                />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
@@ -313,15 +376,11 @@ export default function AdminFiles() {
                   </Select>
                 </div>
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <Label htmlFor="file-mime">{t('files.mimeType')}</Label>
-                  <Input id="file-mime" value={form.mimeType} onChange={(e) => setForm((f) => ({ ...f, mimeType: e.target.value }))} disabled={saving} dir="ltr" />
-                </div>
-                <div>
-                  <Label htmlFor="file-size">{t('files.fileSize')}</Label>
-                  <Input id="file-size" type="number" min="0" value={form.fileSize} onChange={(e) => setForm((f) => ({ ...f, fileSize: e.target.value }))} disabled={saving} dir="ltr" />
-                </div>
+              <div className="rounded-md border bg-muted/20 p-3">
+                <Label>{c.metadata}</Label>
+                <p className="mt-2 text-sm text-muted-foreground" dir="ltr">
+                  {[form.mimeType || '-', formatUploadBytes(Number(form.fileSize) || 0)].join(' · ')}
+                </p>
               </div>
               <div>
                 <Label>{t('files.course')}</Label>

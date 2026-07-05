@@ -2013,6 +2013,38 @@ paths:
                     required: [id]
                 required: [success, data]
 
+  /admin/uploads:
+    post:
+      operationId: uploadAdminFile
+      tags: [admin]
+      summary: Upload a PDF, image, or video file for admin-managed content (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: [file]
+      responses:
+        "201":
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminUpload"
+                required: [success, data]
+
   /admin/files:
     get:
       operationId: listAdminFiles
@@ -2057,7 +2089,7 @@ paths:
     post:
       operationId: createAdminFile
       tags: [admin]
-      summary: Create a metadata-only file record (super_admin only)
+      summary: Create a file/resource record from uploaded or external file data (super_admin only)
       security:
         - bearerAuth: []
       requestBody:
@@ -4249,6 +4281,20 @@ components:
               items:
                 type: string
           required: [viewCount, tags]
+
+    AdminUpload:
+      type: object
+      properties:
+        url:
+          type: string
+        fileName:
+          type: string
+        mimeType:
+          type: string
+          enum: ["application/pdf", "image/jpeg", "image/png", "image/webp", "video/mp4", "video/webm"]
+        sizeBytes:
+          type: integer
+      required: [url, fileName, mimeType, sizeBytes]
 
     CreateAdminFileInput:
       type: object

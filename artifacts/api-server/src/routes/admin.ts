@@ -49,10 +49,42 @@ import {
 } from "@workspace/db";
 import { eq, and, gt, count, sql, ilike, inArray } from "drizzle-orm";
 import { requireAuth, requireRole } from "../middlewares/auth";
+import {
+  UploadError,
+  parseAdminUpload,
+  storeAdminUpload,
+} from "../lib/admin-upload";
 
 const router = Router();
 
 router.use(requireAuth, requireRole("super_admin"));
+
+// POST /admin/uploads
+router.post("/uploads", async (req, res) => {
+  try {
+    if (!req.is("multipart/form-data")) {
+      res.status(415).json({
+        success: false,
+        error: { code: "UNSUPPORTED_MEDIA_TYPE", message: "Expected multipart/form-data" },
+      });
+      return;
+    }
+
+    const upload = await parseAdminUpload(req);
+    const stored = await storeAdminUpload(upload);
+    res.status(201).json({ success: true, data: stored });
+  } catch (err) {
+    if (err instanceof UploadError) {
+      res.status(err.statusCode).json({
+        success: false,
+        error: { code: err.code, message: err.message },
+      });
+      return;
+    }
+    req.log.error({ err }, "AdminUpload error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
 
 function safeUser(user: typeof usersTable.$inferSelect) {
   const { passwordHash: _, ...safe } = user;
