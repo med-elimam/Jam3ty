@@ -2013,6 +2013,973 @@ paths:
                     required: [id]
                 required: [success, data]
 
+  /admin/files:
+    get:
+      operationId: listAdminFiles
+      tags: [admin]
+      summary: List files across all courses (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [lecture, td, tp, summary, exam, correction, book, other]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Admin files list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminFile"
+                required: [success, data]
+    post:
+      operationId: createAdminFile
+      tags: [admin]
+      summary: Create a metadata-only file record (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminFileInput"
+      responses:
+        "201":
+          description: File created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminFile"
+                required: [success, data]
+
+  /admin/files/{fileId}:
+    patch:
+      operationId: updateAdminFile
+      tags: [admin]
+      summary: Update file metadata (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminFileInput"
+      responses:
+        "200":
+          description: File updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminFile"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminFile
+      tags: [admin]
+      summary: Soft-delete a file record (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
+  /admin/announcements:
+    get:
+      operationId: listAdminAnnouncements
+      tags: [admin]
+      summary: List all announcements (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [global, university, faculty, department, level, group, course]
+        - name: priority
+          in: query
+          schema:
+            type: string
+            enum: [normal, important, urgent]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Admin announcements list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminAnnouncement"
+                required: [success, data]
+    post:
+      operationId: createAdminAnnouncement
+      tags: [admin]
+      summary: Create an announcement (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminAnnouncementInput"
+      responses:
+        "201":
+          description: Announcement created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminAnnouncement"
+                required: [success, data]
+
+  /admin/announcements/{announcementId}:
+    patch:
+      operationId: updateAdminAnnouncement
+      tags: [admin]
+      summary: Update an announcement (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminAnnouncementInput"
+      responses:
+        "200":
+          description: Announcement updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminAnnouncement"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminAnnouncement
+      tags: [admin]
+      summary: Delete an announcement (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Announcement deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
+  /admin/timetable:
+    get:
+      operationId: listAdminTimetable
+      tags: [admin]
+      summary: List timetable sessions (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: groupId
+          in: query
+          schema:
+            type: string
+        - name: courseId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Timetable sessions list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminTimetableSession"
+                required: [success, data]
+    post:
+      operationId: createAdminTimetableSession
+      tags: [admin]
+      summary: Create a timetable session (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminTimetableSessionInput"
+      responses:
+        "201":
+          description: Timetable session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminTimetableSession"
+                required: [success, data]
+
+  /admin/timetable/{sessionId}:
+    patch:
+      operationId: updateAdminTimetableSession
+      tags: [admin]
+      summary: Update a timetable session (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminTimetableSessionInput"
+      responses:
+        "200":
+          description: Timetable session updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminTimetableSession"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminTimetableSession
+      tags: [admin]
+      summary: Delete a timetable session (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Timetable session deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required: [id]
+                required: [success, data]
+
+  /admin/assignments:
+    get:
+      operationId: listAdminAssignments
+      tags: [admin]
+      summary: List assignments across courses (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Admin assignments list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminAssignment"
+                required: [success, data]
+    post:
+      operationId: createAdminAssignment
+      tags: [admin]
+      summary: Create an assignment (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminAssignmentInput"
+      responses:
+        "201":
+          description: Assignment created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminAssignment"
+                required: [success, data]
+
+  /admin/assignments/{assignmentId}:
+    patch:
+      operationId: updateAdminAssignment
+      tags: [admin]
+      summary: Update an assignment (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminAssignmentInput"
+      responses:
+        "200":
+          description: Assignment updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminAssignment"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminAssignment
+      tags: [admin]
+      summary: Delete an assignment only when it has no submissions (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Assignment deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/community/posts:
+    get:
+      operationId: listAdminCommunityPosts
+      tags: [admin]
+      summary: List community posts for moderation (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, visible, hidden, removed]
+        - name: visibility
+          in: query
+          schema:
+            type: string
+            enum: [public, same_university, same_department, same_course, same_group]
+        - name: authorId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: reported
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Community posts list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminCommunityPost"
+                required: [success, data]
+
+  /admin/community/posts/{postId}:
+    patch:
+      operationId: updateAdminCommunityPost
+      tags: [admin]
+      summary: Moderate a community post (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminCommunityPostInput"
+      responses:
+        "200":
+          description: Post updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminCommunityPost"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminCommunityPost
+      tags: [admin]
+      summary: Mark a community post as removed (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminCommunityPost"
+                required: [success, data]
+
+  /admin/community/comments:
+    get:
+      operationId: listAdminCommunityComments
+      tags: [admin]
+      summary: List community comments for moderation (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: query
+          schema:
+            type: string
+        - name: authorId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Community comments list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminCommunityComment"
+                required: [success, data]
+
+  /admin/community/comments/{commentId}:
+    patch:
+      operationId: updateAdminCommunityComment
+      tags: [admin]
+      summary: Update a community comment (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminCommunityCommentInput"
+      responses:
+        "200":
+          description: Comment updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminCommunityComment"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminCommunityComment
+      tags: [admin]
+      summary: Delete a community comment (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comment deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/community/reports:
+    get:
+      operationId: listAdminCommunityReports
+      tags: [admin]
+      summary: List community reports (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: targetType
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reports list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminCommunityReport"
+                required: [success, data]
+
+  /admin/community/reports/{reportId}:
+    patch:
+      operationId: updateAdminCommunityReport
+      tags: [admin]
+      summary: Update a report review status (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminCommunityReportInput"
+      responses:
+        "200":
+          description: Report updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminCommunityReport"
+                required: [success, data]
+
+  /admin/agents:
+    get:
+      operationId: listAdminAgents
+      tags: [admin]
+      summary: List activation agents (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, suspended, inactive]
+        - name: universityId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Agents list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminAgent"
+                required: [success, data]
+    post:
+      operationId: createAdminAgent
+      tags: [admin]
+      summary: Create an activation agent (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminAgentInput"
+      responses:
+        "201":
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminAgent"
+                required: [success, data]
+
+  /admin/agents/{agentId}:
+    patch:
+      operationId: updateAdminAgent
+      tags: [admin]
+      summary: Update an activation agent (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminAgentInput"
+      responses:
+        "200":
+          description: Agent updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminAgent"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminAgent
+      tags: [admin]
+      summary: Delete an unused activation agent (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Agent deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/opportunities:
+    get:
+      operationId: listAdminOpportunities
+      tags: [admin]
+      summary: List opportunities (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [internship, job, training, scholarship, competition, hackathon, freelance, volunteering]
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Opportunities list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminOpportunity"
+                required: [success, data]
+    post:
+      operationId: createAdminOpportunity
+      tags: [admin]
+      summary: Create an opportunity (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminOpportunityInput"
+      responses:
+        "201":
+          description: Opportunity created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminOpportunity"
+                required: [success, data]
+
+  /admin/opportunities/{opportunityId}:
+    patch:
+      operationId: updateAdminOpportunity
+      tags: [admin]
+      summary: Update an opportunity (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminOpportunityInput"
+      responses:
+        "200":
+          description: Opportunity updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AdminOpportunity"
+                required: [success, data]
+    delete:
+      operationId: deleteAdminOpportunity
+      tags: [admin]
+      summary: Delete an opportunity (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Opportunity deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
   /admin/payments:
     get:
       operationId: listAdminPayments
@@ -2777,6 +3744,70 @@ components:
           format: date-time
       required: [id, title, fileType, mimeType, fileSize, fileUrl, uploadedById, uploaderName, approvalStatus, downloadCount, isFavorited, createdAt]
 
+    AdminFile:
+      allOf:
+        - $ref: "#/components/schemas/AcademicFile"
+        - type: object
+          properties:
+            viewCount:
+              type: integer
+            tags:
+              type: array
+              items:
+                type: string
+          required: [viewCount, tags]
+
+    CreateAdminFileInput:
+      type: object
+      properties:
+        title:
+          type: string
+        fileUrl:
+          type: string
+        fileType:
+          type: string
+          enum: [lecture, td, tp, summary, exam, correction, book, other]
+        mimeType:
+          type: string
+        fileSize:
+          type: integer
+        courseId:
+          type: string
+          nullable: true
+        approvalStatus:
+          type: string
+          enum: [pending, approved, rejected]
+        tags:
+          type: array
+          items:
+            type: string
+      required: [title, fileUrl, mimeType]
+
+    UpdateAdminFileInput:
+      type: object
+      properties:
+        title:
+          type: string
+        fileUrl:
+          type: string
+        fileType:
+          type: string
+          enum: [lecture, td, tp, summary, exam, correction, book, other]
+        mimeType:
+          type: string
+        fileSize:
+          type: integer
+        courseId:
+          type: string
+          nullable: true
+        approvalStatus:
+          type: string
+          enum: [pending, approved, rejected]
+        tags:
+          type: array
+          items:
+            type: string
+
     # ─── ANNOUNCEMENT SCHEMAS ─────────────────────────────────────────────────
     Announcement:
       type: object
@@ -2810,6 +3841,103 @@ components:
           type: string
           format: date-time
       required: [id, title, content, priority, scope, createdById, createdByName, isRead, createdAt]
+
+    AdminAnnouncement:
+      allOf:
+        - $ref: "#/components/schemas/Announcement"
+        - type: object
+          properties:
+            universityId:
+              type: string
+              nullable: true
+            facultyId:
+              type: string
+              nullable: true
+            departmentId:
+              type: string
+              nullable: true
+            levelId:
+              type: string
+              nullable: true
+            groupId:
+              type: string
+              nullable: true
+            courseId:
+              type: string
+              nullable: true
+
+    CreateAdminAnnouncementInput:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        priority:
+          type: string
+          enum: [normal, important, urgent]
+        scope:
+          type: string
+          enum: [global, university, faculty, department, level, group, course]
+        universityId:
+          type: string
+          nullable: true
+        facultyId:
+          type: string
+          nullable: true
+        departmentId:
+          type: string
+          nullable: true
+        levelId:
+          type: string
+          nullable: true
+        groupId:
+          type: string
+          nullable: true
+        courseId:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+      required: [title, content]
+
+    UpdateAdminAnnouncementInput:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        priority:
+          type: string
+          enum: [normal, important, urgent]
+        scope:
+          type: string
+          enum: [global, university, faculty, department, level, group, course]
+        universityId:
+          type: string
+          nullable: true
+        facultyId:
+          type: string
+          nullable: true
+        departmentId:
+          type: string
+          nullable: true
+        levelId:
+          type: string
+          nullable: true
+        groupId:
+          type: string
+          nullable: true
+        courseId:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
 
     # ─── TIMETABLE SCHEMAS ────────────────────────────────────────────────────
     TimetableSession:
@@ -2846,6 +3974,69 @@ components:
           type: string
           nullable: true
       required: [id, courseId, courseName, dayOfWeek, startTime, endTime, type]
+
+    AdminTimetableSession:
+      allOf:
+        - $ref: "#/components/schemas/TimetableSession"
+        - type: object
+          properties:
+            groupId:
+              type: string
+              nullable: true
+            recurrence:
+              type: string
+          required: [recurrence]
+
+    CreateAdminTimetableSessionInput:
+      type: object
+      properties:
+        courseId:
+          type: string
+        groupId:
+          type: string
+          nullable: true
+        dayOfWeek:
+          type: integer
+          minimum: 0
+          maximum: 6
+        startTime:
+          type: string
+        endTime:
+          type: string
+        room:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [lecture, td, tp]
+        recurrence:
+          type: string
+      required: [courseId, dayOfWeek, startTime, endTime]
+
+    UpdateAdminTimetableSessionInput:
+      type: object
+      properties:
+        courseId:
+          type: string
+        groupId:
+          type: string
+          nullable: true
+        dayOfWeek:
+          type: integer
+          minimum: 0
+          maximum: 6
+        startTime:
+          type: string
+        endTime:
+          type: string
+        room:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [lecture, td, tp]
+        recurrence:
+          type: string
 
     # ─── ASSIGNMENT SCHEMAS ───────────────────────────────────────────────────
     Assignment:
@@ -2901,6 +4092,73 @@ components:
                   format: date-time
                   nullable: true
               required: [id, status]
+
+    AdminAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        courseId:
+          type: string
+        courseName:
+          type: string
+        courseCode:
+          type: string
+          nullable: true
+        deadline:
+          type: string
+          format: date-time
+        attachmentUrl:
+          type: string
+          nullable: true
+        createdBy:
+          type: string
+        submissionCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, courseId, courseName, deadline, createdBy, submissionCount, createdAt]
+
+    CreateAdminAssignmentInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        courseId:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        attachmentUrl:
+          type: string
+          nullable: true
+      required: [title, courseId, deadline]
+
+    UpdateAdminAssignmentInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        courseId:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        attachmentUrl:
+          type: string
+          nullable: true
 
     # ─── EXAM SCHEMAS ─────────────────────────────────────────────────────────
     Exam:
@@ -2974,6 +4232,131 @@ components:
           enum: [public, same_university, same_department, same_course, same_group]
           default: same_university
       required: [content]
+
+    AdminCommunityPost:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        authorId:
+          type: string
+        authorName:
+          type: string
+        authorEmail:
+          type: string
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        facultyId:
+          type: string
+          nullable: true
+        departmentId:
+          type: string
+          nullable: true
+        courseId:
+          type: string
+          nullable: true
+        groupId:
+          type: string
+          nullable: true
+        visibility:
+          type: string
+          enum: [public, same_university, same_department, same_course, same_group]
+        moderationStatus:
+          type: string
+          enum: [pending, visible, hidden, removed]
+        isPinned:
+          type: boolean
+        reactionCount:
+          type: integer
+        commentCount:
+          type: integer
+        reportCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, content, authorId, authorName, visibility, moderationStatus, isPinned, reactionCount, commentCount, reportCount, createdAt, updatedAt]
+
+    UpdateAdminCommunityPostInput:
+      type: object
+      properties:
+        moderationStatus:
+          type: string
+          enum: [pending, visible, hidden, removed]
+        isPinned:
+          type: boolean
+
+    AdminCommunityComment:
+      type: object
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+        authorId:
+          type: string
+        authorName:
+          type: string
+        authorEmail:
+          type: string
+          nullable: true
+        content:
+          type: string
+        reportCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, postId, authorId, authorName, content, reportCount, createdAt]
+
+    UpdateAdminCommunityCommentInput:
+      type: object
+      properties:
+        content:
+          type: string
+      required: [content]
+
+    AdminCommunityReport:
+      type: object
+      properties:
+        id:
+          type: string
+        reportedBy:
+          type: string
+        reporterName:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+        reviewedBy:
+          type: string
+          nullable: true
+        reviewerName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, reportedBy, reporterName, targetType, targetId, reason, status, createdAt]
+
+    UpdateAdminCommunityReportInput:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
 
     # ─── EVENT SCHEMAS ────────────────────────────────────────────────────────
     Event:
@@ -3065,6 +4448,184 @@ components:
           type: string
           format: date-time
       required: [id, title, organization, type, description, isFeatured, status, createdAt]
+
+    AdminOpportunity:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        organization:
+          type: string
+        type:
+          type: string
+          enum: [internship, job, training, scholarship, competition, hackathon, freelance, volunteering]
+        description:
+          type: string
+        location:
+          type: string
+          nullable: true
+        deadline:
+          type: string
+          nullable: true
+        link:
+          type: string
+          nullable: true
+        targetInfo:
+          type: string
+          nullable: true
+        isFeatured:
+          type: boolean
+        status:
+          type: string
+        createdBy:
+          type: string
+        createdByName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, organization, type, description, isFeatured, status, createdBy, createdByName, createdAt]
+
+    CreateAdminOpportunityInput:
+      type: object
+      properties:
+        title:
+          type: string
+        organization:
+          type: string
+        type:
+          type: string
+          enum: [internship, job, training, scholarship, competition, hackathon, freelance, volunteering]
+        description:
+          type: string
+        location:
+          type: string
+          nullable: true
+        deadline:
+          type: string
+          nullable: true
+        link:
+          type: string
+          nullable: true
+        targetInfo:
+          type: string
+          nullable: true
+        isFeatured:
+          type: boolean
+        status:
+          type: string
+      required: [title, organization, type, description]
+
+    UpdateAdminOpportunityInput:
+      type: object
+      properties:
+        title:
+          type: string
+        organization:
+          type: string
+        type:
+          type: string
+          enum: [internship, job, training, scholarship, competition, hackathon, freelance, volunteering]
+        description:
+          type: string
+        location:
+          type: string
+          nullable: true
+        deadline:
+          type: string
+          nullable: true
+        link:
+          type: string
+          nullable: true
+        targetInfo:
+          type: string
+          nullable: true
+        isFeatured:
+          type: boolean
+        status:
+          type: string
+
+    AdminAgent:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+          nullable: true
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        universityName:
+          type: string
+          nullable: true
+        city:
+          type: string
+        commissionRate:
+          type: integer
+        status:
+          type: string
+          enum: [active, suspended, inactive]
+        activationCodeCount:
+          type: integer
+        commissionCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, phone, city, commissionRate, status, activationCodeCount, commissionCount, createdAt]
+
+    CreateAdminAgentInput:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        city:
+          type: string
+        commissionRate:
+          type: integer
+        status:
+          type: string
+          enum: [active, suspended, inactive]
+      required: [name, phone]
+
+    UpdateAdminAgentInput:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        universityId:
+          type: string
+          nullable: true
+        city:
+          type: string
+        commissionRate:
+          type: integer
+        status:
+          type: string
+          enum: [active, suspended, inactive]
 
     # ─── SUBSCRIPTION SCHEMAS ─────────────────────────────────────────────────
     Plan:

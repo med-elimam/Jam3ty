@@ -8,7 +8,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AdminI18nProvider, useAdminI18n } from "./contexts/AdminI18nContext";
 import { AdminAuthProvider, useAdminAuth } from "./contexts/AdminAuthContext";
 
-// Admin pages
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUniversities from "./pages/AdminUniversities";
@@ -16,6 +15,14 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminPayments from "./pages/AdminPayments";
 import AdminAcademicStructure from "./pages/AdminAcademicStructure";
 import AdminCourses from "./pages/AdminCourses";
+import AdminFiles from "./pages/AdminFiles";
+import AdminAnnouncements from "./pages/AdminAnnouncements";
+import AdminTimetable from "./pages/AdminTimetable";
+import AdminAssignments from "./pages/AdminAssignments";
+import AdminCommunity from "./pages/AdminCommunity";
+import AdminOpportunities from "./pages/AdminOpportunities";
+import AdminAgents from "./pages/AdminAgents";
+import AdminSettings from "./pages/AdminSettings";
 import { AdminPlaceholder } from "./pages/AdminPlaceholder";
 
 const queryClient = new QueryClient();
@@ -24,11 +31,11 @@ function ProtectedAdminRoute({ component: Component }: { component: React.Compon
   const { isAuthenticated, isReady } = useAdminAuth();
 
   if (!isReady) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
 
   if (!isAuthenticated) {
-    window.location.href = '/admin/login';
+    window.location.href = "/admin/login";
     return null;
   }
 
@@ -39,35 +46,31 @@ function Router() {
   const { isRTL } = useAdminI18n();
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'}>
+    <div dir={isRTL ? "rtl" : "ltr"}>
       <Switch>
-        {/* Auth */}
         <Route path="/admin/login" component={AdminLogin} />
 
-        {/* Dashboard */}
         <Route path="/admin/dashboard" component={() => <ProtectedAdminRoute component={AdminDashboard} />} />
         <Route path="/admin" component={() => <ProtectedAdminRoute component={AdminDashboard} />} />
 
-        {/* Modules */}
         <Route path="/admin/universities" component={() => <ProtectedAdminRoute component={AdminUniversities} />} />
         <Route path="/admin/academic-structure" component={() => <ProtectedAdminRoute component={AdminAcademicStructure} />} />
         <Route path="/admin/users" component={() => <ProtectedAdminRoute component={AdminUsers} />} />
         <Route path="/admin/courses" component={() => <ProtectedAdminRoute component={AdminCourses} />} />
-        <Route path="/admin/files" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Files" icon="📄" />} />} />
-        <Route path="/admin/announcements" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Announcements" icon="📢" />} />} />
-        <Route path="/admin/timetable" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Timetable" icon="📅" />} />} />
-        <Route path="/admin/assignments" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Assignments" icon="✏️" />} />} />
-        <Route path="/admin/exams" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Exams" icon="📝" />} />} />
-        <Route path="/admin/community" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Community" icon="💬" />} />} />
-        <Route path="/admin/opportunities" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Opportunities" icon="🚀" />} />} />
-        <Route path="/admin/events" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Events" icon="🎉" />} />} />
-        <Route path="/admin/clubs" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Clubs" icon="🎯" />} />} />
-        <Route path="/admin/subscriptions" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Subscriptions" icon="⭐" />} />} />
+        <Route path="/admin/files" component={() => <ProtectedAdminRoute component={AdminFiles} />} />
+        <Route path="/admin/announcements" component={() => <ProtectedAdminRoute component={AdminAnnouncements} />} />
+        <Route path="/admin/timetable" component={() => <ProtectedAdminRoute component={AdminTimetable} />} />
+        <Route path="/admin/assignments" component={() => <ProtectedAdminRoute component={AdminAssignments} />} />
+        <Route path="/admin/exams" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Exams" icon="EX" />} />} />
+        <Route path="/admin/community" component={() => <ProtectedAdminRoute component={AdminCommunity} />} />
+        <Route path="/admin/opportunities" component={() => <ProtectedAdminRoute component={AdminOpportunities} />} />
+        <Route path="/admin/events" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Events" icon="EV" />} />} />
+        <Route path="/admin/clubs" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Clubs" icon="CL" />} />} />
+        <Route path="/admin/subscriptions" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Subscriptions" icon="SU" />} />} />
         <Route path="/admin/payments" component={() => <ProtectedAdminRoute component={AdminPayments} />} />
-        <Route path="/admin/agents" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Agents" icon="🤝" />} />} />
-        <Route path="/admin/settings" component={() => <ProtectedAdminRoute component={() => <AdminPlaceholder title="Settings" icon="⚙️" />} />} />
+        <Route path="/admin/agents" component={() => <ProtectedAdminRoute component={AdminAgents} />} />
+        <Route path="/admin/settings" component={() => <ProtectedAdminRoute component={AdminSettings} />} />
 
-        {/* 404 */}
         <Route path="/admin/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

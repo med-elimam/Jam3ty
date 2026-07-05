@@ -554,6 +554,160 @@ export type CourseDetail = Course & {
   upcomingExams: Exam[];
 };
 
+export type AdminFile = AcademicFile & {
+  viewCount: number;
+  tags: string[];
+};
+
+export type CreateAdminFileInputFileType = typeof CreateAdminFileInputFileType[keyof typeof CreateAdminFileInputFileType];
+
+
+export const CreateAdminFileInputFileType = {
+  lecture: 'lecture',
+  td: 'td',
+  tp: 'tp',
+  summary: 'summary',
+  exam: 'exam',
+  correction: 'correction',
+  book: 'book',
+  other: 'other',
+} as const;
+
+export type CreateAdminFileInputApprovalStatus = typeof CreateAdminFileInputApprovalStatus[keyof typeof CreateAdminFileInputApprovalStatus];
+
+
+export const CreateAdminFileInputApprovalStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface CreateAdminFileInput {
+  title: string;
+  fileUrl: string;
+  fileType?: CreateAdminFileInputFileType;
+  mimeType: string;
+  fileSize?: number;
+  courseId?: string | null;
+  approvalStatus?: CreateAdminFileInputApprovalStatus;
+  tags?: string[];
+}
+
+export type UpdateAdminFileInputFileType = typeof UpdateAdminFileInputFileType[keyof typeof UpdateAdminFileInputFileType];
+
+
+export const UpdateAdminFileInputFileType = {
+  lecture: 'lecture',
+  td: 'td',
+  tp: 'tp',
+  summary: 'summary',
+  exam: 'exam',
+  correction: 'correction',
+  book: 'book',
+  other: 'other',
+} as const;
+
+export type UpdateAdminFileInputApprovalStatus = typeof UpdateAdminFileInputApprovalStatus[keyof typeof UpdateAdminFileInputApprovalStatus];
+
+
+export const UpdateAdminFileInputApprovalStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface UpdateAdminFileInput {
+  title?: string;
+  fileUrl?: string;
+  fileType?: UpdateAdminFileInputFileType;
+  mimeType?: string;
+  fileSize?: number;
+  courseId?: string | null;
+  approvalStatus?: UpdateAdminFileInputApprovalStatus;
+  tags?: string[];
+}
+
+export type AdminAnnouncement = Announcement & ({
+  universityId?: string | null;
+  facultyId?: string | null;
+  departmentId?: string | null;
+  levelId?: string | null;
+  groupId?: string | null;
+  courseId?: string | null;
+});
+
+export type CreateAdminAnnouncementInputPriority = typeof CreateAdminAnnouncementInputPriority[keyof typeof CreateAdminAnnouncementInputPriority];
+
+
+export const CreateAdminAnnouncementInputPriority = {
+  normal: 'normal',
+  important: 'important',
+  urgent: 'urgent',
+} as const;
+
+export type CreateAdminAnnouncementInputScope = typeof CreateAdminAnnouncementInputScope[keyof typeof CreateAdminAnnouncementInputScope];
+
+
+export const CreateAdminAnnouncementInputScope = {
+  global: 'global',
+  university: 'university',
+  faculty: 'faculty',
+  department: 'department',
+  level: 'level',
+  group: 'group',
+  course: 'course',
+} as const;
+
+export interface CreateAdminAnnouncementInput {
+  title: string;
+  content: string;
+  priority?: CreateAdminAnnouncementInputPriority;
+  scope?: CreateAdminAnnouncementInputScope;
+  universityId?: string | null;
+  facultyId?: string | null;
+  departmentId?: string | null;
+  levelId?: string | null;
+  groupId?: string | null;
+  courseId?: string | null;
+  expiresAt?: string | null;
+}
+
+export type UpdateAdminAnnouncementInputPriority = typeof UpdateAdminAnnouncementInputPriority[keyof typeof UpdateAdminAnnouncementInputPriority];
+
+
+export const UpdateAdminAnnouncementInputPriority = {
+  normal: 'normal',
+  important: 'important',
+  urgent: 'urgent',
+} as const;
+
+export type UpdateAdminAnnouncementInputScope = typeof UpdateAdminAnnouncementInputScope[keyof typeof UpdateAdminAnnouncementInputScope];
+
+
+export const UpdateAdminAnnouncementInputScope = {
+  global: 'global',
+  university: 'university',
+  faculty: 'faculty',
+  department: 'department',
+  level: 'level',
+  group: 'group',
+  course: 'course',
+} as const;
+
+export interface UpdateAdminAnnouncementInput {
+  title?: string;
+  content?: string;
+  priority?: UpdateAdminAnnouncementInputPriority;
+  scope?: UpdateAdminAnnouncementInputScope;
+  universityId?: string | null;
+  facultyId?: string | null;
+  departmentId?: string | null;
+  levelId?: string | null;
+  groupId?: string | null;
+  courseId?: string | null;
+  expiresAt?: string | null;
+}
+
 export type TimetableSessionType = typeof TimetableSessionType[keyof typeof TimetableSessionType];
 
 
@@ -580,6 +734,59 @@ export interface TimetableSession {
   groupName?: string | null;
 }
 
+export type AdminTimetableSession = TimetableSession & ({
+  groupId?: string | null;
+  recurrence: string;
+});
+
+export type CreateAdminTimetableSessionInputType = typeof CreateAdminTimetableSessionInputType[keyof typeof CreateAdminTimetableSessionInputType];
+
+
+export const CreateAdminTimetableSessionInputType = {
+  lecture: 'lecture',
+  td: 'td',
+  tp: 'tp',
+} as const;
+
+export interface CreateAdminTimetableSessionInput {
+  courseId: string;
+  groupId?: string | null;
+  /**
+     * @minimum 0
+     * @maximum 6
+     */
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  room?: string | null;
+  type?: CreateAdminTimetableSessionInputType;
+  recurrence?: string;
+}
+
+export type UpdateAdminTimetableSessionInputType = typeof UpdateAdminTimetableSessionInputType[keyof typeof UpdateAdminTimetableSessionInputType];
+
+
+export const UpdateAdminTimetableSessionInputType = {
+  lecture: 'lecture',
+  td: 'td',
+  tp: 'tp',
+} as const;
+
+export interface UpdateAdminTimetableSessionInput {
+  courseId?: string;
+  groupId?: string | null;
+  /**
+     * @minimum 0
+     * @maximum 6
+     */
+  dayOfWeek?: number;
+  startTime?: string;
+  endTime?: string;
+  room?: string | null;
+  type?: UpdateAdminTimetableSessionInputType;
+  recurrence?: string;
+}
+
 export type AssignmentDetailSubmission = {
   id: string;
   fileUrl?: string | null;
@@ -592,6 +799,36 @@ export type AssignmentDetailSubmission = {
 export type AssignmentDetail = Assignment & {
   submission?: AssignmentDetailSubmission;
 };
+
+export interface AdminAssignment {
+  id: string;
+  title: string;
+  description?: string | null;
+  courseId: string;
+  courseName: string;
+  courseCode?: string | null;
+  deadline: string;
+  attachmentUrl?: string | null;
+  createdBy: string;
+  submissionCount: number;
+  createdAt: string;
+}
+
+export interface CreateAdminAssignmentInput {
+  title: string;
+  description?: string | null;
+  courseId: string;
+  deadline: string;
+  attachmentUrl?: string | null;
+}
+
+export interface UpdateAdminAssignmentInput {
+  title?: string;
+  description?: string | null;
+  courseId?: string;
+  deadline?: string;
+  attachmentUrl?: string | null;
+}
 
 export type PostVisibility = typeof PostVisibility[keyof typeof PostVisibility];
 
@@ -633,6 +870,95 @@ export interface CreatePostInput {
   /** @minLength 1 */
   content: string;
   visibility?: CreatePostInputVisibility;
+}
+
+export type AdminCommunityPostVisibility = typeof AdminCommunityPostVisibility[keyof typeof AdminCommunityPostVisibility];
+
+
+export const AdminCommunityPostVisibility = {
+  public: 'public',
+  same_university: 'same_university',
+  same_department: 'same_department',
+  same_course: 'same_course',
+  same_group: 'same_group',
+} as const;
+
+export type AdminCommunityPostModerationStatus = typeof AdminCommunityPostModerationStatus[keyof typeof AdminCommunityPostModerationStatus];
+
+
+export const AdminCommunityPostModerationStatus = {
+  pending: 'pending',
+  visible: 'visible',
+  hidden: 'hidden',
+  removed: 'removed',
+} as const;
+
+export interface AdminCommunityPost {
+  id: string;
+  content: string;
+  authorId: string;
+  authorName: string;
+  authorEmail?: string | null;
+  universityId?: string | null;
+  facultyId?: string | null;
+  departmentId?: string | null;
+  courseId?: string | null;
+  groupId?: string | null;
+  visibility: AdminCommunityPostVisibility;
+  moderationStatus: AdminCommunityPostModerationStatus;
+  isPinned: boolean;
+  reactionCount: number;
+  commentCount: number;
+  reportCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type UpdateAdminCommunityPostInputModerationStatus = typeof UpdateAdminCommunityPostInputModerationStatus[keyof typeof UpdateAdminCommunityPostInputModerationStatus];
+
+
+export const UpdateAdminCommunityPostInputModerationStatus = {
+  pending: 'pending',
+  visible: 'visible',
+  hidden: 'hidden',
+  removed: 'removed',
+} as const;
+
+export interface UpdateAdminCommunityPostInput {
+  moderationStatus?: UpdateAdminCommunityPostInputModerationStatus;
+  isPinned?: boolean;
+}
+
+export interface AdminCommunityComment {
+  id: string;
+  postId: string;
+  authorId: string;
+  authorName: string;
+  authorEmail?: string | null;
+  content: string;
+  reportCount: number;
+  createdAt: string;
+}
+
+export interface UpdateAdminCommunityCommentInput {
+  content: string;
+}
+
+export interface AdminCommunityReport {
+  id: string;
+  reportedBy: string;
+  reporterName: string;
+  targetType: string;
+  targetId: string;
+  reason: string;
+  status: string;
+  reviewedBy?: string | null;
+  reviewerName?: string | null;
+  createdAt: string;
+}
+
+export interface UpdateAdminCommunityReportInput {
+  status: string;
 }
 
 export type EventType = typeof EventType[keyof typeof EventType];
@@ -705,6 +1031,154 @@ export interface Opportunity {
   isFeatured: boolean;
   status: OpportunityStatus;
   createdAt: string;
+}
+
+export type AdminOpportunityType = typeof AdminOpportunityType[keyof typeof AdminOpportunityType];
+
+
+export const AdminOpportunityType = {
+  internship: 'internship',
+  job: 'job',
+  training: 'training',
+  scholarship: 'scholarship',
+  competition: 'competition',
+  hackathon: 'hackathon',
+  freelance: 'freelance',
+  volunteering: 'volunteering',
+} as const;
+
+export interface AdminOpportunity {
+  id: string;
+  title: string;
+  organization: string;
+  type: AdminOpportunityType;
+  description: string;
+  location?: string | null;
+  deadline?: string | null;
+  link?: string | null;
+  targetInfo?: string | null;
+  isFeatured: boolean;
+  status: string;
+  createdBy: string;
+  createdByName: string;
+  createdAt: string;
+}
+
+export type CreateAdminOpportunityInputType = typeof CreateAdminOpportunityInputType[keyof typeof CreateAdminOpportunityInputType];
+
+
+export const CreateAdminOpportunityInputType = {
+  internship: 'internship',
+  job: 'job',
+  training: 'training',
+  scholarship: 'scholarship',
+  competition: 'competition',
+  hackathon: 'hackathon',
+  freelance: 'freelance',
+  volunteering: 'volunteering',
+} as const;
+
+export interface CreateAdminOpportunityInput {
+  title: string;
+  organization: string;
+  type: CreateAdminOpportunityInputType;
+  description: string;
+  location?: string | null;
+  deadline?: string | null;
+  link?: string | null;
+  targetInfo?: string | null;
+  isFeatured?: boolean;
+  status?: string;
+}
+
+export type UpdateAdminOpportunityInputType = typeof UpdateAdminOpportunityInputType[keyof typeof UpdateAdminOpportunityInputType];
+
+
+export const UpdateAdminOpportunityInputType = {
+  internship: 'internship',
+  job: 'job',
+  training: 'training',
+  scholarship: 'scholarship',
+  competition: 'competition',
+  hackathon: 'hackathon',
+  freelance: 'freelance',
+  volunteering: 'volunteering',
+} as const;
+
+export interface UpdateAdminOpportunityInput {
+  title?: string;
+  organization?: string;
+  type?: UpdateAdminOpportunityInputType;
+  description?: string;
+  location?: string | null;
+  deadline?: string | null;
+  link?: string | null;
+  targetInfo?: string | null;
+  isFeatured?: boolean;
+  status?: string;
+}
+
+export type AdminAgentStatus = typeof AdminAgentStatus[keyof typeof AdminAgentStatus];
+
+
+export const AdminAgentStatus = {
+  active: 'active',
+  suspended: 'suspended',
+  inactive: 'inactive',
+} as const;
+
+export interface AdminAgent {
+  id: string;
+  userId?: string | null;
+  name: string;
+  phone: string;
+  email?: string | null;
+  universityId?: string | null;
+  universityName?: string | null;
+  city: string;
+  commissionRate: number;
+  status: AdminAgentStatus;
+  activationCodeCount: number;
+  commissionCount: number;
+  createdAt: string;
+}
+
+export type CreateAdminAgentInputStatus = typeof CreateAdminAgentInputStatus[keyof typeof CreateAdminAgentInputStatus];
+
+
+export const CreateAdminAgentInputStatus = {
+  active: 'active',
+  suspended: 'suspended',
+  inactive: 'inactive',
+} as const;
+
+export interface CreateAdminAgentInput {
+  name: string;
+  phone: string;
+  email?: string | null;
+  universityId?: string | null;
+  city?: string;
+  commissionRate?: number;
+  status?: CreateAdminAgentInputStatus;
+}
+
+export type UpdateAdminAgentInputStatus = typeof UpdateAdminAgentInputStatus[keyof typeof UpdateAdminAgentInputStatus];
+
+
+export const UpdateAdminAgentInputStatus = {
+  active: 'active',
+  suspended: 'suspended',
+  inactive: 'inactive',
+} as const;
+
+export interface UpdateAdminAgentInput {
+  name?: string;
+  phone?: string;
+  email?: string | null;
+  universityId?: string | null;
+  city?: string;
+  commissionRate?: number;
+  status?: UpdateAdminAgentInputStatus;
 }
 
 export interface Plan {
@@ -1342,6 +1816,301 @@ export type DeleteAdminCourse200Data = {
 export type DeleteAdminCourse200 = {
   success: boolean;
   data: DeleteAdminCourse200Data;
+};
+
+export type ListAdminFilesParams = {
+courseId?: string;
+type?: ListAdminFilesType;
+status?: ListAdminFilesStatus;
+search?: string;
+};
+
+export type ListAdminFilesType = typeof ListAdminFilesType[keyof typeof ListAdminFilesType];
+
+
+export const ListAdminFilesType = {
+  lecture: 'lecture',
+  td: 'td',
+  tp: 'tp',
+  summary: 'summary',
+  exam: 'exam',
+  correction: 'correction',
+  book: 'book',
+  other: 'other',
+} as const;
+
+export type ListAdminFilesStatus = typeof ListAdminFilesStatus[keyof typeof ListAdminFilesStatus];
+
+
+export const ListAdminFilesStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type ListAdminFiles200 = {
+  success: boolean;
+  data: AdminFile[];
+};
+
+export type CreateAdminFile201 = {
+  success: boolean;
+  data: AdminFile;
+};
+
+export type UpdateAdminFile200 = {
+  success: boolean;
+  data: AdminFile;
+};
+
+export type DeleteAdminFile200Data = {
+  id: string;
+};
+
+export type DeleteAdminFile200 = {
+  success: boolean;
+  data: DeleteAdminFile200Data;
+};
+
+export type ListAdminAnnouncementsParams = {
+scope?: ListAdminAnnouncementsScope;
+priority?: ListAdminAnnouncementsPriority;
+search?: string;
+};
+
+export type ListAdminAnnouncementsScope = typeof ListAdminAnnouncementsScope[keyof typeof ListAdminAnnouncementsScope];
+
+
+export const ListAdminAnnouncementsScope = {
+  global: 'global',
+  university: 'university',
+  faculty: 'faculty',
+  department: 'department',
+  level: 'level',
+  group: 'group',
+  course: 'course',
+} as const;
+
+export type ListAdminAnnouncementsPriority = typeof ListAdminAnnouncementsPriority[keyof typeof ListAdminAnnouncementsPriority];
+
+
+export const ListAdminAnnouncementsPriority = {
+  normal: 'normal',
+  important: 'important',
+  urgent: 'urgent',
+} as const;
+
+export type ListAdminAnnouncements200 = {
+  success: boolean;
+  data: AdminAnnouncement[];
+};
+
+export type CreateAdminAnnouncement201 = {
+  success: boolean;
+  data: AdminAnnouncement;
+};
+
+export type UpdateAdminAnnouncement200 = {
+  success: boolean;
+  data: AdminAnnouncement;
+};
+
+export type DeleteAdminAnnouncement200Data = {
+  id: string;
+};
+
+export type DeleteAdminAnnouncement200 = {
+  success: boolean;
+  data: DeleteAdminAnnouncement200Data;
+};
+
+export type ListAdminTimetableParams = {
+groupId?: string;
+courseId?: string;
+};
+
+export type ListAdminTimetable200 = {
+  success: boolean;
+  data: AdminTimetableSession[];
+};
+
+export type CreateAdminTimetableSession201 = {
+  success: boolean;
+  data: AdminTimetableSession;
+};
+
+export type UpdateAdminTimetableSession200 = {
+  success: boolean;
+  data: AdminTimetableSession;
+};
+
+export type DeleteAdminTimetableSession200Data = {
+  id: string;
+};
+
+export type DeleteAdminTimetableSession200 = {
+  success: boolean;
+  data: DeleteAdminTimetableSession200Data;
+};
+
+export type ListAdminAssignmentsParams = {
+courseId?: string;
+search?: string;
+};
+
+export type ListAdminAssignments200 = {
+  success: boolean;
+  data: AdminAssignment[];
+};
+
+export type CreateAdminAssignment201 = {
+  success: boolean;
+  data: AdminAssignment;
+};
+
+export type UpdateAdminAssignment200 = {
+  success: boolean;
+  data: AdminAssignment;
+};
+
+export type ListAdminCommunityPostsParams = {
+status?: ListAdminCommunityPostsStatus;
+visibility?: ListAdminCommunityPostsVisibility;
+authorId?: string;
+search?: string;
+reported?: string;
+};
+
+export type ListAdminCommunityPostsStatus = typeof ListAdminCommunityPostsStatus[keyof typeof ListAdminCommunityPostsStatus];
+
+
+export const ListAdminCommunityPostsStatus = {
+  pending: 'pending',
+  visible: 'visible',
+  hidden: 'hidden',
+  removed: 'removed',
+} as const;
+
+export type ListAdminCommunityPostsVisibility = typeof ListAdminCommunityPostsVisibility[keyof typeof ListAdminCommunityPostsVisibility];
+
+
+export const ListAdminCommunityPostsVisibility = {
+  public: 'public',
+  same_university: 'same_university',
+  same_department: 'same_department',
+  same_course: 'same_course',
+  same_group: 'same_group',
+} as const;
+
+export type ListAdminCommunityPosts200 = {
+  success: boolean;
+  data: AdminCommunityPost[];
+};
+
+export type UpdateAdminCommunityPost200 = {
+  success: boolean;
+  data: AdminCommunityPost;
+};
+
+export type DeleteAdminCommunityPost200 = {
+  success: boolean;
+  data: AdminCommunityPost;
+};
+
+export type ListAdminCommunityCommentsParams = {
+postId?: string;
+authorId?: string;
+search?: string;
+};
+
+export type ListAdminCommunityComments200 = {
+  success: boolean;
+  data: AdminCommunityComment[];
+};
+
+export type UpdateAdminCommunityComment200 = {
+  success: boolean;
+  data: AdminCommunityComment;
+};
+
+export type ListAdminCommunityReportsParams = {
+status?: string;
+targetType?: string;
+};
+
+export type ListAdminCommunityReports200 = {
+  success: boolean;
+  data: AdminCommunityReport[];
+};
+
+export type UpdateAdminCommunityReport200 = {
+  success: boolean;
+  data: AdminCommunityReport;
+};
+
+export type ListAdminAgentsParams = {
+status?: ListAdminAgentsStatus;
+universityId?: string;
+search?: string;
+};
+
+export type ListAdminAgentsStatus = typeof ListAdminAgentsStatus[keyof typeof ListAdminAgentsStatus];
+
+
+export const ListAdminAgentsStatus = {
+  active: 'active',
+  suspended: 'suspended',
+  inactive: 'inactive',
+} as const;
+
+export type ListAdminAgents200 = {
+  success: boolean;
+  data: AdminAgent[];
+};
+
+export type CreateAdminAgent201 = {
+  success: boolean;
+  data: AdminAgent;
+};
+
+export type UpdateAdminAgent200 = {
+  success: boolean;
+  data: AdminAgent;
+};
+
+export type ListAdminOpportunitiesParams = {
+type?: ListAdminOpportunitiesType;
+status?: string;
+search?: string;
+};
+
+export type ListAdminOpportunitiesType = typeof ListAdminOpportunitiesType[keyof typeof ListAdminOpportunitiesType];
+
+
+export const ListAdminOpportunitiesType = {
+  internship: 'internship',
+  job: 'job',
+  training: 'training',
+  scholarship: 'scholarship',
+  competition: 'competition',
+  hackathon: 'hackathon',
+  freelance: 'freelance',
+  volunteering: 'volunteering',
+} as const;
+
+export type ListAdminOpportunities200 = {
+  success: boolean;
+  data: AdminOpportunity[];
+};
+
+export type CreateAdminOpportunity201 = {
+  success: boolean;
+  data: AdminOpportunity;
+};
+
+export type UpdateAdminOpportunity200 = {
+  success: boolean;
+  data: AdminOpportunity;
 };
 
 export type ListAdminPaymentsParams = {

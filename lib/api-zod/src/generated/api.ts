@@ -2109,6 +2109,955 @@ export const DeleteAdminCourseResponse = zod.object({
 
 
 /**
+ * @summary List files across all courses (super_admin only)
+ */
+export const ListAdminFilesQueryParams = zod.object({
+  "courseId": zod.coerce.string().optional(),
+  "type": zod.enum(['lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book', 'other']).optional(),
+  "status": zod.enum(['pending', 'approved', 'rejected']).optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAdminFilesResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "fileType": zod.enum(['lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book', 'other']),
+  "mimeType": zod.string(),
+  "fileSize": zod.number(),
+  "fileUrl": zod.string(),
+  "courseId": zod.string().nullish(),
+  "courseName": zod.string().nullish(),
+  "uploadedById": zod.string(),
+  "uploaderName": zod.string(),
+  "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
+  "downloadCount": zod.number(),
+  "isFavorited": zod.boolean(),
+  "createdAt": zod.coerce.date()
+}).and(zod.object({
+  "viewCount": zod.number(),
+  "tags": zod.array(zod.string())
+})))
+})
+
+
+/**
+ * @summary Create a metadata-only file record (super_admin only)
+ */
+export const CreateAdminFileBody = zod.object({
+  "title": zod.string(),
+  "fileUrl": zod.string(),
+  "fileType": zod.enum(['lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book', 'other']).optional(),
+  "mimeType": zod.string(),
+  "fileSize": zod.number().optional(),
+  "courseId": zod.string().nullish(),
+  "approvalStatus": zod.enum(['pending', 'approved', 'rejected']).optional(),
+  "tags": zod.array(zod.string()).optional()
+})
+
+export const CreateAdminFileResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "fileType": zod.enum(['lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book', 'other']),
+  "mimeType": zod.string(),
+  "fileSize": zod.number(),
+  "fileUrl": zod.string(),
+  "courseId": zod.string().nullish(),
+  "courseName": zod.string().nullish(),
+  "uploadedById": zod.string(),
+  "uploaderName": zod.string(),
+  "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
+  "downloadCount": zod.number(),
+  "isFavorited": zod.boolean(),
+  "createdAt": zod.coerce.date()
+}).and(zod.object({
+  "viewCount": zod.number(),
+  "tags": zod.array(zod.string())
+}))
+})
+
+
+/**
+ * @summary Update file metadata (super_admin only)
+ */
+export const UpdateAdminFileParams = zod.object({
+  "fileId": zod.coerce.string()
+})
+
+export const UpdateAdminFileBody = zod.object({
+  "title": zod.string().optional(),
+  "fileUrl": zod.string().optional(),
+  "fileType": zod.enum(['lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book', 'other']).optional(),
+  "mimeType": zod.string().optional(),
+  "fileSize": zod.number().optional(),
+  "courseId": zod.string().nullish(),
+  "approvalStatus": zod.enum(['pending', 'approved', 'rejected']).optional(),
+  "tags": zod.array(zod.string()).optional()
+})
+
+export const UpdateAdminFileResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "fileType": zod.enum(['lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book', 'other']),
+  "mimeType": zod.string(),
+  "fileSize": zod.number(),
+  "fileUrl": zod.string(),
+  "courseId": zod.string().nullish(),
+  "courseName": zod.string().nullish(),
+  "uploadedById": zod.string(),
+  "uploaderName": zod.string(),
+  "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
+  "downloadCount": zod.number(),
+  "isFavorited": zod.boolean(),
+  "createdAt": zod.coerce.date()
+}).and(zod.object({
+  "viewCount": zod.number(),
+  "tags": zod.array(zod.string())
+}))
+})
+
+
+/**
+ * @summary Soft-delete a file record (super_admin only)
+ */
+export const DeleteAdminFileParams = zod.object({
+  "fileId": zod.coerce.string()
+})
+
+export const DeleteAdminFileResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
+ * @summary List all announcements (super_admin only)
+ */
+export const ListAdminAnnouncementsQueryParams = zod.object({
+  "scope": zod.enum(['global', 'university', 'faculty', 'department', 'level', 'group', 'course']).optional(),
+  "priority": zod.enum(['normal', 'important', 'urgent']).optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAdminAnnouncementsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "content": zod.string(),
+  "priority": zod.enum(['normal', 'important', 'urgent']),
+  "scope": zod.enum(['global', 'university', 'faculty', 'department', 'level', 'group', 'course']),
+  "createdById": zod.string(),
+  "createdByName": zod.string(),
+  "courseName": zod.string().nullish(),
+  "isRead": zod.boolean(),
+  "expiresAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+}).and(zod.object({
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "levelId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "courseId": zod.string().nullish()
+})))
+})
+
+
+/**
+ * @summary Create an announcement (super_admin only)
+ */
+export const CreateAdminAnnouncementBody = zod.object({
+  "title": zod.string(),
+  "content": zod.string(),
+  "priority": zod.enum(['normal', 'important', 'urgent']).optional(),
+  "scope": zod.enum(['global', 'university', 'faculty', 'department', 'level', 'group', 'course']).optional(),
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "levelId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "courseId": zod.string().nullish(),
+  "expiresAt": zod.coerce.date().nullish()
+})
+
+export const CreateAdminAnnouncementResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "content": zod.string(),
+  "priority": zod.enum(['normal', 'important', 'urgent']),
+  "scope": zod.enum(['global', 'university', 'faculty', 'department', 'level', 'group', 'course']),
+  "createdById": zod.string(),
+  "createdByName": zod.string(),
+  "courseName": zod.string().nullish(),
+  "isRead": zod.boolean(),
+  "expiresAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+}).and(zod.object({
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "levelId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "courseId": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Update an announcement (super_admin only)
+ */
+export const UpdateAdminAnnouncementParams = zod.object({
+  "announcementId": zod.coerce.string()
+})
+
+export const UpdateAdminAnnouncementBody = zod.object({
+  "title": zod.string().optional(),
+  "content": zod.string().optional(),
+  "priority": zod.enum(['normal', 'important', 'urgent']).optional(),
+  "scope": zod.enum(['global', 'university', 'faculty', 'department', 'level', 'group', 'course']).optional(),
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "levelId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "courseId": zod.string().nullish(),
+  "expiresAt": zod.coerce.date().nullish()
+})
+
+export const UpdateAdminAnnouncementResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "content": zod.string(),
+  "priority": zod.enum(['normal', 'important', 'urgent']),
+  "scope": zod.enum(['global', 'university', 'faculty', 'department', 'level', 'group', 'course']),
+  "createdById": zod.string(),
+  "createdByName": zod.string(),
+  "courseName": zod.string().nullish(),
+  "isRead": zod.boolean(),
+  "expiresAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+}).and(zod.object({
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "levelId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "courseId": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Delete an announcement (super_admin only)
+ */
+export const DeleteAdminAnnouncementParams = zod.object({
+  "announcementId": zod.coerce.string()
+})
+
+export const DeleteAdminAnnouncementResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
+ * @summary List timetable sessions (super_admin only)
+ */
+export const ListAdminTimetableQueryParams = zod.object({
+  "groupId": zod.coerce.string().optional(),
+  "courseId": zod.coerce.string().optional()
+})
+
+export const ListAdminTimetableResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "courseId": zod.string(),
+  "courseName": zod.string(),
+  "courseCode": zod.string().nullish(),
+  "professorName": zod.string().nullish(),
+  "dayOfWeek": zod.number().describe('0=Sunday, 1=Monday ... 6=Saturday'),
+  "startTime": zod.string().describe('HH:MM format'),
+  "endTime": zod.string().describe('HH:MM format'),
+  "room": zod.string().nullish(),
+  "type": zod.enum(['lecture', 'td', 'tp']),
+  "groupName": zod.string().nullish()
+}).and(zod.object({
+  "groupId": zod.string().nullish(),
+  "recurrence": zod.string()
+})))
+})
+
+
+/**
+ * @summary Create a timetable session (super_admin only)
+ */
+export const createAdminTimetableSessionBodyDayOfWeekMin = 0;
+export const createAdminTimetableSessionBodyDayOfWeekMax = 6;
+
+
+
+export const CreateAdminTimetableSessionBody = zod.object({
+  "courseId": zod.string(),
+  "groupId": zod.string().nullish(),
+  "dayOfWeek": zod.number().min(createAdminTimetableSessionBodyDayOfWeekMin).max(createAdminTimetableSessionBodyDayOfWeekMax),
+  "startTime": zod.string(),
+  "endTime": zod.string(),
+  "room": zod.string().nullish(),
+  "type": zod.enum(['lecture', 'td', 'tp']).optional(),
+  "recurrence": zod.string().optional()
+})
+
+export const CreateAdminTimetableSessionResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "courseId": zod.string(),
+  "courseName": zod.string(),
+  "courseCode": zod.string().nullish(),
+  "professorName": zod.string().nullish(),
+  "dayOfWeek": zod.number().describe('0=Sunday, 1=Monday ... 6=Saturday'),
+  "startTime": zod.string().describe('HH:MM format'),
+  "endTime": zod.string().describe('HH:MM format'),
+  "room": zod.string().nullish(),
+  "type": zod.enum(['lecture', 'td', 'tp']),
+  "groupName": zod.string().nullish()
+}).and(zod.object({
+  "groupId": zod.string().nullish(),
+  "recurrence": zod.string()
+}))
+})
+
+
+/**
+ * @summary Update a timetable session (super_admin only)
+ */
+export const UpdateAdminTimetableSessionParams = zod.object({
+  "sessionId": zod.coerce.string()
+})
+
+export const updateAdminTimetableSessionBodyDayOfWeekMin = 0;
+export const updateAdminTimetableSessionBodyDayOfWeekMax = 6;
+
+
+
+export const UpdateAdminTimetableSessionBody = zod.object({
+  "courseId": zod.string().optional(),
+  "groupId": zod.string().nullish(),
+  "dayOfWeek": zod.number().min(updateAdminTimetableSessionBodyDayOfWeekMin).max(updateAdminTimetableSessionBodyDayOfWeekMax).optional(),
+  "startTime": zod.string().optional(),
+  "endTime": zod.string().optional(),
+  "room": zod.string().nullish(),
+  "type": zod.enum(['lecture', 'td', 'tp']).optional(),
+  "recurrence": zod.string().optional()
+})
+
+export const UpdateAdminTimetableSessionResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "courseId": zod.string(),
+  "courseName": zod.string(),
+  "courseCode": zod.string().nullish(),
+  "professorName": zod.string().nullish(),
+  "dayOfWeek": zod.number().describe('0=Sunday, 1=Monday ... 6=Saturday'),
+  "startTime": zod.string().describe('HH:MM format'),
+  "endTime": zod.string().describe('HH:MM format'),
+  "room": zod.string().nullish(),
+  "type": zod.enum(['lecture', 'td', 'tp']),
+  "groupName": zod.string().nullish()
+}).and(zod.object({
+  "groupId": zod.string().nullish(),
+  "recurrence": zod.string()
+}))
+})
+
+
+/**
+ * @summary Delete a timetable session (super_admin only)
+ */
+export const DeleteAdminTimetableSessionParams = zod.object({
+  "sessionId": zod.coerce.string()
+})
+
+export const DeleteAdminTimetableSessionResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string()
+})
+})
+
+
+/**
+ * @summary List assignments across courses (super_admin only)
+ */
+export const ListAdminAssignmentsQueryParams = zod.object({
+  "courseId": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAdminAssignmentsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "courseId": zod.string(),
+  "courseName": zod.string(),
+  "courseCode": zod.string().nullish(),
+  "deadline": zod.coerce.date(),
+  "attachmentUrl": zod.string().nullish(),
+  "createdBy": zod.string(),
+  "submissionCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Create an assignment (super_admin only)
+ */
+export const CreateAdminAssignmentBody = zod.object({
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "courseId": zod.string(),
+  "deadline": zod.coerce.date(),
+  "attachmentUrl": zod.string().nullish()
+})
+
+export const CreateAdminAssignmentResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "courseId": zod.string(),
+  "courseName": zod.string(),
+  "courseCode": zod.string().nullish(),
+  "deadline": zod.coerce.date(),
+  "attachmentUrl": zod.string().nullish(),
+  "createdBy": zod.string(),
+  "submissionCount": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Update an assignment (super_admin only)
+ */
+export const UpdateAdminAssignmentParams = zod.object({
+  "assignmentId": zod.coerce.string()
+})
+
+export const UpdateAdminAssignmentBody = zod.object({
+  "title": zod.string().optional(),
+  "description": zod.string().nullish(),
+  "courseId": zod.string().optional(),
+  "deadline": zod.coerce.date().optional(),
+  "attachmentUrl": zod.string().nullish()
+})
+
+export const UpdateAdminAssignmentResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "courseId": zod.string(),
+  "courseName": zod.string(),
+  "courseCode": zod.string().nullish(),
+  "deadline": zod.coerce.date(),
+  "attachmentUrl": zod.string().nullish(),
+  "createdBy": zod.string(),
+  "submissionCount": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Delete an assignment only when it has no submissions (super_admin only)
+ */
+export const DeleteAdminAssignmentParams = zod.object({
+  "assignmentId": zod.coerce.string()
+})
+
+export const DeleteAdminAssignmentResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().optional()
+})
+
+
+/**
+ * @summary List community posts for moderation (super_admin only)
+ */
+export const ListAdminCommunityPostsQueryParams = zod.object({
+  "status": zod.enum(['pending', 'visible', 'hidden', 'removed']).optional(),
+  "visibility": zod.enum(['public', 'same_university', 'same_department', 'same_course', 'same_group']).optional(),
+  "authorId": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional(),
+  "reported": zod.coerce.string().optional()
+})
+
+export const ListAdminCommunityPostsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "content": zod.string(),
+  "authorId": zod.string(),
+  "authorName": zod.string(),
+  "authorEmail": zod.string().nullish(),
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "courseId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "visibility": zod.enum(['public', 'same_university', 'same_department', 'same_course', 'same_group']),
+  "moderationStatus": zod.enum(['pending', 'visible', 'hidden', 'removed']),
+  "isPinned": zod.boolean(),
+  "reactionCount": zod.number(),
+  "commentCount": zod.number(),
+  "reportCount": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Moderate a community post (super_admin only)
+ */
+export const UpdateAdminCommunityPostParams = zod.object({
+  "postId": zod.coerce.string()
+})
+
+export const UpdateAdminCommunityPostBody = zod.object({
+  "moderationStatus": zod.enum(['pending', 'visible', 'hidden', 'removed']).optional(),
+  "isPinned": zod.boolean().optional()
+})
+
+export const UpdateAdminCommunityPostResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "content": zod.string(),
+  "authorId": zod.string(),
+  "authorName": zod.string(),
+  "authorEmail": zod.string().nullish(),
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "courseId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "visibility": zod.enum(['public', 'same_university', 'same_department', 'same_course', 'same_group']),
+  "moderationStatus": zod.enum(['pending', 'visible', 'hidden', 'removed']),
+  "isPinned": zod.boolean(),
+  "reactionCount": zod.number(),
+  "commentCount": zod.number(),
+  "reportCount": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Mark a community post as removed (super_admin only)
+ */
+export const DeleteAdminCommunityPostParams = zod.object({
+  "postId": zod.coerce.string()
+})
+
+export const DeleteAdminCommunityPostResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "content": zod.string(),
+  "authorId": zod.string(),
+  "authorName": zod.string(),
+  "authorEmail": zod.string().nullish(),
+  "universityId": zod.string().nullish(),
+  "facultyId": zod.string().nullish(),
+  "departmentId": zod.string().nullish(),
+  "courseId": zod.string().nullish(),
+  "groupId": zod.string().nullish(),
+  "visibility": zod.enum(['public', 'same_university', 'same_department', 'same_course', 'same_group']),
+  "moderationStatus": zod.enum(['pending', 'visible', 'hidden', 'removed']),
+  "isPinned": zod.boolean(),
+  "reactionCount": zod.number(),
+  "commentCount": zod.number(),
+  "reportCount": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary List community comments for moderation (super_admin only)
+ */
+export const ListAdminCommunityCommentsQueryParams = zod.object({
+  "postId": zod.coerce.string().optional(),
+  "authorId": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAdminCommunityCommentsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "postId": zod.string(),
+  "authorId": zod.string(),
+  "authorName": zod.string(),
+  "authorEmail": zod.string().nullish(),
+  "content": zod.string(),
+  "reportCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Update a community comment (super_admin only)
+ */
+export const UpdateAdminCommunityCommentParams = zod.object({
+  "commentId": zod.coerce.string()
+})
+
+export const UpdateAdminCommunityCommentBody = zod.object({
+  "content": zod.string()
+})
+
+export const UpdateAdminCommunityCommentResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "postId": zod.string(),
+  "authorId": zod.string(),
+  "authorName": zod.string(),
+  "authorEmail": zod.string().nullish(),
+  "content": zod.string(),
+  "reportCount": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Delete a community comment (super_admin only)
+ */
+export const DeleteAdminCommunityCommentParams = zod.object({
+  "commentId": zod.coerce.string()
+})
+
+export const DeleteAdminCommunityCommentResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().optional()
+})
+
+
+/**
+ * @summary List community reports (super_admin only)
+ */
+export const ListAdminCommunityReportsQueryParams = zod.object({
+  "status": zod.coerce.string().optional(),
+  "targetType": zod.coerce.string().optional()
+})
+
+export const ListAdminCommunityReportsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "reportedBy": zod.string(),
+  "reporterName": zod.string(),
+  "targetType": zod.string(),
+  "targetId": zod.string(),
+  "reason": zod.string(),
+  "status": zod.string(),
+  "reviewedBy": zod.string().nullish(),
+  "reviewerName": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Update a report review status (super_admin only)
+ */
+export const UpdateAdminCommunityReportParams = zod.object({
+  "reportId": zod.coerce.string()
+})
+
+export const UpdateAdminCommunityReportBody = zod.object({
+  "status": zod.string()
+})
+
+export const UpdateAdminCommunityReportResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "reportedBy": zod.string(),
+  "reporterName": zod.string(),
+  "targetType": zod.string(),
+  "targetId": zod.string(),
+  "reason": zod.string(),
+  "status": zod.string(),
+  "reviewedBy": zod.string().nullish(),
+  "reviewerName": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary List activation agents (super_admin only)
+ */
+export const ListAdminAgentsQueryParams = zod.object({
+  "status": zod.enum(['active', 'suspended', 'inactive']).optional(),
+  "universityId": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAdminAgentsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "universityId": zod.string().nullish(),
+  "universityName": zod.string().nullish(),
+  "city": zod.string(),
+  "commissionRate": zod.number(),
+  "status": zod.enum(['active', 'suspended', 'inactive']),
+  "activationCodeCount": zod.number(),
+  "commissionCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Create an activation agent (super_admin only)
+ */
+export const CreateAdminAgentBody = zod.object({
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "universityId": zod.string().nullish(),
+  "city": zod.string().optional(),
+  "commissionRate": zod.number().optional(),
+  "status": zod.enum(['active', 'suspended', 'inactive']).optional()
+})
+
+export const CreateAdminAgentResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "universityId": zod.string().nullish(),
+  "universityName": zod.string().nullish(),
+  "city": zod.string(),
+  "commissionRate": zod.number(),
+  "status": zod.enum(['active', 'suspended', 'inactive']),
+  "activationCodeCount": zod.number(),
+  "commissionCount": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Update an activation agent (super_admin only)
+ */
+export const UpdateAdminAgentParams = zod.object({
+  "agentId": zod.coerce.string()
+})
+
+export const UpdateAdminAgentBody = zod.object({
+  "name": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "email": zod.string().nullish(),
+  "universityId": zod.string().nullish(),
+  "city": zod.string().optional(),
+  "commissionRate": zod.number().optional(),
+  "status": zod.enum(['active', 'suspended', 'inactive']).optional()
+})
+
+export const UpdateAdminAgentResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "universityId": zod.string().nullish(),
+  "universityName": zod.string().nullish(),
+  "city": zod.string(),
+  "commissionRate": zod.number(),
+  "status": zod.enum(['active', 'suspended', 'inactive']),
+  "activationCodeCount": zod.number(),
+  "commissionCount": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Delete an unused activation agent (super_admin only)
+ */
+export const DeleteAdminAgentParams = zod.object({
+  "agentId": zod.coerce.string()
+})
+
+export const DeleteAdminAgentResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().optional()
+})
+
+
+/**
+ * @summary List opportunities (super_admin only)
+ */
+export const ListAdminOpportunitiesQueryParams = zod.object({
+  "type": zod.enum(['internship', 'job', 'training', 'scholarship', 'competition', 'hackathon', 'freelance', 'volunteering']).optional(),
+  "status": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAdminOpportunitiesResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "organization": zod.string(),
+  "type": zod.enum(['internship', 'job', 'training', 'scholarship', 'competition', 'hackathon', 'freelance', 'volunteering']),
+  "description": zod.string(),
+  "location": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
+  "link": zod.string().nullish(),
+  "targetInfo": zod.string().nullish(),
+  "isFeatured": zod.boolean(),
+  "status": zod.string(),
+  "createdBy": zod.string(),
+  "createdByName": zod.string(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Create an opportunity (super_admin only)
+ */
+export const CreateAdminOpportunityBody = zod.object({
+  "title": zod.string(),
+  "organization": zod.string(),
+  "type": zod.enum(['internship', 'job', 'training', 'scholarship', 'competition', 'hackathon', 'freelance', 'volunteering']),
+  "description": zod.string(),
+  "location": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
+  "link": zod.string().nullish(),
+  "targetInfo": zod.string().nullish(),
+  "isFeatured": zod.boolean().optional(),
+  "status": zod.string().optional()
+})
+
+export const CreateAdminOpportunityResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "organization": zod.string(),
+  "type": zod.enum(['internship', 'job', 'training', 'scholarship', 'competition', 'hackathon', 'freelance', 'volunteering']),
+  "description": zod.string(),
+  "location": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
+  "link": zod.string().nullish(),
+  "targetInfo": zod.string().nullish(),
+  "isFeatured": zod.boolean(),
+  "status": zod.string(),
+  "createdBy": zod.string(),
+  "createdByName": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Update an opportunity (super_admin only)
+ */
+export const UpdateAdminOpportunityParams = zod.object({
+  "opportunityId": zod.coerce.string()
+})
+
+export const UpdateAdminOpportunityBody = zod.object({
+  "title": zod.string().optional(),
+  "organization": zod.string().optional(),
+  "type": zod.enum(['internship', 'job', 'training', 'scholarship', 'competition', 'hackathon', 'freelance', 'volunteering']).optional(),
+  "description": zod.string().optional(),
+  "location": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
+  "link": zod.string().nullish(),
+  "targetInfo": zod.string().nullish(),
+  "isFeatured": zod.boolean().optional(),
+  "status": zod.string().optional()
+})
+
+export const UpdateAdminOpportunityResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "organization": zod.string(),
+  "type": zod.enum(['internship', 'job', 'training', 'scholarship', 'competition', 'hackathon', 'freelance', 'volunteering']),
+  "description": zod.string(),
+  "location": zod.string().nullish(),
+  "deadline": zod.string().nullish(),
+  "link": zod.string().nullish(),
+  "targetInfo": zod.string().nullish(),
+  "isFeatured": zod.boolean(),
+  "status": zod.string(),
+  "createdBy": zod.string(),
+  "createdByName": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Delete an opportunity (super_admin only)
+ */
+export const DeleteAdminOpportunityParams = zod.object({
+  "opportunityId": zod.coerce.string()
+})
+
+export const DeleteAdminOpportunityResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().optional()
+})
+
+
+/**
  * @summary List all payments across all users (super_admin only)
  */
 export const ListAdminPaymentsQueryParams = zod.object({
