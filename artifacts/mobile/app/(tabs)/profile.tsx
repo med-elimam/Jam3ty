@@ -9,6 +9,7 @@ import { Feather } from '@expo/vector-icons';
 import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { GuestGate } from '@/components/GuestGate';
 import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
 type FeatherName = React.ComponentProps<typeof Feather>['name'];
@@ -21,9 +22,17 @@ interface MenuItem {
 }
 
 export default function ProfileScreen() {
+  return (
+    <GuestGate>
+      <ProfileScreenInner />
+    </GuestGate>
+  );
+}
+
+function ProfileScreenInner() {
   const colors = useColors();
   const router = useRouter();
-  const { t } = usePreferences();
+  const { t, isRTL } = usePreferences();
   const { user, logout } = useAuth();
 
   const profileQuery = useGetProfile();
@@ -125,17 +134,18 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
               style={[
                 s.menuRow,
+                { flexDirection: isRTL ? 'row' : 'row-reverse' },
                 idx < menuItems.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border },
               ]}
               onPress={item.onPress}
             >
-              <Feather name="chevron-left" size={18} color={colors.mutedForeground} />
+              <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={18} color={colors.mutedForeground} />
               {item.badge && (
                 <View style={[s.menuBadge, { backgroundColor: colors.gold }]}>
                   <Text style={s.menuBadgeText}>{item.badge}</Text>
                 </View>
               )}
-              <Text style={[s.menuLabel, { color: colors.foreground }]}>{item.label}</Text>
+              <Text style={[s.menuLabel, { color: colors.foreground }, { textAlign: isRTL ? 'right' : 'left' }]}>{item.label}</Text>
               <View style={[s.menuIconBox, { backgroundColor: colors.navy + '10' }]}>
                 <Feather name={item.icon} size={18} color={colors.navy} />
               </View>
@@ -192,7 +202,6 @@ const s = StyleSheet.create({
   // Menu
   menuCard: { padding: 0, overflow: 'hidden' },
   menuRow: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     paddingHorizontal: spacing.base,
@@ -205,7 +214,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  menuLabel: { flex: 1, fontSize: fontSize.md, fontWeight: fontWeight.medium, textAlign: 'right' },
+  menuLabel: { flex: 1, fontSize: fontSize.md, fontWeight: fontWeight.medium },
   menuBadge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,

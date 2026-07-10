@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, announcementsTable, usersTable, profilesTable, announcementReadsTable, coursesTable } from "@workspace/db";
-import { eq, and, or, sql, count, isNull } from "drizzle-orm";
+import { eq, and, or, sql, count, isNull, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
@@ -14,6 +14,15 @@ router.get("/announcements", requireAuth, async (req, res) => {
     const offset = (pageNum - 1) * limitNum;
 
     const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!)).limit(1);
+    // Course-scoped announcements follow the same course scoping rule as GET /courses:
+    // courses matching the student's profile departmentId + levelId.
+    const scopedCourseIds = db
+      .select({ id: coursesTable.id })
+      .from(coursesTable)
+      .where(and(
+        eq(coursesTable.departmentId, profile?.departmentId ?? ""),
+        eq(coursesTable.levelId, profile?.levelId ?? ""),
+      ));
 
     // Get announcements relevant to this student
     const conditions = [
@@ -24,6 +33,7 @@ router.get("/announcements", requireAuth, async (req, res) => {
         and(eq(announcementsTable.scope, "department"), profile?.departmentId ? eq(announcementsTable.departmentId, profile.departmentId) : sql`false`),
         and(eq(announcementsTable.scope, "level"), profile?.levelId ? eq(announcementsTable.levelId, profile.levelId) : sql`false`),
         and(eq(announcementsTable.scope, "group"), profile?.groupId ? eq(announcementsTable.groupId, profile.groupId) : sql`false`),
+        and(eq(announcementsTable.scope, "course"), (profile?.departmentId && profile?.levelId) ? inArray(announcementsTable.courseId, scopedCourseIds) : sql`false`),
       ),
       or(isNull(announcementsTable.expiresAt), sql`${announcementsTable.expiresAt} > NOW()`),
     ];

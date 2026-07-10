@@ -1,11 +1,15 @@
 import { Router } from "express";
-import { db, filesTable, usersTable, coursesTable, fileFavoritesTable } from "@workspace/db";
-import { eq, and, ilike, sql, count } from "drizzle-orm";
+import { db, filesTable, usersTable, coursesTable, fileFavoritesTable, profilesTable } from "@workspace/db";
+import { eq, and, or, isNull, inArray, ilike, sql, count } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
 // GET /files
+// Scoping rule: without an explicit courseId, the list contains general files
+// (courseId null) plus files of courses matching the student's profile
+// departmentId + levelId (same rule as GET /courses). No academic placement →
+// general files only. An explicit courseId is honored as-is.
 router.get("/files", requireAuth, async (req, res) => {
   try {
     const { courseId, type, search, page = "1", limit = "20" } = req.query as Record<string, string>;
@@ -14,7 +18,20 @@ router.get("/files", requireAuth, async (req, res) => {
     const offset = (pageNum - 1) * limitNum;
 
     const conditions = [eq(filesTable.approvalStatus, "approved"), eq(filesTable.isDeleted, false)];
-    if (courseId) conditions.push(eq(filesTable.courseId, courseId));
+    if (courseId) {
+      conditions.push(eq(filesTable.courseId, courseId));
+    } else {
+      const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!)).limit(1);
+      if (profile?.departmentId && profile?.levelId) {
+        const scopedCourseIds = db
+          .select({ id: coursesTable.id })
+          .from(coursesTable)
+          .where(and(eq(coursesTable.departmentId, profile.departmentId), eq(coursesTable.levelId, profile.levelId)));
+        conditions.push(or(isNull(filesTable.courseId), inArray(filesTable.courseId, scopedCourseIds))!);
+      } else {
+        conditions.push(isNull(filesTable.courseId));
+      }
+    }
     if (type) conditions.push(eq(filesTable.fileType, type as "lecture" | "td" | "tp" | "summary" | "exam" | "correction" | "book" | "other"));
     if (search) conditions.push(ilike(filesTable.title, `%${search}%`));
 

@@ -1,21 +1,33 @@
 import React from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useColors } from '@/hooks/useColors';
-import { useListClubs, useJoinClub } from '@workspace/api-client-react';
+import { useListClubs, useJoinClub, Club } from '@workspace/api-client-react';
 import { getListClubsQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { GuestGate } from '@/components/GuestGate';
+import { resolveFileUrl } from '@/lib/urls';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 export default function ClubsScreen() {
+  return (
+    <GuestGate>
+      <ClubsScreenInner />
+    </GuestGate>
+  );
+}
+
+function ClubsScreenInner() {
   const colors = useColors();
-  const { t } = usePreferences();
+  const { t, isRTL } = usePreferences();
   const qc = useQueryClient();
-  const { data, isLoading, refetch, isRefetching } = useListClubs();
+  const { data, isLoading, isError, refetch, isRefetching } = useListClubs();
   const join = useJoinClub({
     mutation: {
       onSuccess: () => {
@@ -25,53 +37,63 @@ export default function ClubsScreen() {
       onError: () => Alert.alert(t('common.error'), t('clubs.requestError')),
     },
   });
-  const clubs: any[] = (data as any)?.data ?? [];
+  const clubs: Club[] = data?.data ?? [];
+  const align = { textAlign: isRTL ? 'right' : 'left' } as const;
+  const rowDir = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {isLoading ? (
         <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+      ) : isError ? (
+        <ErrorState onRetry={() => refetch()} />
       ) : (
         <FlatList
           data={clubs}
-          keyExtractor={(c: any) => c.id}
+          keyExtractor={(c) => c.id}
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
             <EmptyState icon="users" title={t('clubs.empty')} body={t('clubs.emptyBody')} />
           }
-          renderItem={({ item }: { item: any }) => (
-            <Card style={s.card}>
-              <View style={s.cardTop}>
-                <View style={[s.clubEmoji, { backgroundColor: colors.navy + '10' }]}>
-                  <Text style={s.emoji}>🎓</Text>
+          renderItem={({ item }: { item: Club }) => {
+            const logoUrl = resolveFileUrl(item.logoUrl);
+            return (
+              <Card style={s.card}>
+                <View style={[s.cardTop, rowDir]}>
+                  <View style={[s.clubLogo, { backgroundColor: colors.navy + '10' }]}>
+                    {logoUrl ? (
+                      <Image source={{ uri: logoUrl }} style={s.logoImage} contentFit="cover" />
+                    ) : (
+                      <Text style={s.emoji}>🎓</Text>
+                    )}
+                  </View>
+                  <View style={s.cardInfo}>
+                    <Text style={[s.clubName, { color: colors.foreground }, align]}>{item.name}</Text>
+                  </View>
+                  {item.isMember ? (
+                    <Badge label={t('clubs.member')} color="success" />
+                  ) : (
+                    <Button
+                      label={t('clubs.join')}
+                      variant="primary"
+                      size="sm"
+                      fullWidth={false}
+                      onPress={() => join.mutate({ clubId: item.id })}
+                    />
+                  )}
                 </View>
-                <View style={s.cardInfo}>
-                  <Text style={[s.clubName, { color: colors.foreground }]}>{item.nameAr || item.name}</Text>
-                  {item.category && <Text style={[s.clubCat, { color: colors.mutedForeground }]}>{item.category}</Text>}
-                </View>
-                {item.isMember ? (
-                  <Badge label={t('clubs.member')} color="success" />
-                ) : (
-                  <Button
-                    label={t('clubs.join')}
-                    variant="primary"
-                    size="sm"
-                    fullWidth={false}
-                    onPress={() => join.mutate({ clubId: item.id })}
-                  />
+                {item.description && (
+                  <Text style={[s.desc, { color: colors.mutedForeground }, align]} numberOfLines={2}>
+                    {item.description}
+                  </Text>
                 )}
-              </View>
-              {item.description && (
-                <Text style={[s.desc, { color: colors.mutedForeground }]} numberOfLines={2}>
-                  {item.descriptionAr || item.description}
-                </Text>
-              )}
-              {item.memberCount > 0 && (
-                <Text style={[s.meta, { color: colors.mutedForeground }]}>{t('clubs.memberCount', { n: item.memberCount })}</Text>
-              )}
-            </Card>
-          )}
+                {item.memberCount > 0 && (
+                  <Text style={[s.meta, { color: colors.mutedForeground }, align]}>{t('clubs.memberCount', { n: item.memberCount })}</Text>
+                )}
+              </Card>
+            );
+          }}
         />
       )}
     </View>
@@ -81,12 +103,12 @@ export default function ClubsScreen() {
 const s = StyleSheet.create({
   list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
   card: { gap: spacing.sm },
-  cardTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  clubEmoji: { width: 46, height: 46, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  cardTop: { alignItems: 'center', gap: spacing.md },
+  clubLogo: { width: 46, height: 46, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' },
+  logoImage: { width: '100%', height: '100%' },
   emoji: { fontSize: 22 },
   cardInfo: { flex: 1 },
-  clubName: { fontSize: fontSize.md, fontWeight: fontWeight.bold, textAlign: 'right' },
-  clubCat: { fontSize: fontSize.sm, marginTop: 2, textAlign: 'right' },
-  desc: { fontSize: fontSize.sm, lineHeight: fontSize.sm * 1.6, textAlign: 'right' },
-  meta: { fontSize: fontSize.xs, textAlign: 'right' },
+  clubName: { fontSize: fontSize.md, fontWeight: fontWeight.bold },
+  desc: { fontSize: fontSize.sm, lineHeight: fontSize.sm * 1.6 },
+  meta: { fontSize: fontSize.xs },
 });

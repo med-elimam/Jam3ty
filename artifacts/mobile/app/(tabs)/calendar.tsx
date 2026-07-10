@@ -4,28 +4,38 @@ import { useColors } from '@/hooks/useColors';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useGetTimetable } from '@workspace/api-client-react';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { GuestGate } from '@/components/GuestGate';
 import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
 const SESSION_COLORS = ['#1E3A5F', '#2B5480', '#D4A853', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444'];
 const TODAY_DOW = new Date().getDay();
 
 export default function CalendarScreen() {
+  return (
+    <GuestGate>
+      <CalendarScreenInner />
+    </GuestGate>
+  );
+}
+
+function CalendarScreenInner() {
   const colors = useColors();
   const { t, tArray, isRTL } = usePreferences();
   const [selectedDay, setSelectedDay] = useState(TODAY_DOW);
-  const { data, isLoading } = useGetTimetable();
+  const { data, isLoading, isError, refetch } = useGetTimetable();
 
   const daysFull = tArray('days.full');
   const daysShort = tArray('days.short');
   const align = { textAlign: isRTL ? 'right' : 'left' } as const;
 
-  const sessions: any[] = (data as any)?.data ?? [];
+  const sessions = data?.data ?? [];
   const dayMap = daysShort.reduce((acc, _, i) => {
     acc[i] = sessions
       .filter((s) => s.dayOfWeek === i)
       .sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
     return acc;
-  }, {} as Record<number, any[]>);
+  }, {} as Record<number, typeof sessions>);
 
   const daySessions = dayMap[selectedDay] ?? [];
 
@@ -86,12 +96,14 @@ export default function CalendarScreen() {
 
       {isLoading ? (
         <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+      ) : isError ? (
+        <ErrorState onRetry={() => refetch()} />
       ) : (
         <ScrollView contentContainerStyle={s.list}>
           {daySessions.length === 0 ? (
             <EmptyState icon="calendar" title={t('timetable.emptyTitle')} body={t('timetable.emptyBody')} />
           ) : (
-            daySessions.map((session: any, idx: number) => {
+            daySessions.map((session, idx) => {
               const accent = SESSION_COLORS[idx % SESSION_COLORS.length];
               return (
                 <View

@@ -1,16 +1,18 @@
 import React from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { useColors } from '@/hooks/useColors';
-import { useListAnnouncements, useMarkAnnouncementRead } from '@workspace/api-client-react';
+import { useListAnnouncements, useMarkAnnouncementRead, Announcement, AnnouncementPriority } from '@workspace/api-client-react';
 import { getListAnnouncementsQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Badge, BadgeColor } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { GuestGate } from '@/components/GuestGate';
 import { spacing, fontSize, fontWeight } from '@/constants/theme';
 import { usePreferences } from '@/contexts/PreferencesContext';
 
-function timeAgo(date: string, t: (key: string, vars?: Record<string, any>) => string) {
+function timeAgo(date: string, t: (key: string, vars?: Record<string, string | number>) => string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
   if (diff < 60) return t('time.now');
   if (diff < 3600) return `${Math.floor(diff / 60)}${t('time.min')}`;
@@ -18,27 +20,40 @@ function timeAgo(date: string, t: (key: string, vars?: Record<string, any>) => s
   return `${Math.floor(diff / 86400)}${t('time.day')}`;
 }
 
-const PRIORITY_COLOR: Record<string, 'danger' | 'warning' | 'muted'> = { urgent: 'danger', high: 'danger', important: 'warning', medium: 'warning', low: 'muted', normal: 'muted' };
+// Colors keyed by the real announcementPriorityEnum values (normal/important/urgent)
+const PRIORITY_COLOR: Record<AnnouncementPriority, BadgeColor> = { urgent: 'danger', important: 'warning', normal: 'muted' };
 
 export default function AnnouncementsScreen() {
+  return (
+    <GuestGate>
+      <AnnouncementsScreenInner />
+    </GuestGate>
+  );
+}
+
+function AnnouncementsScreenInner() {
   const colors = useColors();
-  const { t } = usePreferences();
+  const { t, isRTL } = usePreferences();
   const qc = useQueryClient();
-  const { data, isLoading, refetch, isRefetching } = useListAnnouncements();
+  const { data, isLoading, isError, refetch, isRefetching } = useListAnnouncements();
   const markRead = useMarkAnnouncementRead({
     mutation: { onSuccess: () => qc.invalidateQueries({ queryKey: getListAnnouncementsQueryKey() }) },
   });
 
-  const announcements: any[] = (data as any)?.data ?? [];
+  const announcements: Announcement[] = data?.data ?? [];
+  const align = { textAlign: isRTL ? 'right' : 'left' } as const;
+  const rowDir = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {isLoading ? (
         <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+      ) : isError ? (
+        <ErrorState onRetry={() => refetch()} />
       ) : (
         <FlatList
           data={announcements}
-          keyExtractor={(a: any) => a.id}
+          keyExtractor={(a) => a.id}
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
@@ -48,28 +63,28 @@ export default function AnnouncementsScreen() {
               body={t('announcements.emptyBody')}
             />
           }
-          renderItem={({ item }: { item: any }) => (
+          renderItem={({ item }: { item: Announcement }) => (
             <Card
               onPress={() => !item.isRead && markRead.mutate({ announcementId: item.id })}
               accent={!item.isRead ? colors.navy : undefined}
               style={s.card}
             >
-              <View style={s.cardTop}>
-                <View style={s.badgeRow}>
+              <View style={[s.cardTop, rowDir]}>
+                <View style={[s.badgeRow, rowDir]}>
                   {!item.isRead && <View style={[s.dot, { backgroundColor: colors.navy }]} />}
-                  {item.priority && item.priority !== 'normal' && (
+                  {item.priority !== 'normal' && (
                     <Badge label={t(`priority.${item.priority}`)} color={PRIORITY_COLOR[item.priority] ?? 'muted'} />
                   )}
                 </View>
                 <Text style={[s.time, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt, t)}</Text>
               </View>
-              <Text style={[s.title, { color: colors.foreground }]} numberOfLines={3}>
-                {item.titleAr || item.title}
+              <Text style={[s.title, { color: colors.foreground }, align]} numberOfLines={3}>
+                {item.title}
               </Text>
-              <Text style={[s.body, { color: colors.mutedForeground }]} numberOfLines={3}>
-                {item.contentAr || item.content}
+              <Text style={[s.body, { color: colors.mutedForeground }, align]} numberOfLines={3}>
+                {item.content}
               </Text>
-              <Text style={[s.author, { color: colors.mutedForeground }]}>{item.createdByName}</Text>
+              <Text style={[s.author, { color: colors.mutedForeground }, align]}>{item.createdByName}</Text>
             </Card>
           )}
         />
@@ -81,11 +96,11 @@ export default function AnnouncementsScreen() {
 const s = StyleSheet.create({
   list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
   card: { gap: spacing.sm },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  cardTop: { justifyContent: 'space-between', alignItems: 'center' },
+  badgeRow: { alignItems: 'center', gap: spacing.sm },
   dot: { width: 7, height: 7, borderRadius: 4 },
   time: { fontSize: fontSize.xs },
-  title: { fontSize: fontSize.md, fontWeight: fontWeight.bold, textAlign: 'right' },
-  body: { fontSize: fontSize.sm, lineHeight: fontSize.sm * 1.6, textAlign: 'right' },
-  author: { fontSize: fontSize.xs, textAlign: 'right' },
+  title: { fontSize: fontSize.md, fontWeight: fontWeight.bold },
+  body: { fontSize: fontSize.sm, lineHeight: fontSize.sm * 1.6 },
+  author: { fontSize: fontSize.xs },
 });

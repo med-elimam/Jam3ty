@@ -1,21 +1,32 @@
 import { Router } from "express";
 import { db, timetableSessionsTable, coursesTable, usersTable, profilesTable, studentGroupsTable } from "@workspace/db";
-import { eq, and, or, isNull } from "drizzle-orm";
+import { eq, and, or, isNull, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
 // GET /timetable
+// Scoping rule: sessions are limited to courses matching the student's profile
+// departmentId + levelId (same rule as GET /courses), and within those to sessions
+// with no group or the student's group. No academic placement → empty timetable.
 router.get("/timetable", requireAuth, async (req, res) => {
   try {
     const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!)).limit(1);
 
-    const sessions = await db.select().from(timetableSessionsTable).where(
-      or(
-        isNull(timetableSessionsTable.groupId),
-        profile?.groupId ? eq(timetableSessionsTable.groupId, profile.groupId) : isNull(timetableSessionsTable.groupId),
-      )
-    ).orderBy(timetableSessionsTable.dayOfWeek, timetableSessionsTable.startTime);
+    let sessions: (typeof timetableSessionsTable.$inferSelect)[] = [];
+    if (profile?.departmentId && profile?.levelId) {
+      const scopedCourseIds = db
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(and(eq(coursesTable.departmentId, profile.departmentId), eq(coursesTable.levelId, profile.levelId)));
+      sessions = await db.select().from(timetableSessionsTable).where(and(
+        inArray(timetableSessionsTable.courseId, scopedCourseIds),
+        or(
+          isNull(timetableSessionsTable.groupId),
+          profile.groupId ? eq(timetableSessionsTable.groupId, profile.groupId) : isNull(timetableSessionsTable.groupId),
+        ),
+      )).orderBy(timetableSessionsTable.dayOfWeek, timetableSessionsTable.startTime);
+    }
 
     const enriched = await Promise.all(sessions.map(async (session) => {
       const [course] = await db.select().from(coursesTable).where(eq(coursesTable.id, session.courseId)).limit(1);

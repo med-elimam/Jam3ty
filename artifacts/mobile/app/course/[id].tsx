@@ -1,116 +1,159 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
-import { useGetCourse } from '@workspace/api-client-react';
+import { useGetCourse, AcademicFile } from '@workspace/api-client-react';
+import { usePreferences } from '@/contexts/PreferencesContext';
+import { GuestGate } from '@/components/GuestGate';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { resolveFileUrl, openExternalUrl } from '@/lib/urls';
 import { Feather } from '@expo/vector-icons';
 
-const TABS = ['Files', 'Announcements', 'Assignments', 'Exams'] as const;
+const TABS = ['files', 'announcements', 'assignments', 'exams'] as const;
+type Tab = typeof TABS[number];
+
+const TAB_LABEL_KEY: Record<Tab, string> = {
+  files: 'course.tabFiles',
+  announcements: 'course.tabAnnouncements',
+  assignments: 'course.tabAssignments',
+  exams: 'course.tabExams',
+};
 
 export default function CourseDetailScreen() {
+  return (
+    <GuestGate>
+      <CourseDetailInner />
+    </GuestGate>
+  );
+}
+
+function CourseDetailInner() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const router = useRouter();
-  const [tab, setTab] = useState<typeof TABS[number]>('Files');
+  const { t, isRTL } = usePreferences();
+  const [tab, setTab] = useState<Tab>('files');
 
-  const { data, isLoading, refetch, isRefetching } = useGetCourse(id);
-  const course = (data as any)?.data;
+  const { data, isLoading, isError, refetch, isRefetching } = useGetCourse(id);
+  const course = data?.data;
   const s = styles(colors);
+  const align = { textAlign: isRTL ? 'right' : 'left' } as const;
+  const rowDir = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
+
+  const openFile = async (file: AcademicFile) => {
+    const url = resolveFileUrl(file.fileUrl);
+    if (!url) {
+      Alert.alert(t('common.error'), t('files.noUrl'));
+      return;
+    }
+    const opened = await openExternalUrl(url);
+    if (!opened) Alert.alert(t('common.error'), t('files.openError'));
+  };
 
   if (isLoading) {
-    return <View style={[s.root, { alignItems: 'center', justifyContent: 'center' }]}><ActivityIndicator color={colors.navy} size="large" /></View>;
+    return <View style={[s.root, s.center]}><ActivityIndicator color={colors.navy} size="large" /></View>;
+  }
+
+  if (isError) {
+    return <View style={[s.root, s.center]}><ErrorState onRetry={() => refetch()} /></View>;
   }
 
   if (!course) {
-    return <View style={[s.root, { alignItems: 'center', justifyContent: 'center' }]}><Text style={{ color: colors.mutedForeground }}>Course not found</Text></View>;
+    return <View style={[s.root, s.center]}><Text style={{ color: colors.mutedForeground }}>{t('course.notFound')}</Text></View>;
   }
 
   return (
     <ScrollView style={s.root} refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View style={s.header}>
-        <View style={s.codeBox}><Text style={s.code}>{course.code}</Text></View>
+        {course.code && <View style={s.codeBox}><Text style={s.code}>{course.code}</Text></View>}
         <Text style={s.courseName}>{course.nameAr || course.name}</Text>
-        {course.professorName && <Text style={s.professor}>Dr. {course.professorName}</Text>}
-        <Text style={s.semester}>{course.semester} · {course.creditHours ?? 3} credits</Text>
+        {course.professorName && <Text style={s.professor}>{t('courses.professorPrefix')}{course.professorName}</Text>}
+        <Text style={s.semester}>{course.semester}</Text>
         <View style={s.stats}>
-          <View style={s.stat}><Feather name="file" size={16} color={colors.gold} /><Text style={s.statNum}>{course.fileCount}</Text><Text style={s.statLabel}>Files</Text></View>
+          <View style={s.stat}><Feather name="file" size={16} color={colors.gold} /><Text style={s.statNum}>{course.fileCount}</Text><Text style={s.statLabel}>{t('course.tabFiles')}</Text></View>
           <View style={s.statDivider} />
-          <View style={s.stat}><Feather name="clipboard" size={16} color={colors.gold} /><Text style={s.statNum}>{course.assignmentCount}</Text><Text style={s.statLabel}>Assignments</Text></View>
+          <View style={s.stat}><Feather name="clipboard" size={16} color={colors.gold} /><Text style={s.statNum}>{course.assignmentCount}</Text><Text style={s.statLabel}>{t('course.tabAssignments')}</Text></View>
         </View>
       </View>
 
       {/* Description */}
-      {course.description && <View style={s.section}><Text style={s.desc}>{course.description}</Text></View>}
+      {course.description && <View style={s.section}><Text style={[s.desc, align]}>{course.description}</Text></View>}
 
       {/* Tab bar */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tabBar}>
-        {TABS.map((t) => (
-          <TouchableOpacity key={t} style={[s.tabBtn, tab === t && s.tabBtnActive]} onPress={() => setTab(t)}>
-            <Text style={[s.tabText, tab === t && s.tabTextActive]}>{t}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[s.tabBar, rowDir]}>
+        {TABS.map((key) => (
+          <TouchableOpacity key={key} style={[s.tabBtn, tab === key && s.tabBtnActive]} onPress={() => setTab(key)}>
+            <Text style={[s.tabText, tab === key && s.tabTextActive]}>{t(TAB_LABEL_KEY[key])}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
       {/* Tab content */}
-      {tab === 'Files' && (
+      {tab === 'files' && (
         <View style={s.tabContent}>
           {(course.recentFiles ?? []).length === 0 ? (
-            <Text style={s.emptyText}>No files yet</Text>
+            <Text style={s.emptyText}>{t('course.noFiles')}</Text>
           ) : (
-            (course.recentFiles ?? []).map((f: any) => (
-              <View key={f.id} style={s.itemCard}>
+            (course.recentFiles ?? []).map((f) => (
+              <TouchableOpacity key={f.id} style={[s.itemCard, rowDir]} activeOpacity={0.7} onPress={() => openFile(f)}>
                 <Feather name="file-text" size={20} color={colors.navy} />
-                <Text style={s.itemTitle} numberOfLines={2}>{f.title}</Text>
-                <Text style={s.itemMeta}>{f.fileType}</Text>
-              </View>
+                <Text style={[s.itemTitle, align]} numberOfLines={2}>{f.title}</Text>
+                <Text style={s.itemMeta}>{t(`fileTypes.${f.fileType}`)}</Text>
+              </TouchableOpacity>
             ))
           )}
-          <TouchableOpacity style={s.viewAllBtn} onPress={() => router.push({ pathname: '/files' as any, params: { courseId: id } })}>
-            <Text style={s.viewAllText}>View all files →</Text>
+          <TouchableOpacity
+            style={s.viewAllBtn}
+            onPress={() => router.push({ pathname: '/files', params: { courseId: id, courseName: course.nameAr || course.name } })}
+          >
+            <View style={[s.viewAllInner, rowDir]}>
+              <Text style={s.viewAllText}>{t('course.viewAllFiles')}</Text>
+              <Feather name={isRTL ? 'arrow-left' : 'arrow-right'} size={15} color={colors.navy} />
+            </View>
           </TouchableOpacity>
         </View>
       )}
 
-      {tab === 'Announcements' && (
+      {tab === 'announcements' && (
         <View style={s.tabContent}>
           {(course.recentAnnouncements ?? []).length === 0 ? (
-            <Text style={s.emptyText}>No announcements</Text>
+            <Text style={s.emptyText}>{t('course.noAnnouncements')}</Text>
           ) : (
-            (course.recentAnnouncements ?? []).map((a: any) => (
-              <View key={a.id} style={[s.itemCard, { flexDirection: 'column', alignItems: 'flex-start', gap: 4 }]}>
-                <Text style={s.itemTitle}>{a.titleAr || a.title}</Text>
-                <Text style={s.itemMeta} numberOfLines={2}>{a.contentAr || a.content}</Text>
+            (course.recentAnnouncements ?? []).map((a) => (
+              <View key={a.id} style={[s.itemCard, s.itemCardColumn]}>
+                <Text style={[s.itemTitle, align]}>{a.title}</Text>
+                <Text style={[s.itemMeta, align]} numberOfLines={2}>{a.content}</Text>
               </View>
             ))
           )}
         </View>
       )}
 
-      {tab === 'Assignments' && (
+      {tab === 'assignments' && (
         <View style={s.tabContent}>
           {(course.upcomingAssignments ?? []).length === 0 ? (
-            <Text style={s.emptyText}>No assignments</Text>
+            <Text style={s.emptyText}>{t('course.noAssignments')}</Text>
           ) : (
-            (course.upcomingAssignments ?? []).map((a: any) => (
-              <View key={a.id} style={[s.itemCard, { flexDirection: 'column', alignItems: 'flex-start', gap: 4 }]}>
-                <Text style={s.itemTitle}>{a.titleAr || a.title}</Text>
-                <Text style={s.itemMeta}>Due: {a.deadline?.split('T')[0]}</Text>
+            (course.upcomingAssignments ?? []).map((a) => (
+              <View key={a.id} style={[s.itemCard, s.itemCardColumn]}>
+                <Text style={[s.itemTitle, align]}>{a.title}</Text>
+                <Text style={[s.itemMeta, align]}>{t('course.due')}{a.deadline?.split('T')[0]}</Text>
               </View>
             ))
           )}
         </View>
       )}
 
-      {tab === 'Exams' && (
+      {tab === 'exams' && (
         <View style={s.tabContent}>
           {(course.upcomingExams ?? []).length === 0 ? (
-            <Text style={s.emptyText}>No exams scheduled</Text>
+            <Text style={s.emptyText}>{t('course.noExams')}</Text>
           ) : (
-            (course.upcomingExams ?? []).map((e: any) => (
-              <View key={e.id} style={[s.itemCard, { flexDirection: 'column', alignItems: 'flex-start', gap: 4 }]}>
-                <Text style={s.itemTitle}>{e.titleAr || e.title}</Text>
-                <Text style={s.itemMeta}>{e.examType} · {e.date}</Text>
+            (course.upcomingExams ?? []).map((e) => (
+              <View key={e.id} style={[s.itemCard, s.itemCardColumn]}>
+                <Text style={[s.itemTitle, align]}>{e.title}</Text>
+                <Text style={[s.itemMeta, align]}>{t(`examTypes.${e.type}`)} · {e.date}</Text>
               </View>
             ))
           )}
@@ -123,6 +166,7 @@ export default function CourseDetailScreen() {
 const styles = (colors: ReturnType<typeof useColors>) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
+    center: { alignItems: 'center', justifyContent: 'center' },
     header: { backgroundColor: colors.navy, padding: 20, alignItems: 'center', gap: 6 },
     codeBox: { backgroundColor: colors.gold, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 },
     code: { fontSize: 12, fontWeight: '700', color: '#000' },
@@ -142,10 +186,12 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     tabText: { fontSize: 14, fontWeight: '600', color: colors.mutedForeground },
     tabTextActive: { color: '#fff' },
     tabContent: { padding: 16 },
-    itemCard: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: 10, padding: 12, marginBottom: 8 },
+    itemCard: { alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: 10, padding: 12, marginBottom: 8 },
+    itemCardColumn: { flexDirection: 'column', alignItems: 'stretch', gap: 4 },
     itemTitle: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.foreground },
     itemMeta: { fontSize: 12, color: colors.mutedForeground },
     emptyText: { textAlign: 'center', color: colors.mutedForeground, fontSize: 14, paddingVertical: 20 },
     viewAllBtn: { paddingVertical: 12, alignItems: 'center' },
+    viewAllInner: { alignItems: 'center', gap: 6 },
     viewAllText: { fontSize: 14, fontWeight: '600', color: colors.navy },
   });

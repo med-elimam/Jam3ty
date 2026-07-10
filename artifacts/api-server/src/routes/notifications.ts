@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, notificationsTable } from "@workspace/db";
-import { eq, and, isNull, count } from "drizzle-orm";
+import { eq, and, isNull, count, desc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
@@ -12,7 +12,7 @@ router.get("/notifications", requireAuth, async (req, res) => {
     const conditions = [eq(notificationsTable.userId, req.userId!)];
     if (unreadOnly === "true") conditions.push(isNull(notificationsTable.readAt));
 
-    const notifications = await db.select().from(notificationsTable).where(and(...conditions)).orderBy(notificationsTable.createdAt).limit(50);
+    const notifications = await db.select().from(notificationsTable).where(and(...conditions)).orderBy(desc(notificationsTable.createdAt)).limit(50);
     const [unreadRow] = await db.select({ count: count() }).from(notificationsTable).where(and(eq(notificationsTable.userId, req.userId!), isNull(notificationsTable.readAt)));
     const unreadCount = unreadRow?.count ?? 0;
 

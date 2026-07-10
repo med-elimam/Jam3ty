@@ -17,6 +17,12 @@
         "C:\\Users\\HP ZBOOK\\Desktop\\Jam3ty\\admin-web\\vite.config.ts"
       ],
       "port": 3001
+    },
+    {
+      "name": "student-web-export",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:\\Users\\HPZBOO~1\\AppData\\Local\\Temp\\claude\\C--Users-HP-ZBOOK-Desktop-Jam3ty\\d30a6725-6e7d-4d00-982c-4a6c0ac97c52\\scratchpad\\serve-dist.js"],
+      "port": 8321
     }
   ]
 }

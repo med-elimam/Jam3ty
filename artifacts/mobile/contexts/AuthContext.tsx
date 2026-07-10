@@ -12,6 +12,7 @@ import { setAuthTokenGetter, setBaseUrl } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSegments } from 'expo-router';
 import { Platform } from 'react-native';
+import { API_BASE_URL } from '@/lib/urls';
 
 const setToken = async (key: string, value: string) => {
   if (Platform.OS === 'web') {
@@ -38,7 +39,6 @@ const deleteToken = async (key: string) => {
 };
 
 // ─── API base URL ────────────────────────────────────────────────────────────
-const API_BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').replace(/\/+$/, '');
 setBaseUrl(API_BASE_URL || null);
 
 // ─── Secure store keys ───────────────────────────────────────────────────────
@@ -69,6 +69,8 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
+  /** True for the client-only guest session — protected API calls would all 401. */
+  isGuest: boolean;
   login: (user: AuthUser, accessToken: string, refreshToken: string) => Promise<void>;
   loginAsGuest: () => void;
   logout: () => Promise<void>;
@@ -129,6 +131,7 @@ const AuthContext = createContext<AuthContextValue>({
   accessToken: null,
   isLoading: true,
   isAuthenticated: false,
+  isGuest: false,
   login: async () => {},
   loginAsGuest: () => {},
   logout: async () => {},
@@ -281,7 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ ...state, login, loginAsGuest, logout, updateUser }),
+    () => ({ ...state, isGuest: state.user?.id === GUEST_USER.id, login, loginAsGuest, logout, updateUser }),
     [state, login, loginAsGuest, logout, updateUser],
   );
 

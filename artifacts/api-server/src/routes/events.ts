@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { db, eventsTable, eventRegistrationsTable } from "@workspace/db";
-import { eq, and, sql, count } from "drizzle-orm";
+import { db, eventsTable, eventRegistrationsTable, profilesTable } from "@workspace/db";
+import { eq, and, or, isNull, sql, count } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
 // GET /events
+// Scoping rule: platform-wide events (no universityId) are visible to everyone;
+// university-bound events only to students of that university.
 router.get("/events", requireAuth, async (req, res) => {
   try {
     const { page = "1", limit = "20" } = req.query as Record<string, string>;
@@ -13,7 +15,11 @@ router.get("/events", requireAuth, async (req, res) => {
     const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
     const offset = (pageNum - 1) * limitNum;
 
-    const events = await db.select().from(eventsTable).where(sql`${eventsTable.startDate} >= NOW()`).orderBy(eventsTable.startDate).limit(limitNum).offset(offset);
+    const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!)).limit(1);
+    const events = await db.select().from(eventsTable).where(and(
+      sql`${eventsTable.startDate} >= NOW()`,
+      or(isNull(eventsTable.universityId), profile?.universityId ? eq(eventsTable.universityId, profile.universityId) : sql`false`),
+    )).orderBy(eventsTable.startDate).limit(limitNum).offset(offset);
     const regIds = await db.select({ eventId: eventRegistrationsTable.eventId }).from(eventRegistrationsTable).where(eq(eventRegistrationsTable.userId, req.userId!));
     const regSet = new Set(regIds.map((r) => r.eventId));
     const enriched = events.map((e) => ({ ...e, isRegistered: regSet.has(e.id) }));

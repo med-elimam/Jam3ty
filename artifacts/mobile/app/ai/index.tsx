@@ -3,11 +3,20 @@ import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet
 import { useColors } from '@/hooks/useColors';
 import { useAiChat, useGetAiUsage } from '@workspace/api-client-react';
 import { usePreferences } from '@/contexts/PreferencesContext';
+import { GuestGate } from '@/components/GuestGate';
 import { Feather } from '@expo/vector-icons';
 
 interface Message { id: string; role: 'user' | 'assistant'; content: string; ts: Date; }
 
 export default function AIScreen() {
+  return (
+    <GuestGate>
+      <AIScreenInner />
+    </GuestGate>
+  );
+}
+
+function AIScreenInner() {
   const colors = useColors();
   const { t, isRTL, language } = usePreferences();
   const [messages, setMessages] = useState<Message[]>([
@@ -26,7 +35,7 @@ export default function AIScreen() {
   const listRef = useRef<FlatList>(null);
 
   const { data: usageData } = useGetAiUsage();
-  const usage = (usageData as any)?.data;
+  const usage = usageData?.data;
 
   const chatMutation = useAiChat({
     mutation: {

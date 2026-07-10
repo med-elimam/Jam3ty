@@ -11,25 +11,37 @@ import {
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { usePreferences } from '@/contexts/PreferencesContext';
-import { useListCourses } from '@workspace/api-client-react';
+import { useListCourses, Course } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { GuestGate } from '@/components/GuestGate';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 export default function CoursesScreen() {
+  return (
+    <GuestGate>
+      <CoursesScreenInner />
+    </GuestGate>
+  );
+}
+
+function CoursesScreenInner() {
   const colors = useColors();
   const router = useRouter();
   const { t, isRTL } = usePreferences();
   const [search, setSearch] = useState('');
-  const { data, isLoading } = useListCourses({ search: search || undefined });
+  const { data, isLoading, isError, refetch } = useListCourses({ search: search || undefined });
 
-  const courses: any[] = (data as any)?.data ?? [];
+  const courses: Course[] = data?.data ?? [];
+  const align = { textAlign: isRTL ? 'right' : 'left' } as const;
+  const rowDir = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Search bar */}
-      <View style={[s.searchBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[s.searchBar, rowDir, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Feather name="search" size={18} color={colors.mutedForeground} />
         <TextInput
           style={[s.searchInput, { color: colors.foreground }]}
@@ -48,10 +60,12 @@ export default function CoursesScreen() {
 
       {isLoading ? (
         <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+      ) : isError ? (
+        <ErrorState onRetry={() => refetch()} />
       ) : (
         <FlatList
           data={courses}
-          keyExtractor={(item: any) => item.id}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={s.list}
           ListEmptyComponent={
             <EmptyState
@@ -60,23 +74,23 @@ export default function CoursesScreen() {
               body={t('courses.emptyBody')}
             />
           }
-          renderItem={({ item }: { item: any }) => (
+          renderItem={({ item }: { item: Course }) => (
             <Card
               onPress={() => router.push({ pathname: '/course/[id]', params: { id: item.id } })}
               style={s.courseCard}
             >
-              <View style={s.cardInner}>
-                <Feather name="chevron-left" size={18} color={colors.mutedForeground} />
+              <View style={[s.cardInner, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
+                <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={18} color={colors.mutedForeground} />
                 <View style={s.courseInfo}>
-                  <Text style={[s.courseName, { color: colors.foreground }]} numberOfLines={2}>
+                  <Text style={[s.courseName, { color: colors.foreground }, align]} numberOfLines={2}>
                     {item.nameAr || item.name}
                   </Text>
                   {item.professorName && (
-                    <Text style={[s.courseProfessor, { color: colors.mutedForeground }]}>
+                    <Text style={[s.courseProfessor, { color: colors.mutedForeground }, align]}>
                       {t('courses.professorPrefix')}{item.professorName}
                     </Text>
                   )}
-                  <View style={s.courseStats}>
+                  <View style={[s.courseStats, { justifyContent: isRTL ? 'flex-end' : 'flex-start' }]}>
                     {item.fileCount != null && (
                       <View style={s.stat}>
                         <Feather name="file" size={12} color={colors.mutedForeground} />
@@ -105,7 +119,6 @@ export default function CoursesScreen() {
 
 const s = StyleSheet.create({
   searchBar: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     margin: spacing.base,
@@ -117,16 +130,16 @@ const s = StyleSheet.create({
   searchInput: { flex: 1, fontSize: fontSize.md },
   list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
   courseCard: {},
-  cardInner: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  cardInner: { alignItems: 'center', gap: spacing.md },
   courseIcon: {
     width: 52, height: 52, borderRadius: radius.md,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   courseCode: { fontSize: fontSize.xs, fontWeight: fontWeight.bold, color: '#fff', textAlign: 'center' },
   courseInfo: { flex: 1 },
-  courseName: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, textAlign: 'right' },
-  courseProfessor: { fontSize: fontSize.sm, marginTop: 2, textAlign: 'right' },
-  courseStats: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xs, justifyContent: 'flex-end' },
+  courseName: { fontSize: fontSize.md, fontWeight: fontWeight.semibold },
+  courseProfessor: { fontSize: fontSize.sm, marginTop: 2 },
+  courseStats: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xs },
   stat: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   statText: { fontSize: fontSize.xs },
 });

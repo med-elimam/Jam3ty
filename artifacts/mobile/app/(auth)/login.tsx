@@ -18,8 +18,9 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
-const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').replace(/\/+$/, '');
-const LOGIN_ENDPOINT = `${BASE_URL}/api/auth/login`;
+import { API_BASE_URL } from '@/lib/urls';
+
+const LOGIN_ENDPOINT = `${API_BASE_URL}/api/auth/login`;
 
 export default function LoginScreen() {
   const colors = useColors();

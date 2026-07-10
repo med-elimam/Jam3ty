@@ -18,8 +18,9 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
-const BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL ?? '').replace(/\/+$/, '');
-const REGISTER_ENDPOINT = `${BASE_URL}/api/auth/register`;
+import { API_BASE_URL } from '@/lib/urls';
+
+const REGISTER_ENDPOINT = `${API_BASE_URL}/api/auth/register`;
 
 export default function RegisterScreen() {
   const colors = useColors();

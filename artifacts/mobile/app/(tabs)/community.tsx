@@ -14,7 +14,7 @@ import {
 import { useColors } from '@/hooks/useColors';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useListPosts, useCreatePost, useReactToPost } from '@workspace/api-client-react';
+import { useListPosts, useCreatePost, useReactToPost, Post } from '@workspace/api-client-react';
 import { getListPostsQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Feather } from '@expo/vector-icons';
@@ -22,6 +22,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { GuestGate } from '@/components/GuestGate';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 function timeAgo(date: string, t: (key: string, vars?: Record<string, any>) => string) {
@@ -33,6 +35,14 @@ function timeAgo(date: string, t: (key: string, vars?: Record<string, any>) => s
 }
 
 export default function CommunityScreen() {
+  return (
+    <GuestGate>
+      <CommunityScreenInner />
+    </GuestGate>
+  );
+}
+
+function CommunityScreenInner() {
   const colors = useColors();
   const { t, isRTL } = usePreferences();
   const { user } = useAuth();
@@ -40,8 +50,8 @@ export default function CommunityScreen() {
   const [showCreate, setShowCreate] = useState(false);
   const [newPost, setNewPost] = useState('');
 
-  const { data, isLoading, isRefetching, refetch } = useListPosts();
-  const posts: any[] = (data as any)?.data ?? [];
+  const { data, isLoading, isError, isRefetching, refetch } = useListPosts();
+  const posts = data?.data ?? [];
 
   const createPost = useCreatePost({
     mutation: {
@@ -60,9 +70,12 @@ export default function CommunityScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {isError ? (
+        <ErrorState onRetry={() => refetch()} />
+      ) : (
       <FlatList
         data={posts}
-        keyExtractor={(item: any) => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={s.list}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
         ListHeaderComponent={
@@ -87,18 +100,18 @@ export default function CommunityScreen() {
             />
           ) : null
         }
-        renderItem={({ item }: { item: any }) => (
+        renderItem={({ item }: { item: Post }) => (
           <Card style={s.postCard}>
-            <View style={s.postHeader}>
+            <View style={[s.postHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <Avatar name={item.authorName} size={38} />
               <View style={s.postMeta}>
-                <Text style={[s.authorName, { color: colors.foreground }]}>{item.authorName}</Text>
-                <Text style={[s.postTime, { color: colors.mutedForeground }]}>{timeAgo(item.createdAt, t)}</Text>
+                <Text style={[s.authorName, { color: colors.foreground }, { textAlign: isRTL ? 'right' : 'left' }]}>{item.authorName}</Text>
+                <Text style={[s.postTime, { color: colors.mutedForeground }, { textAlign: isRTL ? 'right' : 'left' }]}>{timeAgo(item.createdAt, t)}</Text>
               </View>
               {item.isPinned && <Feather name="bookmark" size={16} color={colors.gold} />}
             </View>
-            <Text style={[s.postContent, { color: colors.foreground }]}>{item.content}</Text>
-            <View style={[s.postActions, { borderTopColor: colors.border }]}>
+            <Text style={[s.postContent, { color: colors.foreground }, { textAlign: isRTL ? 'right' : 'left' }]}>{item.content}</Text>
+            <View style={[s.postActions, { borderTopColor: colors.border, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <TouchableOpacity
                 style={s.actionBtn}
                 onPress={() => reactPost.mutate({ postId: item.id, data: { reaction: 'like' } })}
@@ -114,6 +127,7 @@ export default function CommunityScreen() {
           </Card>
         )}
       />
+      )}
 
       {/* Create modal */}
       <Modal visible={showCreate} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowCreate(false)}>

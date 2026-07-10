@@ -37700,3 +37700,93 @@
       "statusCode": 304
     }
     [35mresponseTime[39m: 1259
+[02:40:45.022] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3771,
+      "method": "OPTIONS",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 1
+[02:40:45.023] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3772,
+      "method": "OPTIONS",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:40:45.034] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3773,
+      "method": "OPTIONS",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 204
+    }
+    [35mresponseTime[39m: 0
+[02:40:45.153] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3776,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 4
+[02:40:45.248] [32mINFO[39m (7000): [36mrequest aborted[39m
+    [35mreq[39m: {
+      "id": 3774,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": null
+    }
+    [35mresponseTime[39m: 107
+[02:40:45.251] [32mINFO[39m (7000): [36mrequest aborted[39m
+    [35mreq[39m: {
+      "id": 3775,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": null
+    }
+    [35mresponseTime[39m: 107
+[02:40:47.236] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3777,
+      "method": "GET",
+      "url": "/api/auth/me"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 454
+[02:40:47.696] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3779,
+      "method": "GET",
+      "url": "/api/admin/exams"
+    }
+    [35mres[39m: {
+      "statusCode": 404
+    }
+    [35mresponseTime[39m: 2
+[02:40:47.919] [32mINFO[39m (7000): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3778,
+      "method": "GET",
+      "url": "/api/admin/courses"
+    }
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 228

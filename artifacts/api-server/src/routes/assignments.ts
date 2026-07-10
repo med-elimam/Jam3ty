@@ -1,22 +1,31 @@
 import { Router } from "express";
 import { db, assignmentsTable, assignmentSubmissionsTable, coursesTable, profilesTable } from "@workspace/db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
 // GET /assignments
+// Scoping rule: without an explicit courseId, assignments are limited to courses
+// matching the student's profile departmentId + levelId (same rule as GET /courses).
+// No academic placement → no assignments. An explicit courseId is honored as-is
+// (course pages are reachable by id).
 router.get("/assignments", requireAuth, async (req, res) => {
   try {
     const { courseId, status } = req.query as Record<string, string>;
     const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!)).limit(1);
 
-    let assignments;
+    let assignments: (typeof assignmentsTable.$inferSelect)[];
     if (courseId) {
       assignments = await db.select().from(assignmentsTable).where(eq(assignmentsTable.courseId, courseId)).orderBy(assignmentsTable.deadline);
+    } else if (profile?.departmentId && profile?.levelId) {
+      const scopedCourseIds = db
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(and(eq(coursesTable.departmentId, profile.departmentId), eq(coursesTable.levelId, profile.levelId)));
+      assignments = await db.select().from(assignmentsTable).where(inArray(assignmentsTable.courseId, scopedCourseIds)).orderBy(assignmentsTable.deadline).limit(50);
     } else {
-      // Get assignments for courses in the student's dept/level
-      assignments = await db.select().from(assignmentsTable).orderBy(assignmentsTable.deadline).limit(50);
+      assignments = [];
     }
 
     const enriched = await Promise.all(assignments.map(async (a) => {

@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
-import { useListFiles, useToggleFileFavorite, ListFilesType } from '@workspace/api-client-react';
+import { useListFiles, useToggleFileFavorite, ListFilesType, AcademicFile } from '@workspace/api-client-react';
 import { getListFilesQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Feather } from '@expo/vector-icons';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { GuestGate } from '@/components/GuestGate';
+import { resolveFileUrl, openExternalUrl } from '@/lib/urls';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 import { usePreferences } from '@/contexts/PreferencesContext';
 
@@ -17,26 +21,51 @@ const FILE_ICON: Record<string, React.ComponentProps<typeof Feather>['name']> = 
 };
 
 export default function FilesScreen() {
+  return (
+    <GuestGate>
+      <FilesScreenInner />
+    </GuestGate>
+  );
+}
+
+function FilesScreenInner() {
   const colors = useColors();
   const { t, isRTL } = usePreferences();
   const qc = useQueryClient();
+  const params = useLocalSearchParams<{ courseId?: string; courseName?: string }>();
   const [search, setSearch] = useState('');
   const [activeType, setActiveType] = useState('all');
+  const [courseFilter, setCourseFilter] = useState<string | undefined>(
+    typeof params.courseId === 'string' && params.courseId ? params.courseId : undefined,
+  );
 
-  const { data, isLoading, refetch, isRefetching } = useListFiles({
+  const { data, isLoading, isError, refetch, isRefetching } = useListFiles({
     search: search || undefined,
     type: (activeType === 'all' ? undefined : activeType) as ListFilesType | undefined,
+    courseId: courseFilter,
   });
   const toggleFav = useToggleFileFavorite({
     mutation: { onSuccess: () => qc.invalidateQueries({ queryKey: getListFilesQueryKey() }) },
   });
 
-  const files: any[] = (data as any)?.data ?? [];
+  const files: AcademicFile[] = data?.data ?? [];
+  const rowDir = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
+  const align = { textAlign: isRTL ? 'right' : 'left' } as const;
+
+  const openFile = async (file: AcademicFile) => {
+    const url = resolveFileUrl(file.fileUrl);
+    if (!url) {
+      Alert.alert(t('common.error'), t('files.noUrl'));
+      return;
+    }
+    const opened = await openExternalUrl(url);
+    if (!opened) Alert.alert(t('common.error'), t('files.openError'));
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Search bar */}
-      <View style={[s.searchBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[s.searchBar, rowDir, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Feather name="search" size={16} color={colors.mutedForeground} />
         <TextInput
           style={[s.searchInput, { color: colors.foreground }]}
@@ -48,11 +77,26 @@ export default function FilesScreen() {
         />
       </View>
 
+      {/* Active course filter (navigated from a course page) */}
+      {courseFilter && (
+        <View style={[s.courseChipRow, rowDir]}>
+          <View style={[s.courseChip, rowDir, { backgroundColor: colors.navy + '12' }]}>
+            <Feather name="book-open" size={13} color={colors.navy} />
+            <Text style={[s.courseChipText, { color: colors.navy }]} numberOfLines={1}>
+              {typeof params.courseName === 'string' && params.courseName ? params.courseName : t('files.courseFilter')}
+            </Text>
+            <TouchableOpacity onPress={() => setCourseFilter(undefined)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Feather name="x" size={14} color={colors.navy} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       {/* Horizontal filter chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[s.chipRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+        contentContainerStyle={[s.chipRow, rowDir]}
       >
         {FILE_TYPES.map((key) => {
           const active = activeType === key;
@@ -79,26 +123,28 @@ export default function FilesScreen() {
 
       {isLoading ? (
         <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+      ) : isError ? (
+        <ErrorState onRetry={() => refetch()} />
       ) : (
         <FlatList
           data={files}
-          keyExtractor={(f: any) => f.id}
+          keyExtractor={(f) => f.id}
           contentContainerStyle={s.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
           ListEmptyComponent={
             <EmptyState icon="folder" title={t('files.empty')} body={t('files.emptyBody')} />
           }
-          renderItem={({ item }: { item: any }) => (
-            <Card style={s.fileCard}>
+          renderItem={({ item }: { item: AcademicFile }) => (
+            <Card onPress={() => openFile(item)} style={[s.fileCard, rowDir]}>
               <View style={[s.fileIcon, { backgroundColor: colors.navy + '12' }]}>
                 <Feather name={FILE_ICON[item.fileType] ?? 'file'} size={22} color={colors.navy} />
               </View>
               <View style={s.fileInfo}>
-                <Text style={[s.fileName, { color: colors.foreground }]} numberOfLines={2}>{item.title}</Text>
-                <Text style={[s.fileMeta, { color: colors.mutedForeground }]}>
+                <Text style={[s.fileName, { color: colors.foreground }, align]} numberOfLines={2}>{item.title}</Text>
+                <Text style={[s.fileMeta, { color: colors.mutedForeground }, align]}>
                   {item.uploaderName} · {t(`fileTypes.${item.fileType}`)}
                 </Text>
-                {item.courseName && <Text style={[s.fileCourse, { color: colors.navy }]}>{item.courseName}</Text>}
+                {item.courseName && <Text style={[s.fileCourse, { color: colors.navy }, align]}>{item.courseName}</Text>}
               </View>
               <TouchableOpacity onPress={() => toggleFav.mutate({ fileId: item.id })} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Feather name="heart" size={20} color={item.isFavorited ? colors.destructive : colors.border} />
@@ -113,11 +159,23 @@ export default function FilesScreen() {
 
 const s = StyleSheet.create({
   searchBar: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    alignItems: 'center', gap: spacing.sm,
     margin: spacing.base, marginBottom: spacing.sm,
     padding: spacing.md, borderRadius: radius.lg, borderWidth: 1,
   },
   searchInput: { flex: 1, fontSize: fontSize.md },
+
+  // ── Active course filter chip ────────────────────────────────────────
+  courseChipRow: { paddingHorizontal: spacing.base, paddingBottom: spacing.sm },
+  courseChip: {
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.full,
+    maxWidth: '80%',
+  },
+  courseChipText: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold, flexShrink: 1 },
 
   // ── Horizontal filter chips ──────────────────────────────────────────
   chipRow: {
@@ -136,10 +194,10 @@ const s = StyleSheet.create({
   chipLabel: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
 
   list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
-  fileCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  fileCard: { alignItems: 'center', gap: spacing.md },
   fileIcon: { width: 48, height: 48, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   fileInfo: { flex: 1 },
-  fileName: { fontSize: fontSize.base, fontWeight: fontWeight.semibold, textAlign: 'right' },
-  fileMeta: { fontSize: fontSize.sm, marginTop: 2, textAlign: 'right' },
-  fileCourse: { fontSize: fontSize.xs, marginTop: 2, textAlign: 'right' },
+  fileName: { fontSize: fontSize.base, fontWeight: fontWeight.semibold },
+  fileMeta: { fontSize: fontSize.sm, marginTop: 2 },
+  fileCourse: { fontSize: fontSize.xs, marginTop: 2 },
 });
