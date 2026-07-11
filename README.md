@@ -5,18 +5,19 @@ A university platform for Mauritania: students get their courses, files, timetab
 ## Repository layout
 
 ```
-artifacts/mobile/      Student app — Expo (React Native). THE student-facing product:
-                       runs natively on Android/iOS AND is exported to web
-                       (`expo export -p web`) and served at `/` in production.
-admin-web/             Admin dashboard — React + Vite + shadcn/ui + Tailwind 4 (wouter, React Query).
-                       Served at `/admin` in production.
-artifacts/api-server/  Express API — the only backend. Serves /api/* and, in production,
-                       the two built SPAs as static files.
-lib/db/                Drizzle ORM schema + Postgres client (single source of truth for the data model).
-lib/api-spec/          Hand-maintained openapi.yaml + orval config (generates the two packages below).
-lib/api-client-react/  Generated React Query hooks + fetch client (used by admin-web AND mobile).
-lib/api-zod/           Generated zod validators (used by api-server).
-scripts/               DB seed scripts.
+artifacts/mobile/         Student app — Expo (React Native). THE student-facing product:
+                          runs natively on Android/iOS AND is exported to web
+                          (`expo export -p web`) and served at `/` in production.
+artifacts/api-server/     Express API — the only backend. Serves /api/* and, in production,
+                          the two built SPAs as static files.
+artifacts/mockup-sandbox/ Internal Vite sandbox for prototyping UI mockups (not deployed).
+admin-web/                Admin dashboard — React + Vite + shadcn/ui + Tailwind 4 (wouter, React Query).
+                          Served at `/admin` in production.
+lib/db/                   Drizzle ORM schema + Postgres client (single source of truth for the data model).
+lib/api-spec/             Hand-maintained openapi.yaml + orval config (generates the two packages below).
+lib/api-client-react/     Generated React Query hooks + fetch client (used by admin-web AND mobile).
+lib/api-zod/              Generated zod validators (used by api-server).
+scripts/                  One-off / DB seed scripts (tsx).
 ```
 
 The legacy `student-web/` Vite SPA was removed — the Expo web export replaced it (the root script name `build:student-web` now builds the mobile web export).
@@ -45,7 +46,10 @@ Database:
 
 ```bash
 pnpm run db:migrate     # drizzle-kit push of lib/db schema to DATABASE_URL (no migration files)
-pnpm run db:seed:dev    # demo data — creates admin@jamiati.mr / Admin@1234 and student@jamiati.mr / Student@1234
+
+# Seed demo data (academic hierarchy + demo accounts). Credentials are printed
+# by the script — they are NOT published here. Change them before any public deploy.
+pnpm --filter @workspace/scripts run seed
 ```
 
 Typecheck (there is no test suite and no lint script):
@@ -57,7 +61,7 @@ pnpm --dir artifacts/mobile exec tsc -p tsconfig.json --noEmit  # mobile
 
 ## Environment
 
-**API server** (`artifacts/api-server/.env`): `PORT`, `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `CORS_ORIGINS`, optional `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD`.
+**API server** (`artifacts/api-server/.env`): requires `PORT`, `DATABASE_URL`, and the JWT signing secrets (`JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`); `CORS_ORIGINS` and the upload/log settings are optional. See `DEPLOYMENT.md` for the full list and production values — never commit real secrets.
 
 **Frontends** — the generated API client already prefixes paths with `/api`, so the base URL must be the **root origin only, never ending in `/api`**:
 

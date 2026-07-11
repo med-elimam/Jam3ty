@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
 import { directionalHeaderOptions } from '@/components/DirectionalHeaderTitle';
+import { HeaderNotificationButton } from '@/components/HeaderNotificationButton';
 
 type FeatherName = React.ComponentProps<typeof Feather>['name'];
 
@@ -80,6 +81,8 @@ export default function TabLayout() {
           options={{
             ...directionalHeaderOptions(t(tab.titleKey), isRTL, true),
             headerShown: tab.name !== 'index', // Hide header for Home tab
+            // Materials root tab: surface a simple notification bell (no back button).
+            headerRight: tab.name === 'courses' ? () => <HeaderNotificationButton /> : undefined,
             tabBarIcon: ({ color }) => (
               <TabIcon name={tab.icon} color={color} />
             ),
