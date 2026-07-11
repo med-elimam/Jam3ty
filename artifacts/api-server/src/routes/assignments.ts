@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, assignmentsTable, assignmentSubmissionsTable, coursesTable, profilesTable } from "@workspace/db";
 import { eq, and, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
-import { requireEntitlement } from "../middlewares/entitlements";
+import { FREE_TIER_LIMITS, isPlusUser } from "../services/subscription-service";
 
 const router = Router();
 
@@ -11,7 +11,9 @@ const router = Router();
 // matching the student's profile departmentId + levelId (same rule as GET /courses).
 // No academic placement → no assignments. An explicit courseId is honored as-is
 // (course pages are reachable by id).
-router.get("/assignments", requireAuth, requireEntitlement("assignments.view"), async (req, res) => {
+//
+// Freemium: free-tier users see the first FREE_TIER_LIMITS.assignments; Plus sees all.
+router.get("/assignments", requireAuth, async (req, res) => {
   try {
     const { courseId, status } = req.query as Record<string, string>;
     const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!)).limit(1);
@@ -29,7 +31,10 @@ router.get("/assignments", requireAuth, requireEntitlement("assignments.view"), 
       assignments = [];
     }
 
-    const enriched = await Promise.all(assignments.map(async (a) => {
+    const plus = await isPlusUser(req.userId!);
+    const visible = plus ? assignments : assignments.slice(0, FREE_TIER_LIMITS.assignments);
+
+    const enriched = await Promise.all(visible.map(async (a) => {
       const [course] = await db.select({ name: coursesTable.name }).from(coursesTable).where(eq(coursesTable.id, a.courseId)).limit(1);
       const [submission] = await db.select().from(assignmentSubmissionsTable).where(and(eq(assignmentSubmissionsTable.assignmentId, a.id), eq(assignmentSubmissionsTable.studentId, req.userId!))).limit(1);
       return {
@@ -47,8 +52,8 @@ router.get("/assignments", requireAuth, requireEntitlement("assignments.view"), 
   }
 });
 
-// GET /assignments/:assignmentId
-router.get("/assignments/:assignmentId", requireAuth, requireEntitlement("assignments.view"), async (req, res) => {
+// GET /assignments/:assignmentId — single assignment (preview is open to all users).
+router.get("/assignments/:assignmentId", requireAuth, async (req, res) => {
   try {
     const { assignmentId } = req.params as { assignmentId: string };
     const [assignment] = await db.select().from(assignmentsTable).where(eq(assignmentsTable.id, assignmentId)).limit(1);

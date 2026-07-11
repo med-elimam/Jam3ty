@@ -3088,61 +3088,50 @@ router.post("/notifications/send", requireAuth, requireRole("super_admin"), asyn
 
     const { pushTokensTable, profilesTable, notificationsTable } = await import("@workspace/db");
 
-    // 1. Query target users and their push tokens
-    let tokensQuery;
+    // 1. Resolve the set of TARGET USER IDs for the audience — independent of
+    //    whether they have a push token. In-app notifications must reach every
+    //    targeted user (web users and users who denied push permission included);
+    //    push is a best-effort extra layered on top.
+    let targetUserIds: string[];
     if (userId) {
-      // Direct user targeting
-      tokensQuery = db.select({
-        token: pushTokensTable.token,
-        userId: pushTokensTable.userId,
-      }).from(pushTokensTable).where(eq(pushTokensTable.userId, userId));
+      targetUserIds = [userId];
     } else if (departmentId || levelId) {
-      // Targeted department/level
       const conditions = [];
       if (departmentId) conditions.push(eq(profilesTable.departmentId, departmentId));
       if (levelId) conditions.push(eq(profilesTable.levelId, levelId));
-
-      tokensQuery = db.select({
-        token: pushTokensTable.token,
-        userId: pushTokensTable.userId,
-      })
-      .from(pushTokensTable)
-      .innerJoin(profilesTable, eq(profilesTable.userId, pushTokensTable.userId))
-      .where(and(...conditions));
+      const rows = await db.select({ userId: profilesTable.userId }).from(profilesTable).where(and(...conditions));
+      targetUserIds = rows.map((r) => r.userId);
     } else {
-      // All users
-      tokensQuery = db.select({
-        token: pushTokensTable.token,
-        userId: pushTokensTable.userId,
-      }).from(pushTokensTable);
+      const rows = await db.select({ id: usersTable.id }).from(usersTable);
+      targetUserIds = rows.map((r) => r.id);
     }
 
-    const rows = await tokensQuery;
+    targetUserIds = Array.from(new Set(targetUserIds));
 
-    if (rows.length === 0) {
-      res.json({ success: true, message: "No target users with push tokens found" });
+    if (targetUserIds.length === 0) {
+      res.json({ success: true, message: "No users match the selected audience" });
       return;
     }
 
-    // 2. Identify unique users to insert persistent in-app notifications
-    const uniqueUserIds = Array.from(new Set(rows.map(r => r.userId)));
-    
-    // Batch insert notifications in chunks of 50
-    const batchSize = 50;
-    for (let i = 0; i < uniqueUserIds.length; i += batchSize) {
-      const chunk = uniqueUserIds.slice(i, i + batchSize);
-      const values = chunk.map(uid => ({
+    // 2. Insert persistent in-app notifications for EVERY targeted user (chunked).
+    const notifBatchSize = 500;
+    for (let i = 0; i < targetUserIds.length; i += notifBatchSize) {
+      const chunk = targetUserIds.slice(i, i + notifBatchSize);
+      await db.insert(notificationsTable).values(chunk.map((uid) => ({
         userId: uid,
         type: "admin_broadcast",
         title,
         body,
         data: { senderId: req.userId },
-      }));
-      await db.insert(notificationsTable).values(values);
+      })));
     }
 
-    // 3. Send Push Notifications via Expo API
-    const messages = rows.map(r => ({
+    // 3. Best-effort push to whatever devices the targeted users have registered.
+    const tokenRows = await db.select({ token: pushTokensTable.token })
+      .from(pushTokensTable)
+      .where(inArray(pushTokensTable.userId, targetUserIds));
+
+    const messages = tokenRows.map((r) => ({
       to: r.token,
       sound: "default",
       title,
@@ -3172,7 +3161,7 @@ router.post("/notifications/send", requireAuth, requireRole("super_admin"), asyn
       }
     }
 
-    res.json({ success: true, message: `Notification sent to ${rows.length} devices.` });
+    res.json({ success: true, message: `Notification delivered to ${targetUserIds.length} user(s); pushed to ${messages.length} device(s).` });
   } catch (err) {
     req.log.error({ err }, "AdminSendNotification error");
     res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });

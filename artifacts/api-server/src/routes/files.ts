@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, filesTable, usersTable, coursesTable, fileFavoritesTable, profilesTable } from "@workspace/db";
 import { eq, and, or, isNull, inArray, ilike, sql, count } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
-import { requireEntitlement } from "../middlewares/entitlements";
+import { FREE_TIER_LIMITS, isPlusUser } from "../services/subscription-service";
 
 const router = Router();
 
@@ -11,12 +11,21 @@ const router = Router();
 // (courseId null) plus files of courses matching the student's profile
 // departmentId + levelId (same rule as GET /courses). No academic placement →
 // general files only. An explicit courseId is honored as-is.
-router.get("/files", requireAuth, requireEntitlement("files.view"), async (req, res) => {
+//
+// Freemium: everyone can browse files, but free-tier users only ever receive the
+// newest FREE_TIER_LIMITS.files rows of a query (a per-course teaser); Jam3ty Plus
+// lifts the cap. `pagination.total` always reports the true count.
+router.get("/files", requireAuth, async (req, res) => {
   try {
     const { courseId, type, search, page = "1", limit = "20" } = req.query as Record<string, string>;
     const pageNum = Math.max(1, parseInt(page));
     const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
     const offset = (pageNum - 1) * limitNum;
+
+    const plus = await isPlusUser(req.userId!);
+    // Free users can only reach the first FREE_TIER_LIMITS.files rows of any query.
+    const queryOffset = plus ? offset : Math.min(offset, FREE_TIER_LIMITS.files);
+    const queryLimit = plus ? limitNum : Math.max(0, Math.min(limitNum, FREE_TIER_LIMITS.files - queryOffset));
 
     const conditions = [eq(filesTable.approvalStatus, "approved"), eq(filesTable.isDeleted, false)];
     if (courseId) {
@@ -36,7 +45,9 @@ router.get("/files", requireAuth, requireEntitlement("files.view"), async (req, 
     if (type) conditions.push(eq(filesTable.fileType, type as "lecture" | "td" | "tp" | "summary" | "exam" | "correction" | "book" | "other"));
     if (search) conditions.push(ilike(filesTable.title, `%${search}%`));
 
-    const files = await db.select().from(filesTable).where(and(...conditions)).orderBy(sql`${filesTable.createdAt} DESC`).limit(limitNum).offset(offset);
+    const files = queryLimit <= 0
+      ? []
+      : await db.select().from(filesTable).where(and(...conditions)).orderBy(sql`${filesTable.createdAt} DESC`).limit(queryLimit).offset(queryOffset);
     const [totalRow] = await db.select({ count: count() }).from(filesTable).where(and(...conditions));
     const total = totalRow?.count ?? 0;
 
@@ -63,7 +74,8 @@ router.get("/files", requireAuth, requireEntitlement("files.view"), async (req, 
 });
 
 // GET /files/:fileId — single approved file, enriched like the list rows.
-router.get("/files/:fileId", requireAuth, requireEntitlement("files.view"), async (req, res) => {
+// Preview is a free-tier feature, so single-file access is open to all users.
+router.get("/files/:fileId", requireAuth, async (req, res) => {
   try {
     const { fileId } = req.params as { fileId: string };
     const [file] = await db
@@ -97,7 +109,7 @@ router.get("/files/:fileId", requireAuth, requireEntitlement("files.view"), asyn
 });
 
 // POST /files/:fileId/view — increment the view counter (fire-and-forget from clients).
-router.post("/files/:fileId/view", requireAuth, requireEntitlement("files.view"), async (req, res) => {
+router.post("/files/:fileId/view", requireAuth, async (req, res) => {
   try {
     const { fileId } = req.params as { fileId: string };
     const [updated] = await db

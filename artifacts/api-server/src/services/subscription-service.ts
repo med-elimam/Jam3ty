@@ -61,6 +61,27 @@ export async function canAccess(userId: string, entitlementKey: string) {
   };
 }
 
+/**
+ * Free-tier caps for content that is visible-but-limited without a paid plan.
+ * Free users get a taste (the newest N rows of a query); Jam3ty Plus lifts the
+ * cap entirely. Tune these numbers here — they are the single source of truth.
+ */
+export const FREE_TIER_LIMITS = {
+  files: 5,
+  exams: 5,
+  assignments: 5,
+} as const;
+
+/**
+ * A "Plus" user is anyone with an active (or grace-period) subscription whose
+ * plan carries the premium `files.view` entitlement. Free-tier users have no
+ * such subscription and are served capped content by the route handlers.
+ */
+export async function isPlusUser(userId: string): Promise<boolean> {
+  const { entitlements } = await resolveEntitlements(userId);
+  return entitlements.some((entitlement) => entitlement.key === "files.view");
+}
+
 async function activatePaidOrder(
   tx: Transaction,
   order: LockedOrder,

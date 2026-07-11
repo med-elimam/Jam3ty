@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, examsTable, coursesTable, profilesTable } from "@workspace/db";
 import { eq, and, gte, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
-import { requireEntitlement } from "../middlewares/entitlements";
+import { FREE_TIER_LIMITS, isPlusUser } from "../services/subscription-service";
 
 const router = Router();
 
@@ -10,7 +10,9 @@ const router = Router();
 // Scoping rule: without an explicit courseId, exams are limited to courses matching
 // the student's profile departmentId + levelId (same rule as GET /courses).
 // No academic placement → no exams. An explicit courseId is honored as-is.
-router.get("/exams", requireAuth, requireEntitlement("exams.view"), async (req, res) => {
+//
+// Freemium: free-tier users see the first FREE_TIER_LIMITS.exams; Plus sees all.
+router.get("/exams", requireAuth, async (req, res) => {
   try {
     const { courseId, upcoming } = req.query as Record<string, string>;
     const conditions = [];
@@ -30,7 +32,8 @@ router.get("/exams", requireAuth, requireEntitlement("exams.view"), async (req, 
     }
     if (upcoming === "true") conditions.push(gte(examsTable.date, new Date().toISOString().split("T")[0]!));
 
-    const exams = await db.select().from(examsTable).where(and(...conditions)).orderBy(examsTable.date).limit(50);
+    const plus = await isPlusUser(req.userId!);
+    const exams = await db.select().from(examsTable).where(and(...conditions)).orderBy(examsTable.date).limit(plus ? 50 : FREE_TIER_LIMITS.exams);
 
     const enriched = await Promise.all(exams.map(async (e) => {
       const [course] = await db.select({ name: coursesTable.name }).from(coursesTable).where(eq(coursesTable.id, e.courseId)).limit(1);
