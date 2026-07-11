@@ -83,7 +83,7 @@ export function Button({
       style={[
         s.btn,
         pad[size],
-        { backgroundColor: bg[variant], borderRadius: 14, borderCurve: 'continuous' },
+        { backgroundColor: bg[variant], borderRadius: 12, borderCurve: 'continuous' },
         borderColor[variant] ? { borderWidth: 1.5, borderColor: borderColor[variant] } : undefined,
         fullWidth && { alignSelf: 'stretch' },
         isDisabled && s.disabled,

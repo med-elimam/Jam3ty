@@ -16,10 +16,10 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: 12,
-  md: 16,
-  lg: 20,
-  xl: 24,
+  sm: 10,
+  md: 12,
+  lg: 14,
+  xl: 16,
   full: 9999,
 } as const;
 
@@ -48,7 +48,7 @@ export const lineHeight = {
   relaxed: 1.7,
 };
 
-/** Shadow presets (soft and diffuse) */
+/** Shadow presets (extremely soft, near-flat) */
 export const shadow = {
   none: {
     shadowColor: 'transparent',
@@ -58,23 +58,23 @@ export const shadow = {
   },
   sm: {
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.01,
+    shadowRadius: 3,
+    elevation: 0,
   },
   md: {
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 30,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+    elevation: 1,
   },
   lg: {
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.08,
-    shadowRadius: 40,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
 } as const;

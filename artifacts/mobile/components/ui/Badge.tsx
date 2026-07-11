@@ -13,42 +13,36 @@ interface BadgeProps {
 
 export function Badge({ label, color = 'primary', style }: BadgeProps) {
   const colors = useColors();
-  const isDark = colors.background === '#0B0F19';
 
-  const bg: Record<BadgeColor, string> = isDark ? {
-    primary: 'rgba(99, 102, 241, 0.15)',
-    success: 'rgba(16, 185, 129, 0.15)',
-    warning: 'rgba(245, 158, 11, 0.15)',
-    danger: 'rgba(239, 68, 68, 0.15)',
-    gold: 'rgba(99, 102, 241, 0.15)',
-    muted: 'rgba(148, 163, 184, 0.15)',
-  } : {
-    primary: '#EEF2FF',
-    success: '#EDF3EC', // Pale green
-    warning: '#FBF3DB', // Pale yellow
-    danger: '#FDEBEC',  // Pale red
-    gold: '#EEF2FF',
-    muted: '#F1F5F9',
+  const bg: Record<BadgeColor, string> = {
+    primary: colors.primary + '0A',
+    success: colors.success + '0A',
+    warning: colors.warning + '0A',
+    danger: colors.destructive + '0A',
+    gold: colors.primary + '0A',
+    muted: colors.mutedForeground + '0D',
   };
 
-  const fg: Record<BadgeColor, string> = isDark ? {
-    primary: '#818CF8',
-    success: '#34D399',
-    warning: '#FBBF24',
-    danger: '#F87171',
-    gold: '#818CF8',
-    muted: '#94A3B8',
-  } : {
-    primary: '#4F46E5',
-    success: '#346538',
-    warning: '#956400',
-    danger: '#9F2F2D',
-    gold: '#6366F1',
-    muted: '#64748B',
+  const border: Record<BadgeColor, string> = {
+    primary: colors.primary + '28',
+    success: colors.success + '28',
+    warning: colors.warning + '28',
+    danger: colors.destructive + '28',
+    gold: colors.primary + '28',
+    muted: colors.mutedForeground + '20',
+  };
+
+  const fg: Record<BadgeColor, string> = {
+    primary: colors.primary,
+    success: colors.success,
+    warning: colors.warning,
+    danger: colors.destructive,
+    gold: colors.primary,
+    muted: colors.mutedForeground,
   };
 
   return (
-    <View style={[s.badge, { backgroundColor: bg[color] }, style]}>
+    <View style={[s.badge, { backgroundColor: bg[color], borderColor: border[color] }, style]}>
       <Text style={[s.label, { color: fg[color] }]}>{label}</Text>
     </View>
   );
@@ -56,14 +50,15 @@ export function Badge({ label, color = 'primary', style }: BadgeProps) {
 
 const s = StyleSheet.create({
   badge: {
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
     borderCurve: 'continuous',
     alignSelf: 'flex-start',
   },
   label: {
-    fontSize: fontSize.xs,
+    fontSize: 10,
     fontWeight: fontWeight.bold,
   },
 });

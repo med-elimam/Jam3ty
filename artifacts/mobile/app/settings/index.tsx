@@ -55,8 +55,8 @@ function SettingsRow({
       >
         {label}
       </Text>
-      <View style={[s.rowIcon, { backgroundColor: (destructive ? colors.destructive : colors.primary) + '12' }]}>
-        <Feather name={icon} size={17} color={destructive ? colors.destructive : colors.primary} />
+      <View style={[s.rowIcon, { backgroundColor: destructive ? colors.destructive + '12' : colors.muted }]}>
+        <Feather name={icon} size={17} color={destructive ? colors.destructive : colors.mutedForeground} />
       </View>
     </TouchableOpacity>
   );
@@ -112,7 +112,7 @@ export default function SettingsScreen() {
 
         {/* App section */}
         <View style={s.section}>
-          <Text style={[s.sectionLabel, { color: colors.mutedForeground }, align]}>{t('settings.sectionApp')}</Text>
+          <Text style={[s.sectionLabel, { color: colors.mutedForeground }, isRTL ? { textTransform: 'none', letterSpacing: 0 } : undefined, align]}>{t('settings.sectionApp')}</Text>
           <Card style={s.card}>
             <SettingsRow icon="globe" label={t('settings.language')} value={langValue} isRTL={isRTL} onPress={() => router.push('/settings/language')} />
             <SettingsRow icon="moon" label={t('settings.appearance')} value={themeValue} isRTL={isRTL} onPress={() => router.push('/settings/appearance')} />
@@ -122,7 +122,7 @@ export default function SettingsScreen() {
 
         {/* Account section */}
         <View style={s.section}>
-          <Text style={[s.sectionLabel, { color: colors.mutedForeground }, align]}>{t('settings.sectionAccount')}</Text>
+          <Text style={[s.sectionLabel, { color: colors.mutedForeground }, isRTL ? { textTransform: 'none', letterSpacing: 0 } : undefined, align]}>{t('settings.sectionAccount')}</Text>
           <Card style={s.card}>
             <SettingsRow icon="lock" label={t('settings.changePassword')} isRTL={isRTL} onPress={handleChangePassword} />
             <SettingsRow icon="shield" label={t('settings.privacy')} isRTL={isRTL} onPress={() => router.push('/settings/privacy')} />
@@ -132,7 +132,7 @@ export default function SettingsScreen() {
 
         {/* About section */}
         <View style={s.section}>
-          <Text style={[s.sectionLabel, { color: colors.mutedForeground }, align]}>{t('settings.sectionAbout')}</Text>
+          <Text style={[s.sectionLabel, { color: colors.mutedForeground }, isRTL ? { textTransform: 'none', letterSpacing: 0 } : undefined, align]}>{t('settings.sectionAbout')}</Text>
           <Card style={s.card}>
             <SettingsRow icon="info" label={t('settings.appVersion')} value="1.0.0" isRTL={isRTL} />
             <SettingsRow

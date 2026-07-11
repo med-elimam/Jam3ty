@@ -80,7 +80,7 @@ function CommunityScreenInner() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
         ListHeaderComponent={
           <TouchableOpacity
-            style={[s.createRow, shadow.sm, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[s.createRow, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={() => setShowCreate(true)}
           >
             <Avatar name={user?.fullName ?? 'U'} size={36} />
@@ -169,7 +169,7 @@ const s = StyleSheet.create({
   list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
   createRow: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    padding: spacing.md, borderRadius: 16, borderCurve: 'continuous', borderWidth: 1, marginBottom: spacing.xs,
+    padding: spacing.md, borderRadius: 12, borderCurve: 'continuous', borderWidth: 1, marginBottom: spacing.xs,
   },
   createPlaceholder: { flex: 1, paddingHorizontal: spacing.base, paddingVertical: spacing.sm },
   createPlaceholderText: { fontSize: fontSize.md, textAlign: 'right' },

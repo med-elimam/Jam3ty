@@ -52,6 +52,7 @@ function FilesScreenInner() {
   const files: AcademicFile[] = data?.data ?? [];
   const rowDir = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
   const align = { textAlign: isRTL ? 'right' : 'left' } as const;
+  const forwardChevron = isRTL ? 'chevron-left' : 'chevron-right';
 
   const openFile = async (file: AcademicFile) => {
     const url = resolveFileUrl(file.fileUrl);
@@ -66,7 +67,7 @@ function FilesScreenInner() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Search bar */}
-      <View style={[s.searchBar, rowDir, shadow.sm, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[s.searchBar, rowDir, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Feather name="search" size={16} color={colors.mutedForeground} />
         <TextInput
           style={[s.searchInput, { color: colors.foreground }]}
@@ -81,7 +82,7 @@ function FilesScreenInner() {
       {/* Active course filter (navigated from a course page) */}
       {courseFilter && (
         <View style={[s.courseChipRow, rowDir]}>
-          <View style={[s.courseChip, rowDir, { backgroundColor: colors.primary + '12' }]}>
+          <View style={[s.courseChip, rowDir, { backgroundColor: colors.primary + '0D', borderColor: colors.primary + '28', borderWidth: 1 }]}>
             <Feather name="book-open" size={13} color={colors.primary} />
             <Text style={[s.courseChipText, { color: colors.primary }]} numberOfLines={1}>
               {typeof params.courseName === 'string' && params.courseName ? params.courseName : t('files.courseFilter')}
@@ -136,20 +137,36 @@ function FilesScreenInner() {
             <EmptyState icon="folder" title={t('files.empty')} body={t('files.emptyBody')} />
           }
           renderItem={({ item }: { item: AcademicFile }) => (
-            <Card onPress={() => openFile(item)} style={[s.fileCard, rowDir]}>
-              <View style={[s.fileIcon, { backgroundColor: colors.primary + '12' }]}>
-                <Feather name={FILE_ICON[item.fileType] ?? 'file'} size={22} color={colors.primary} />
+            <Card onPress={() => openFile(item)} style={s.fileCard} padding={12}>
+              <View style={[s.fileInner, rowDir]}>
+                <Feather
+                  name={FILE_ICON[item.fileType] ?? 'file'}
+                  size={18}
+                  color={colors.mutedForeground}
+                  style={isRTL ? { marginLeft: 10 } : { marginRight: 10 }}
+                />
+                
+                <View style={s.fileInfo}>
+                  <Text style={[s.fileName, { color: colors.foreground }, align]} numberOfLines={1}>
+                    {item.title}
+                  </Text>
+                  <Text style={[s.fileMeta, { color: colors.mutedForeground }, align]}>
+                    {item.uploaderName} · {t(`fileTypes.${item.fileType}`)}
+                    {item.courseName ? ` · ${item.courseName}` : ''}
+                  </Text>
+                </View>
+
+                <View style={[s.fileActions, rowDir]}>
+                  <TouchableOpacity
+                    onPress={() => toggleFav.mutate({ fileId: item.id })}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    style={isRTL ? { marginLeft: 8 } : { marginRight: 8 }}
+                  >
+                    <Feather name="heart" size={16} color={item.isFavorited ? colors.destructive : colors.border} />
+                  </TouchableOpacity>
+                  <Feather name={forwardChevron} size={14} color={colors.mutedForeground} />
+                </View>
               </View>
-              <View style={s.fileInfo}>
-                <Text style={[s.fileName, { color: colors.foreground }, align]} numberOfLines={2}>{item.title}</Text>
-                <Text style={[s.fileMeta, { color: colors.mutedForeground }, align]}>
-                  {item.uploaderName} · {t(`fileTypes.${item.fileType}`)}
-                </Text>
-                {item.courseName && <Text style={[s.fileCourse, { color: colors.primary }, align]}>{item.courseName}</Text>}
-              </View>
-              <TouchableOpacity onPress={() => toggleFav.mutate({ fileId: item.id })} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Feather name="heart" size={20} color={item.isFavorited ? colors.destructive : colors.border} />
-              </TouchableOpacity>
             </Card>
           )}
         />
@@ -164,7 +181,7 @@ const s = StyleSheet.create({
     margin: spacing.base, marginBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md - 1,
-    borderRadius: 16,
+    borderRadius: 12,
     borderCurve: 'continuous',
     borderWidth: 1,
   },
@@ -192,18 +209,33 @@ const s = StyleSheet.create({
   chip: {
     paddingHorizontal: spacing.md,
     height: 32,
-    borderRadius: 9999,
-    borderWidth: 1.5,
+    borderRadius: 10,
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   chipLabel: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
 
   list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
-  fileCard: { alignItems: 'center', gap: spacing.md },
-  fileIcon: { width: 48, height: 48, borderRadius: 10, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  fileInfo: { flex: 1 },
-  fileName: { fontSize: fontSize.base, fontWeight: fontWeight.semibold },
-  fileMeta: { fontSize: fontSize.sm, marginTop: 2 },
-  fileCourse: { fontSize: fontSize.xs, marginTop: 2 },
+  fileCard: {
+    minHeight: 52,
+    justifyContent: 'center',
+  },
+  fileInner: {
+    alignItems: 'center',
+  },
+  fileInfo: {
+    flex: 1,
+    gap: 1,
+  },
+  fileName: {
+    fontSize: 14,
+    fontWeight: fontWeight.semibold,
+  },
+  fileMeta: {
+    fontSize: 11,
+  },
+  fileActions: {
+    alignItems: 'center',
+  },
 });

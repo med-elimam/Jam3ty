@@ -19,21 +19,21 @@ interface CardProps {
   accent?: string;
 }
 
-export function Card({ children, onPress, style, padding = 20, accent }: CardProps) {
+export function Card({ children, onPress, style, padding = 16, accent }: CardProps) {
   const colors = useColors();
 
   const containerStyle: ViewStyle[] = [
     s.card,
-    shadow.md,
+    shadow.sm,
     {
       backgroundColor: colors.card,
-      borderRadius: 20,
+      borderRadius: 14,
       borderCurve: 'continuous',
       padding,
       borderWidth: 1,
       borderColor: colors.border,
     },
-    accent ? { borderLeftWidth: 3.5, borderLeftColor: accent } : undefined,
+    accent ? { borderLeftWidth: 3, borderLeftColor: accent } : undefined,
     style,
   ].filter(Boolean) as ViewStyle[];
 

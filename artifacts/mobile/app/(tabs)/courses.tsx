@@ -41,7 +41,7 @@ function CoursesScreenInner() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Search bar */}
-      <View style={[s.searchBar, rowDir, shadow.sm, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[s.searchBar, rowDir, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Feather name="search" size={18} color={colors.mutedForeground} />
         <TextInput
           style={[s.searchInput, { color: colors.foreground }]}
@@ -74,43 +74,62 @@ function CoursesScreenInner() {
               body={t('courses.emptyBody')}
             />
           }
-          renderItem={({ item }: { item: Course }) => (
-            <Card
-              onPress={() => router.push({ pathname: '/course/[id]', params: { id: item.id } })}
-              style={s.courseCard}
-            >
-              <View style={[s.cardInner, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
-                <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={18} color={colors.mutedForeground} />
-                <View style={s.courseInfo}>
-                  <Text style={[s.courseName, { color: colors.foreground }, align]} numberOfLines={2}>
-                    {item.nameAr || item.name}
-                  </Text>
-                  {item.professorName && (
-                    <Text style={[s.courseProfessor, { color: colors.mutedForeground }, align]}>
-                      {t('courses.professorPrefix')}{item.professorName}
+          renderItem={({ item }: { item: Course }) => {
+            const hasStats = item.fileCount != null || item.assignmentCount != null;
+
+            return (
+              <Card
+                onPress={() => router.push({ pathname: '/course/[id]', params: { id: item.id } })}
+                style={s.courseCard}
+                padding={12}
+              >
+                <View style={[s.cardInner, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
+                  <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={16} color={colors.mutedForeground} />
+                  
+                  <View style={s.courseInfo}>
+                    <Text style={[s.courseName, { color: colors.foreground }, align]} numberOfLines={2}>
+                      {item.nameAr || item.name}
                     </Text>
-                  )}
-                  <View style={[s.courseStats, { justifyContent: isRTL ? 'flex-end' : 'flex-start' }]}>
-                    {item.fileCount != null && (
-                      <View style={s.stat}>
-                        <Feather name="file" size={12} color={colors.mutedForeground} />
-                        <Text style={[s.statText, { color: colors.mutedForeground }]}>{t('courses.fileCount', { n: item.fileCount })}</Text>
-                      </View>
+                    {item.professorName && (
+                      <Text style={[s.courseProfessor, { color: colors.mutedForeground }, align]}>
+                        {t('courses.professorPrefix')}{item.professorName}
+                      </Text>
                     )}
-                    {item.assignmentCount != null && (
-                      <View style={s.stat}>
-                        <Feather name="clipboard" size={12} color={colors.mutedForeground} />
-                        <Text style={[s.statText, { color: colors.mutedForeground }]}>{t('courses.assignmentCount', { n: item.assignmentCount })}</Text>
-                      </View>
+
+                    {hasStats && (
+                      <>
+                        <View style={[s.divider, { backgroundColor: colors.border }]} />
+                        <View style={[s.courseStats, { justifyContent: isRTL ? 'flex-end' : 'flex-start' }]}>
+                          {item.fileCount != null && (
+                            <View style={s.stat}>
+                              <Feather name="file" size={11} color={colors.mutedForeground} />
+                              <Text style={[s.statText, { color: colors.mutedForeground }]}>
+                                {t('courses.fileCount', { n: item.fileCount })}
+                              </Text>
+                            </View>
+                          )}
+                          {item.assignmentCount != null && (
+                            <View style={s.stat}>
+                              <Feather name="clipboard" size={11} color={colors.mutedForeground} />
+                              <Text style={[s.statText, { color: colors.mutedForeground }]}>
+                                {t('courses.assignmentCount', { n: item.assignmentCount })}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </>
                     )}
                   </View>
+
+                  <View style={[s.courseIcon, { backgroundColor: colors.primary + '0A', borderColor: colors.primary + '28' }]}>
+                    <Text style={[s.courseCode, { color: colors.primary }]}>
+                      {(item.code ?? item.name ?? '?').slice(0, 4).toUpperCase()}
+                    </Text>
+                  </View>
                 </View>
-                <View style={[s.courseIcon, { backgroundColor: colors.primary }]}>
-                  <Text style={s.courseCode}>{(item.code ?? item.name ?? '?').slice(0, 4)}</Text>
-                </View>
-              </View>
-            </Card>
-          )}
+              </Card>
+            );
+          }}
         />
       )}
     </View>
@@ -124,23 +143,33 @@ const s = StyleSheet.create({
     margin: spacing.base,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md - 1,
-    borderRadius: 16,
+    borderRadius: 12,
     borderCurve: 'continuous',
     borderWidth: 1,
   },
   searchInput: { flex: 1, fontSize: fontSize.md },
   list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
-  courseCard: {},
+  courseCard: {
+    minHeight: 72,
+    justifyContent: 'center',
+  },
   cardInner: { alignItems: 'center', gap: spacing.md },
   courseIcon: {
-    width: 52, height: 52, borderRadius: 12, borderCurve: 'continuous',
-    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    width: 48,
+    height: 48,
+    borderRadius: 10,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
-  courseCode: { fontSize: fontSize.xs, fontWeight: fontWeight.bold, color: '#fff', textAlign: 'center' },
+  courseCode: { fontSize: 10, fontWeight: fontWeight.bold, textAlign: 'center' },
   courseInfo: { flex: 1 },
-  courseName: { fontSize: fontSize.md, fontWeight: fontWeight.semibold },
-  courseProfessor: { fontSize: fontSize.sm, marginTop: 2 },
-  courseStats: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xs },
+  courseName: { fontSize: 14, fontWeight: fontWeight.semibold },
+  courseProfessor: { fontSize: 12, marginTop: 1 },
+  divider: { height: 1, marginVertical: 6 },
+  courseStats: { flexDirection: 'row', gap: spacing.md },
   stat: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  statText: { fontSize: fontSize.xs },
+  statText: { fontSize: 11 },
 });

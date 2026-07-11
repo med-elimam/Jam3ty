@@ -67,14 +67,14 @@ function CourseDetailInner() {
     <ScrollView style={s.root} refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View style={s.header}>
-        {course.code && <View style={s.codeBox}><Text style={s.code}>{course.code}</Text></View>}
+        {course.code && <View style={[s.codeBox, { backgroundColor: colors.primary + '0A', borderColor: colors.primary + '28', borderWidth: 1 }]}><Text style={s.code}>{course.code.toUpperCase()}</Text></View>}
         <Text style={s.courseName}>{course.nameAr || course.name}</Text>
         {course.professorName && <Text style={s.professor}>{t('courses.professorPrefix')}{course.professorName}</Text>}
         <Text style={s.semester}>{course.semester}</Text>
         <View style={s.stats}>
-          <View style={s.stat}><Feather name="file" size={16} color={colors.primary} style={{ marginBottom: 4 }} /><Text style={s.statNum}>{course.fileCount}</Text><Text style={s.statLabel}>{t('course.tabFiles')}</Text></View>
+          <View style={s.stat}><Feather name="file" size={14} color={colors.mutedForeground} style={{ marginBottom: 2 }} /><Text style={s.statNum}>{course.fileCount}</Text><Text style={s.statLabel}>{t('course.tabFiles')}</Text></View>
           <View style={s.statDivider} />
-          <View style={s.stat}><Feather name="clipboard" size={16} color={colors.primary} style={{ marginBottom: 4 }} /><Text style={s.statNum}>{course.assignmentCount}</Text><Text style={s.statLabel}>{t('course.tabAssignments')}</Text></View>
+          <View style={s.stat}><Feather name="clipboard" size={14} color={colors.mutedForeground} style={{ marginBottom: 2 }} /><Text style={s.statNum}>{course.assignmentCount}</Text><Text style={s.statLabel}>{t('course.tabAssignments')}</Text></View>
         </View>
       </View>
 
@@ -82,13 +82,15 @@ function CourseDetailInner() {
       {course.description && <View style={s.section}><Text style={[s.desc, align]}>{course.description}</Text></View>}
 
       {/* Tab bar */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[s.tabBar, rowDir]}>
-        {TABS.map((key) => (
-          <TouchableOpacity key={key} style={[s.tabBtn, tab === key && s.tabBtnActive]} onPress={() => setTab(key)}>
-            <Text style={[s.tabText, tab === key && s.tabTextActive]}>{t(TAB_LABEL_KEY[key])}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={[s.tabBarContainer, { borderBottomColor: colors.border }]}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[s.tabBar, rowDir]}>
+          {TABS.map((key) => (
+            <TouchableOpacity key={key} style={[s.tabBtn, tab === key && s.tabBtnActive]} onPress={() => setTab(key)}>
+              <Text style={[s.tabText, tab === key && s.tabTextActive]}>{t(TAB_LABEL_KEY[key])}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Tab content */}
       {tab === 'files' && (
@@ -98,9 +100,12 @@ function CourseDetailInner() {
           ) : (
             (course.recentFiles ?? []).map((f) => (
               <TouchableOpacity key={f.id} style={[s.itemCard, rowDir]} activeOpacity={0.7} onPress={() => openFile(f)}>
-                <Feather name="file-text" size={20} color={colors.primary} />
-                <Text style={[s.itemTitle, align]} numberOfLines={2}>{f.title}</Text>
-                <Text style={s.itemMeta}>{t(`fileTypes.${f.fileType}`)}</Text>
+                <Feather name="file-text" size={18} color={colors.mutedForeground} style={isRTL ? { marginLeft: 10 } : { marginRight: 10 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[s.itemTitle, align]} numberOfLines={1}>{f.title}</Text>
+                  <Text style={[s.itemMeta, align]}>{t(`fileTypes.${f.fileType}`)}</Text>
+                </View>
+                <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={14} color={colors.mutedForeground} />
               </TouchableOpacity>
             ))
           )}
@@ -110,7 +115,7 @@ function CourseDetailInner() {
           >
             <View style={[s.viewAllInner, rowDir]}>
               <Text style={s.viewAllText}>{t('course.viewAllFiles')}</Text>
-              <Feather name={isRTL ? 'arrow-left' : 'arrow-right'} size={15} color={colors.primary} />
+              <Feather name={isRTL ? 'arrow-left' : 'arrow-right'} size={14} color={colors.primary} />
             </View>
           </TouchableOpacity>
         </View>
@@ -139,7 +144,7 @@ function CourseDetailInner() {
             (course.upcomingAssignments ?? []).map((a) => (
               <View key={a.id} style={[s.itemCard, s.itemCardColumn]}>
                 <Text style={[s.itemTitle, align]}>{a.title}</Text>
-                <Text style={[s.itemMeta, align]}>{t('course.due')}{a.deadline?.split('T')[0]}</Text>
+                <Text style={[s.itemMeta, align]}>{t('course.due')} {a.deadline?.split('T')[0]}</Text>
               </View>
             ))
           )}
@@ -169,30 +174,31 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     root: { flex: 1, backgroundColor: colors.background },
     center: { alignItems: 'center', justifyContent: 'center' },
     header: { backgroundColor: colors.card, padding: 20, alignItems: 'center', gap: 6, borderBottomWidth: 1, borderBottomColor: colors.border },
-    codeBox: { backgroundColor: 'rgba(79, 70, 229, 0.08)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 },
-    code: { fontSize: 12, fontWeight: '700', color: colors.primary },
-    courseName: { fontSize: 20, fontWeight: '700', color: colors.foreground, textAlign: 'center' },
-    professor: { fontSize: 14, color: colors.mutedForeground },
-    semester: { fontSize: 12, color: colors.mutedForeground },
-    stats: { flexDirection: 'row', gap: 24, marginTop: 8 },
+    codeBox: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
+    code: { fontSize: 11, fontWeight: '700', color: colors.primary },
+    courseName: { fontSize: 18, fontWeight: '700', color: colors.foreground, textAlign: 'center', marginTop: 4 },
+    professor: { fontSize: 13, color: colors.mutedForeground },
+    semester: { fontSize: 11, color: colors.mutedForeground },
+    stats: { flexDirection: 'row', gap: 24, marginTop: 12 },
     stat: { alignItems: 'center', gap: 2 },
-    statNum: { fontSize: 20, fontWeight: '700', color: colors.foreground },
-    statLabel: { fontSize: 11, color: colors.mutedForeground },
+    statNum: { fontSize: 18, fontWeight: '700', color: colors.foreground },
+    statLabel: { fontSize: 10, color: colors.mutedForeground },
     statDivider: { width: 1, backgroundColor: colors.border },
     section: { padding: 16, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
-    desc: { fontSize: 14, color: colors.mutedForeground, lineHeight: 21 },
-    tabBar: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-    tabBtn: { paddingHorizontal: 16, height: 32, borderRadius: 20, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, justifyContent: 'center', alignItems: 'center' },
-    tabBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-    tabText: { fontSize: 14, fontWeight: '600', color: colors.mutedForeground },
-    tabTextActive: { color: '#fff' },
+    desc: { fontSize: 13, color: colors.mutedForeground, lineHeight: 18 },
+    tabBarContainer: { backgroundColor: colors.card, borderBottomWidth: 1 },
+    tabBar: { paddingHorizontal: 16, gap: 16, height: 40 },
+    tabBtn: { paddingVertical: 8, paddingHorizontal: 4, height: 40, justifyContent: 'center', alignItems: 'center' },
+    tabBtnActive: { borderBottomWidth: 2, borderBottomColor: colors.primary },
+    tabText: { fontSize: 13, fontWeight: '600', color: colors.mutedForeground },
+    tabTextActive: { color: colors.primary },
     tabContent: { padding: 16 },
     itemCard: { alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: 12, borderCurve: 'continuous', padding: 12, marginBottom: 8, borderWidth: 1, borderColor: colors.border },
     itemCardColumn: { flexDirection: 'column', alignItems: 'stretch', gap: 4 },
     itemTitle: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.foreground },
-    itemMeta: { fontSize: 12, color: colors.mutedForeground },
-    emptyText: { textAlign: 'center', color: colors.mutedForeground, fontSize: 14, paddingVertical: 20 },
+    itemMeta: { fontSize: 11, color: colors.mutedForeground },
+    emptyText: { textAlign: 'center', color: colors.mutedForeground, fontSize: 13, paddingVertical: 20 },
     viewAllBtn: { paddingVertical: 12, alignItems: 'center' },
     viewAllInner: { alignItems: 'center', gap: 6 },
-    viewAllText: { fontSize: 14, fontWeight: '600', color: colors.primary },
+    viewAllText: { fontSize: 13, fontWeight: '600', color: colors.primary },
   });

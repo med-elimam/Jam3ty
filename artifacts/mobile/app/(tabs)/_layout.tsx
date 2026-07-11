@@ -10,11 +10,10 @@ import { directionalHeaderOptions } from '@/components/DirectionalHeaderTitle';
 
 type FeatherName = React.ComponentProps<typeof Feather>['name'];
 
-function TabIcon({ name, color, focused }: { name: FeatherName; color: string; focused: boolean }) {
+function TabIcon({ name, color }: { name: FeatherName; color: string }) {
   return (
     <View style={styles.iconWrap}>
       <Feather name={name} size={22} color={color} />
-      {focused && <View style={[styles.dot, { backgroundColor: color }]} />}
     </View>
   );
 }
@@ -44,7 +43,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#94A3B8',
+        tabBarInactiveTintColor: colors.mutedForeground,
         headerShown: true,
         headerStyle: { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border, elevation: 0, shadowOpacity: 0 },
         headerTintColor: colors.foreground,
@@ -55,8 +54,8 @@ export default function TabLayout() {
           borderTopWidth: 1,
           borderTopColor: colors.border,
           elevation: 0,
-          height: Platform.OS === 'android' ? 68 : 84,
-          paddingBottom: Platform.OS === 'android' ? 10 : 24,
+          height: Platform.OS === 'android' ? 64 : 80,
+          paddingBottom: Platform.OS === 'android' ? 8 : 22,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
@@ -80,8 +79,9 @@ export default function TabLayout() {
           name={tab.name}
           options={{
             ...directionalHeaderOptions(t(tab.titleKey), isRTL),
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon name={tab.icon} color={color} focused={focused} />
+            headerShown: tab.name !== 'index', // Hide header for Home tab
+            tabBarIcon: ({ color }) => (
+              <TabIcon name={tab.icon} color={color} />
             ),
           }}
         />
@@ -92,5 +92,4 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   iconWrap: { alignItems: 'center', justifyContent: 'center', gap: 3 },
-  dot: { width: 4, height: 4, borderRadius: 2 },
 });

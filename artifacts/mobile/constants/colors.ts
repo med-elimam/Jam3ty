@@ -9,7 +9,7 @@ const colors = {
     tint: '#4F46E5',
 
     // Core surfaces
-    background: '#F8FAFC',
+    background: '#FAFAFB',
     foreground: '#0F172A',
 
     // Cards / elevated surfaces
@@ -37,9 +37,9 @@ const colors = {
     destructiveForeground: '#FFFFFF',
 
     // Borders / inputs
-    border: '#E5E7EB',
-    input: '#E5E7EB',
-    divider: '#E2E8F0',
+    border: '#E8E8EC',
+    input: '#E8E8EC',
+    divider: '#E8E8EC',
 
     // Status
     success: '#10B981',

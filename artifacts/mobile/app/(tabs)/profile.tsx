@@ -133,7 +133,7 @@ function ProfileScreenInner() {
         )}
 
         {/* ── Menu ── */}
-        <Card style={s.menuCard}>
+        <Card padding={0} style={s.menuCard}>
           {menuItems.map((item, idx) => (
             <TouchableOpacity
               key={item.label}
@@ -152,8 +152,8 @@ function ProfileScreenInner() {
                 </View>
               )}
               <Text style={[s.menuLabel, { color: colors.foreground }, { textAlign: isRTL ? 'right' : 'left' }]}>{item.label}</Text>
-              <View style={[s.menuIconBox, { backgroundColor: colors.primary + '12' }]}>
-                <Feather name={item.icon} size={18} color={colors.primary} />
+              <View style={[s.menuIconBox, { backgroundColor: colors.muted }]}>
+                <Feather name={item.icon} size={18} color={colors.mutedForeground} />
               </View>
             </TouchableOpacity>
           ))}

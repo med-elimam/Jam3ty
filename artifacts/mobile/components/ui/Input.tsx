@@ -36,11 +36,10 @@ export function Input({ label, error, containerStyle, isPassword, ...rest }: Inp
               : focused
               ? colors.primary
               : colors.border,
-            borderWidth: focused || error ? 1.5 : 1,
+            borderWidth: 1,
             backgroundColor: colors.card,
-            borderRadius: 14,
+            borderRadius: 12,
             borderCurve: 'continuous',
-            boxShadow: focused ? '0 4px 12px rgba(79, 70, 229, 0.08)' : undefined,
           },
         ]}
       >
