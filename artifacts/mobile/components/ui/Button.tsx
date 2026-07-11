@@ -38,8 +38,8 @@ export function Button({
   const isDisabled = disabled || loading;
 
   const bg: Record<ButtonVariant, string> = {
-    primary: colors.navy,
-    secondary: colors.secondary,
+    primary: colors.primary,
+    secondary: '#FFFFFF',
     outline: 'transparent',
     ghost: 'transparent',
     danger: colors.destructive,
@@ -47,18 +47,18 @@ export function Button({
   };
 
   const textColor: Record<ButtonVariant, string> = {
-    primary: '#fff',
-    secondary: colors.navy,
-    outline: colors.navy,
-    ghost: colors.navy,
-    danger: '#fff',
-    gold: '#1A1A2E',
+    primary: '#FFFFFF',
+    secondary: colors.primary,
+    outline: colors.primary,
+    ghost: colors.primary,
+    danger: '#FFFFFF',
+    gold: '#FFFFFF',
   };
 
   const borderColor: Record<ButtonVariant, string | undefined> = {
     primary: undefined,
-    secondary: undefined,
-    outline: colors.navy,
+    secondary: colors.primary,
+    outline: colors.border,
     ghost: undefined,
     danger: undefined,
     gold: undefined,
@@ -66,8 +66,8 @@ export function Button({
 
   const pad: Record<ButtonSize, { paddingVertical: number; paddingHorizontal: number }> = {
     sm: { paddingVertical: 8, paddingHorizontal: spacing.md },
-    md: { paddingVertical: 13, paddingHorizontal: spacing.base },
-    lg: { paddingVertical: 17, paddingHorizontal: spacing.xl },
+    md: { paddingVertical: 12, paddingHorizontal: spacing.base },
+    lg: { paddingVertical: 16, paddingHorizontal: spacing.xl },
   };
 
   const textSize: Record<ButtonSize, number> = {
@@ -78,12 +78,12 @@ export function Button({
 
   return (
     <TouchableOpacity
-      activeOpacity={0.75}
+      activeOpacity={0.8}
       disabled={isDisabled}
       style={[
         s.btn,
         pad[size],
-        { backgroundColor: bg[variant], borderRadius: radius.lg },
+        { backgroundColor: bg[variant], borderRadius: 14, borderCurve: 'continuous' },
         borderColor[variant] ? { borderWidth: 1.5, borderColor: borderColor[variant] } : undefined,
         fullWidth && { alignSelf: 'stretch' },
         isDisabled && s.disabled,

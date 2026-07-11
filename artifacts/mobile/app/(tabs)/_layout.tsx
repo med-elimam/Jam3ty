@@ -43,11 +43,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.navy,
-        tabBarInactiveTintColor: colors.mutedForeground,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: '#94A3B8',
         headerShown: true,
-        headerStyle: { backgroundColor: colors.navy },
-        headerTintColor: '#fff',
+        headerStyle: { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border, elevation: 0, shadowOpacity: 0 },
+        headerTintColor: colors.foreground,
         tabBarStyle: {
           flexDirection: 'row',
           position: 'absolute',
@@ -68,7 +68,7 @@ export default function TabLayout() {
           isIOS ? (
             <BlurView
               intensity={96}
-              tint={isDark ? 'dark' : 'extraLight'}
+              tint={isDark ? 'dark' : 'default'}
               style={StyleSheet.absoluteFill}
             />
           ) : null,

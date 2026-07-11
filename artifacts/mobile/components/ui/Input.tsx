@@ -34,10 +34,13 @@ export function Input({ label, error, containerStyle, isPassword, ...rest }: Inp
             borderColor: error
               ? colors.destructive
               : focused
-              ? colors.navy
+              ? colors.primary
               : colors.border,
+            borderWidth: focused || error ? 1.5 : 1,
             backgroundColor: colors.card,
-            borderRadius: radius.md,
+            borderRadius: 14,
+            borderCurve: 'continuous',
+            boxShadow: focused ? '0 4px 12px rgba(79, 70, 229, 0.08)' : undefined,
           },
         ]}
       >
@@ -71,13 +74,13 @@ const s = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
     paddingHorizontal: spacing.base,
+    minHeight: 48,
   },
   input: {
     flex: 1,
     fontSize: fontSize.md,
-    paddingVertical: 14,
+    paddingVertical: 12,
   },
   eyeBtn: { padding: spacing.xs },
   error: { fontSize: fontSize.xs, textAlign: 'right' },

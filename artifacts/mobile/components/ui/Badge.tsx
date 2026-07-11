@@ -13,23 +13,38 @@ interface BadgeProps {
 
 export function Badge({ label, color = 'primary', style }: BadgeProps) {
   const colors = useColors();
+  const isDark = colors.background === '#0B0F19';
 
-  const bg: Record<BadgeColor, string> = {
-    primary: colors.navy + '18',
-    success: colors.success + '20',
-    warning: colors.warning + '20',
-    danger: colors.destructive + '20',
-    gold: colors.gold + '22',
-    muted: colors.mutedForeground + '18',
+  const bg: Record<BadgeColor, string> = isDark ? {
+    primary: 'rgba(99, 102, 241, 0.15)',
+    success: 'rgba(16, 185, 129, 0.15)',
+    warning: 'rgba(245, 158, 11, 0.15)',
+    danger: 'rgba(239, 68, 68, 0.15)',
+    gold: 'rgba(99, 102, 241, 0.15)',
+    muted: 'rgba(148, 163, 184, 0.15)',
+  } : {
+    primary: '#EEF2FF',
+    success: '#EDF3EC', // Pale green
+    warning: '#FBF3DB', // Pale yellow
+    danger: '#FDEBEC',  // Pale red
+    gold: '#EEF2FF',
+    muted: '#F1F5F9',
   };
 
-  const fg: Record<BadgeColor, string> = {
-    primary: colors.navy,
-    success: colors.success,
-    warning: colors.warning,
-    danger: colors.destructive,
-    gold: colors.gold,
-    muted: colors.mutedForeground,
+  const fg: Record<BadgeColor, string> = isDark ? {
+    primary: '#818CF8',
+    success: '#34D399',
+    warning: '#FBBF24',
+    danger: '#F87171',
+    gold: '#818CF8',
+    muted: '#94A3B8',
+  } : {
+    primary: '#4F46E5',
+    success: '#346538',
+    warning: '#956400',
+    danger: '#9F2F2D',
+    gold: '#6366F1',
+    muted: '#64748B',
   };
 
   return (
@@ -42,8 +57,9 @@ export function Badge({ label, color = 'primary', style }: BadgeProps) {
 const s = StyleSheet.create({
   badge: {
     paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 3,
-    borderRadius: radius.full,
+    paddingVertical: 4,
+    borderRadius: 10,
+    borderCurve: 'continuous',
     alignSelf: 'flex-start',
   },
   label: {

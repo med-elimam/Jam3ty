@@ -68,7 +68,7 @@ function OpportunitiesScreenInner() {
           <TouchableOpacity
             key={String(opt.key)}
             activeOpacity={0.75}
-            style={[s.typeChip, { backgroundColor: activeType === opt.key ? colors.navy : colors.card, borderColor: activeType === opt.key ? colors.navy : colors.border }]}
+            style={[s.typeChip, { backgroundColor: activeType === opt.key ? colors.primary : colors.card, borderColor: activeType === opt.key ? colors.primary : colors.border }]}
             onPress={() => setActiveType(opt.key)}
           >
             <Text style={[s.typeLabel, { color: activeType === opt.key ? '#fff' : colors.mutedForeground }]}>{t(`opportunityTypes.${opt.labelKey}`)}</Text>
@@ -77,7 +77,7 @@ function OpportunitiesScreenInner() {
       </ScrollView>
 
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -85,12 +85,12 @@ function OpportunitiesScreenInner() {
           data={opps}
           keyExtractor={(o) => o.id}
           contentContainerStyle={s.list}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
           ListEmptyComponent={
             <EmptyState icon="briefcase" title={t('opportunities.empty')} body={t('opportunities.emptyBody')} />
           }
           renderItem={({ item }: { item: Opportunity }) => {
-            const color = OPP_COLOR[item.type] ?? colors.navy;
+            const color = OPP_COLOR[item.type] ?? colors.primary;
             const icon = OPP_ICON[item.type] ?? 'briefcase';
             const dLeft = deadlineDaysLeft(item.deadline);
             const link = item.link && /^https?:\/\//i.test(item.link) ? item.link : null;
@@ -153,7 +153,7 @@ const s = StyleSheet.create({
   list: { paddingHorizontal: spacing.base, paddingBottom: 100, gap: spacing.sm },
   card: { gap: spacing.sm },
   cardHeader: { gap: spacing.md, alignItems: 'flex-start' },
-  iconBox: { width: 48, height: 48, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  iconBox: { width: 48, height: 48, borderRadius: 10, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   cardInfo: { flex: 1 },
   cardTitle: { fontSize: fontSize.md, fontWeight: fontWeight.bold },
   cardCompany: { fontSize: fontSize.sm, marginTop: 2 },

@@ -56,7 +56,7 @@ function AssignmentsScreenInner() {
             activeOpacity={0.75}
             style={[
               s.filterChip,
-              { backgroundColor: filter === f.value ? colors.navy : colors.card, borderColor: filter === f.value ? colors.navy : colors.border },
+              { backgroundColor: filter === f.value ? colors.primary : colors.card, borderColor: filter === f.value ? colors.primary : colors.border },
             ]}
             onPress={() => setFilter(f.value)}
           >
@@ -66,7 +66,7 @@ function AssignmentsScreenInner() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -74,7 +74,7 @@ function AssignmentsScreenInner() {
           data={assignments}
           keyExtractor={(a) => a.id}
           contentContainerStyle={s.list}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
           ListEmptyComponent={
             <EmptyState icon="clipboard" title={t('assignments.empty')} body={t('assignments.emptyBody')} />
           }

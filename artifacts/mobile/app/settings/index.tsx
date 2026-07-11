@@ -55,8 +55,8 @@ function SettingsRow({
       >
         {label}
       </Text>
-      <View style={[s.rowIcon, { backgroundColor: (destructive ? colors.destructive : colors.navy) + '12' }]}>
-        <Feather name={icon} size={17} color={destructive ? colors.destructive : colors.navy} />
+      <View style={[s.rowIcon, { backgroundColor: (destructive ? colors.destructive : colors.primary) + '12' }]}>
+        <Feather name={icon} size={17} color={destructive ? colors.destructive : colors.primary} />
       </View>
     </TouchableOpacity>
   );
@@ -99,7 +99,7 @@ export default function SettingsScreen() {
     <Screen edges={['bottom']}>
       <ScrollView contentContainerStyle={s.content}>
         {/* Profile strip */}
-        <View style={[s.profileStrip, { backgroundColor: colors.navy, flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
+        <View style={[s.profileStrip, { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border, flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
           <View style={s.profileInfo}>
             <Text style={[s.profileName, align]}>{user?.fullName}</Text>
             <Text style={[s.profileEmail, align]}>{user?.email}</Text>
@@ -107,9 +107,6 @@ export default function SettingsScreen() {
           <Avatar
             name={user?.fullName ?? 'U'}
             size={52}
-            bg={colors.gold + '28'}
-            fg={colors.gold}
-            style={{ borderWidth: 2, borderColor: colors.gold }}
           />
         </View>
 
@@ -170,8 +167,8 @@ const s = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   profileInfo: { gap: 3, flex: 1 },
-  profileName: { fontSize: fontSize.lg, fontWeight: fontWeight.bold, color: '#fff' },
-  profileEmail: { fontSize: fontSize.sm, color: 'rgba(255,255,255,0.65)' },
+  profileName: { fontSize: fontSize.lg, fontWeight: fontWeight.bold },
+  profileEmail: { fontSize: fontSize.sm },
   section: { paddingHorizontal: spacing.base, gap: spacing.sm },
   sectionLabel: {
     fontSize: fontSize.xs,
@@ -186,7 +183,7 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.base,
   },
-  rowIcon: { width: 36, height: 36, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  rowIcon: { width: 36, height: 36, borderRadius: 10, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
   rowLabel: { flex: 1, fontSize: fontSize.md, fontWeight: fontWeight.medium },
   rowValue: { fontSize: fontSize.sm },
   footer: { fontSize: fontSize.xs, textAlign: 'center', paddingHorizontal: spacing.xl, paddingBottom: spacing.sm },

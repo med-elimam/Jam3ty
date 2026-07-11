@@ -142,7 +142,7 @@ export default function OnboardingScreen() {
         <View
           style={[
             s.progressFill,
-            { backgroundColor: colors.navy, width: `${progressPct}%` as any },
+            { backgroundColor: colors.primary, width: `${progressPct}%` as any },
           ]}
         />
       </View>
@@ -152,13 +152,13 @@ export default function OnboardingScreen() {
         <Text style={[s.stepCount, { color: colors.mutedForeground }]}>
           {step + 1} / {STEPS.length}
         </Text>
-        <Text style={[s.stepTitle, { color: colors.navy }]}>{stepTitles[step]}</Text>
+        <Text style={[s.stepTitle, { color: colors.primary }]}>{stepTitles[step]}</Text>
       </View>
 
       {/* Options list */}
       {isLoading ? (
         <View style={s.loader}>
-          <ActivityIndicator color={colors.navy} size="large" />
+          <ActivityIndicator color={colors.primary} size="large" />
         </View>
       ) : (
         <FlatList
@@ -180,9 +180,10 @@ export default function OnboardingScreen() {
                   s.option,
                   shadow.sm,
                   {
-                    backgroundColor: isSelected ? colors.navy : colors.card,
-                    borderColor: isSelected ? colors.navy : colors.border,
-                    borderRadius: radius.lg,
+                    backgroundColor: isSelected ? colors.primary : colors.card,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                    borderRadius: 16,
+                    borderCurve: 'continuous',
                   },
                 ]}
                 onPress={() => selectField(field as keyof Selection, id)}
@@ -206,7 +207,7 @@ export default function OnboardingScreen() {
                   ]}
                 >
                   {isSelected && (
-                    <View style={[s.radioDot, { backgroundColor: colors.navy }]} />
+                    <View style={[s.radioDot, { backgroundColor: colors.primary }]} />
                   )}
                 </View>
               </TouchableOpacity>
@@ -226,13 +227,13 @@ export default function OnboardingScreen() {
                 style={[
                   s.groupChip,
                   {
-                    backgroundColor: sel.groupId === g.id ? colors.navy : colors.secondary,
+                    backgroundColor: sel.groupId === g.id ? colors.primary : colors.secondary,
                     borderRadius: radius.full,
                   },
                 ]}
                 onPress={() => setSel((p) => ({ ...p, groupId: g.id }))}
               >
-                <Text style={{ color: sel.groupId === g.id ? '#fff' : colors.navy, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}>
+                <Text style={{ color: sel.groupId === g.id ? '#fff' : colors.primary, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}>
                   {g.nameAr || g.name}
                 </Text>
               </TouchableOpacity>

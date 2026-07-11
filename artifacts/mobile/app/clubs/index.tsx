@@ -45,7 +45,7 @@ function ClubsScreenInner() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -53,7 +53,7 @@ function ClubsScreenInner() {
           data={clubs}
           keyExtractor={(c) => c.id}
           contentContainerStyle={s.list}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
           ListEmptyComponent={
             <EmptyState icon="users" title={t('clubs.empty')} body={t('clubs.emptyBody')} />
           }
@@ -62,7 +62,7 @@ function ClubsScreenInner() {
             return (
               <Card style={s.card}>
                 <View style={[s.cardTop, rowDir]}>
-                  <View style={[s.clubLogo, { backgroundColor: colors.navy + '10' }]}>
+                  <View style={[s.clubLogo, { backgroundColor: colors.primary + '12' }]}>
                     {logoUrl ? (
                       <Image source={{ uri: logoUrl }} style={s.logoImage} contentFit="cover" />
                     ) : (
@@ -105,7 +105,7 @@ const s = StyleSheet.create({
   list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
   card: { gap: spacing.sm },
   cardTop: { alignItems: 'center', gap: spacing.md },
-  clubLogo: { width: 46, height: 46, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' },
+  clubLogo: { width: 46, height: 46, borderRadius: 12, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' },
   logoImage: { width: '100%', height: '100%' },
   emoji: { fontSize: 22 },
   cardInfo: { flex: 1 },

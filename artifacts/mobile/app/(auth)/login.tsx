@@ -88,10 +88,10 @@ export default function LoginScreen() {
       >
         {/* Logo */}
         <View style={s.logoSection}>
-          <View style={[s.logoBox, { backgroundColor: colors.navy }]}>
-            <Text style={[s.logoLetter, { color: colors.gold }]}>ج</Text>
+          <View style={[s.logoBox, { backgroundColor: colors.primary }]}>
+            <Text style={[s.logoLetter, { color: '#FFFFFF' }]}>ج</Text>
           </View>
-          <Text style={[s.appName, { color: colors.navy }]}>{t('brand.appName')}</Text>
+          <Text style={[s.appName, { color: colors.foreground }]}>{t('brand.appName')}</Text>
           <Text style={[s.tagline, { color: colors.mutedForeground }]}>{t('auth.appTagline')}</Text>
         </View>
 
@@ -131,7 +131,7 @@ export default function LoginScreen() {
           <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={s.linkRow}>
             <Text style={[s.linkText, { color: colors.mutedForeground }]}>
               {t('auth.noAccount')}{' '}
-              <Text style={{ color: colors.navy, fontWeight: fontWeight.semibold }}>{t('auth.createAccount')}</Text>
+              <Text style={{ color: colors.primary, fontWeight: fontWeight.semibold }}>{t('auth.createAccount')}</Text>
             </Text>
           </TouchableOpacity>
 
@@ -152,14 +152,15 @@ const s = StyleSheet.create({
   logoBox: {
     width: 88,
     height: 88,
-    borderRadius: radius.xl,
+    borderRadius: 22,
+    borderCurve: 'continuous',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 4,
   },
   logoLetter: { fontSize: 44, fontWeight: fontWeight.bold },
   appName: { fontSize: fontSize['3xl'], fontWeight: fontWeight.bold, letterSpacing: 0.5 },

@@ -8,7 +8,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { GuestGate } from '@/components/GuestGate';
 import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
-const SESSION_COLORS = ['#1E3A5F', '#2B5480', '#D4A853', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444'];
+const SESSION_COLORS = ['#4F46E5', '#6366F1', '#10B981', '#F59E0B', '#64748B'];
 const TODAY_DOW = new Date().getDay();
 
 export default function CalendarScreen() {
@@ -67,8 +67,8 @@ function CalendarScreenInner() {
               style={[
                 s.dayCell,
                 {
-                  backgroundColor: isActive ? colors.navy : 'transparent',
-                  borderColor: isToday && !isActive ? colors.gold : 'transparent',
+                  backgroundColor: isActive ? colors.primary : 'transparent',
+                  borderColor: isToday && !isActive ? colors.primary : 'transparent',
                 },
               ]}
               onPress={() => setSelectedDay(i)}
@@ -76,11 +76,11 @@ function CalendarScreenInner() {
               <Text style={[s.dayAbbr, { color: isActive ? 'rgba(255,255,255,0.75)' : colors.mutedForeground }]}>
                 {label}
               </Text>
-              <Text style={[s.dayNum, { color: isActive ? '#fff' : isToday ? colors.gold : colors.foreground }]}>
+              <Text style={[s.dayNum, { color: isActive ? '#fff' : isToday ? colors.primary : colors.foreground }]}>
                 {dateNum}
               </Text>
               {count > 0 && (
-                <View style={[s.dayDot, { backgroundColor: isActive ? 'rgba(255,255,255,0.6)' : colors.gold }]} />
+                <View style={[s.dayDot, { backgroundColor: isActive ? 'rgba(255,255,255,0.6)' : colors.primary }]} />
               )}
             </TouchableOpacity>
           );
@@ -95,7 +95,7 @@ function CalendarScreenInner() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -137,8 +137,8 @@ function CalendarScreenInner() {
                         <Text style={[s.tagText, { color: accent }]}>{typeLabel(session.type)}</Text>
                       </View>
                       {session.room && (
-                        <View style={[s.tag, { backgroundColor: colors.navy + '10' }]}>
-                          <Text style={[s.tagText, { color: colors.navy }]}>
+                        <View style={[s.tag, { backgroundColor: 'rgba(99, 102, 241, 0.08)' }]}>
+                          <Text style={[s.tagText, { color: colors.primary }]}>
                             {t('timetable.room')} {session.room}
                           </Text>
                         </View>
@@ -167,12 +167,13 @@ const s = StyleSheet.create({
   dayCell: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    borderWidth: 1,
     gap: 2,
   },
-  dayAbbr: { fontSize: fontSize.xs, fontWeight: fontWeight.medium, textTransform: 'uppercase' },
+  dayAbbr: { fontSize: fontSize.xs - 1, fontWeight: fontWeight.medium, textTransform: 'uppercase' },
   dayNum: { fontSize: fontSize.md, fontWeight: fontWeight.bold },
   dayDot: { width: 4, height: 4, borderRadius: 2, marginTop: 3 },
   headerRow: {
@@ -184,7 +185,7 @@ const s = StyleSheet.create({
   dayTitle: { fontSize: fontSize.lg, fontWeight: fontWeight.bold },
   dayCount: { fontSize: fontSize.sm },
   list: { paddingHorizontal: spacing.base, paddingBottom: 120, gap: spacing.sm },
-  sessionCard: { borderRadius: radius.lg, borderWidth: 1, overflow: 'hidden' },
+  sessionCard: { borderRadius: 16, borderCurve: 'continuous', borderWidth: 1, overflow: 'hidden' },
   timeCol: { width: 62, padding: spacing.sm, alignItems: 'center', justifyContent: 'center', gap: 4 },
   timeStart: { fontSize: fontSize.sm, fontWeight: fontWeight.bold },
   timeLine: { width: 2, flex: 1, borderRadius: 1, minHeight: 12 },
@@ -193,6 +194,6 @@ const s = StyleSheet.create({
   sessionName: { fontSize: fontSize.md, fontWeight: fontWeight.semibold },
   sessionMeta: { fontSize: fontSize.sm, marginTop: 2 },
   sessionTags: { flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.sm },
-  tag: { paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.sm },
+  tag: { paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: 8, borderCurve: 'continuous' },
   tagText: { fontSize: fontSize.xs, fontWeight: fontWeight.semibold },
 });

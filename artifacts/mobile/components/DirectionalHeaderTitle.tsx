@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
+import { useColors } from '@/hooks/useColors';
 
 interface DirectionalHeaderTitleProps {
   title: string;
@@ -7,11 +8,12 @@ interface DirectionalHeaderTitleProps {
 }
 
 function DirectionalHeaderTitle({ title, isRTL }: DirectionalHeaderTitleProps) {
+  const colors = useColors();
   return (
     <Text
       accessibilityRole="header"
       numberOfLines={1}
-      style={[styles.title, isRTL ? styles.rtl : styles.ltr]}
+      style={[styles.title, { color: colors.foreground }, isRTL ? styles.rtl : styles.ltr]}
     >
       {title}
     </Text>
@@ -38,7 +40,6 @@ export function directionalHeaderOptions(title: string, isRTL: boolean) {
 
 const styles = StyleSheet.create({
   title: {
-    color: '#fff',
     fontSize: 17,
     fontWeight: '700',
     maxWidth: '100%',

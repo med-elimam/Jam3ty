@@ -15,19 +15,18 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, body, actionLabel, onAction }: EmptyStateProps) {
   const colors = useColors();
+  const isDark = colors.background === '#0B0F19';
 
   return (
     <View style={s.root}>
-      <View style={[s.iconCircle, { backgroundColor: colors.secondary }]}>
-        <View style={[s.iconInner, { backgroundColor: colors.navy + '15' }]}>
-          <Feather name={icon} size={36} color={colors.navy} />
-        </View>
+      <View style={[s.iconCircle, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.15)' : '#EEF2FF' }]}>
+        <Feather name={icon} size={32} color={isDark ? '#818CF8' : '#4F46E5'} />
       </View>
       <Text style={[s.title, { color: colors.foreground }]}>{title}</Text>
       {body && <Text style={[s.body, { color: colors.mutedForeground }]}>{body}</Text>}
       {actionLabel && onAction && (
         <View style={s.action}>
-          <Button label={actionLabel} onPress={onAction} variant="outline" size="sm" fullWidth={false} />
+          <Button label={actionLabel} onPress={onAction} variant="primary" size="sm" fullWidth={false} />
         </View>
       )}
     </View>
@@ -37,34 +36,28 @@ export function EmptyState({ icon, title, body, actionLabel, onAction }: EmptySt
 const s = StyleSheet.create({
   root: {
     alignItems: 'center',
-    paddingTop: spacing['3xl'],
+    paddingVertical: 40,
     paddingHorizontal: spacing['2xl'],
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   iconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm,
-  },
-  iconInner: {
     width: 72,
     height: 72,
-    borderRadius: radius.full,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: spacing.xs,
   },
   title: {
-    fontSize: fontSize.lg,
+    fontSize: 18,
     fontWeight: fontWeight.bold,
     textAlign: 'center',
   },
   body: {
-    fontSize: fontSize.base,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: fontSize.base * 1.6,
+    lineHeight: 20,
+    maxWidth: 280,
   },
-  action: { marginTop: spacing.sm },
+  action: { marginTop: spacing.md },
 });

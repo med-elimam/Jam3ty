@@ -19,7 +19,8 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { GuestHome } from '@/components/GuestHome';
-import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
+import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
+import { Avatar } from '@/components/ui/Avatar';
 
 function formatTime(t: string) {
   return t?.slice(0, 5) ?? '';
@@ -37,8 +38,7 @@ function SectionTitle({ title, icon }: { title: string; icon: React.ComponentPro
   const { isRTL } = usePreferences();
   return (
     <View style={[s.sectionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-      <View style={[s.sectionAccent, { backgroundColor: colors.navy }]} />
-      <Feather name={icon} size={16} color={colors.navy} />
+      <Feather name={icon} size={18} color={colors.primary} style={isRTL ? { marginLeft: 8 } : { marginRight: 8 }} />
       <Text style={[s.sectionTitle, { color: colors.foreground }]}>{title}</Text>
     </View>
   );
@@ -46,9 +46,6 @@ function SectionTitle({ title, icon }: { title: string; icon: React.ComponentPro
 
 export default function HomeScreen() {
   const { isGuest } = useAuth();
-  // Guests get a browsable public home (announcements, events, plans) with a
-  // login CTA — not a dead lock screen. The personalized dashboard hooks below
-  // never mount for guests.
   if (isGuest) return <GuestHome />;
   return <HomeScreenInner />;
 }
@@ -69,7 +66,7 @@ function HomeScreenInner() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={colors.navy} size="large" />
+        <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
   }
@@ -86,49 +83,54 @@ function HomeScreenInner() {
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={s.content}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
     >
-      {/* ── Hero ── */}
-      <View style={[s.hero, { backgroundColor: colors.navy }]}>
-        <View style={[s.heroInner, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
-          <TouchableOpacity
-            onPress={() => router.push('/notifications')}
-            style={s.notifBtn}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          >
-            <Feather name="bell" size={22} color="rgba(255,255,255,0.9)" />
-            {(d?.unreadNotificationsCount ?? 0) > 0 && (
-              <View style={[s.notifBadge, { backgroundColor: colors.gold }]}>
-                <Text style={s.notifBadgeText}>{d?.unreadNotificationsCount}</Text>
+      {/* ── White Premium Header ── */}
+      <View style={[s.header, { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+        <View style={[s.headerTop, rowDir]}>
+          <View style={[s.userInfo, rowDir]}>
+            <Avatar name={user?.fullName ?? d?.student?.fullName ?? ''} size={42} />
+            <View style={[s.userText, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+              <Text style={s.heroGreet}>{t('home.greeting')} 👋</Text>
+              <Text style={[s.heroName, { color: colors.foreground }]}>{firstName}</Text>
+            </View>
+          </View>
+          
+          <View style={[s.headerActions, rowDir]}>
+            {/* Subscription status pill */}
+            {d?.subscription ? (
+              <View style={[s.subPillHeader, { backgroundColor: 'rgba(16, 185, 129, 0.08)' }]}>
+                <Feather name="check-circle" size={12} color={colors.success} />
+                <Text style={[s.subPillTextHeader, { color: colors.success }]}>
+                  {d.subscription.planName}
+                </Text>
               </View>
+            ) : (
+              <TouchableOpacity
+                style={[s.subPillHeader, { backgroundColor: 'rgba(79, 70, 229, 0.08)' }]}
+                onPress={() => router.push('/subscription')}
+              >
+                <Feather name="star" size={12} color={colors.primary} />
+                <Text style={[s.subPillTextHeader, { color: colors.primary }]}>
+                  {t('home.upgradeFull')}
+                </Text>
+              </TouchableOpacity>
             )}
-          </TouchableOpacity>
-          <View style={{ alignItems: isRTL ? 'flex-end' : 'flex-start' }}>
-            <Text style={s.heroGreet}>{t('home.greeting')} 👋</Text>
-            <Text style={s.heroName}>{firstName}</Text>
+
+            <TouchableOpacity
+              onPress={() => router.push('/notifications')}
+              style={[s.notifBtn, { backgroundColor: colors.muted }]}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
+              <Feather name="bell" size={20} color={colors.foreground} />
+              {(d?.unreadNotificationsCount ?? 0) > 0 && (
+                <View style={[s.notifBadge, { backgroundColor: colors.destructive }]}>
+                  <Text style={s.notifBadgeText}>{d?.unreadNotificationsCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
-
-        {/* Subscription banner inside hero */}
-        {d?.subscription ? (
-          <View style={[s.subPill, { backgroundColor: colors.success + '25' }]}>
-            <Feather name="check-circle" size={13} color={colors.success} />
-            <Text style={[s.subPillText, { color: colors.success }]}>
-              {d.subscription.planName} · {t('home.daysRemaining', { n: d.subscription.daysRemaining })}
-            </Text>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={[s.subPill, { backgroundColor: colors.gold + '22' }]}
-            onPress={() => router.push('/subscription')}
-          >
-            <Feather name="star" size={13} color={colors.gold} />
-            <Text style={[s.subPillText, { color: colors.gold }]}>
-              {t('home.upgradeFull')}
-            </Text>
-            <Feather name={forwardChevron} size={13} color={colors.gold} />
-          </TouchableOpacity>
-        )}
       </View>
 
       {/* ── Today's Sessions ── */}
@@ -142,10 +144,10 @@ function HomeScreenInner() {
           />
         ) : (
           (d?.todaysSessions ?? []).slice(0, 4).map((session) => (
-            <Card key={session.id} accent={colors.navy} style={s.sessionCard}>
+            <Card key={session.id} accent={colors.primary} style={s.sessionCard}>
               <View style={[s.sessionInner, rowDir]}>
-                <View style={[s.timePill, { backgroundColor: colors.navy + '10' }]}>
-                  <Text style={[s.timeText, { color: colors.navy }]}>{formatTime(session.startTime)}</Text>
+                <View style={[s.timePill, { backgroundColor: colors.muted }]}>
+                  <Text style={[s.timeText, { color: colors.primary }]}>{formatTime(session.startTime)}</Text>
                   <Text style={[s.timeEnd, { color: colors.mutedForeground }]}>{formatTime(session.endTime)}</Text>
                 </View>
                 <View style={s.sessionBody}>
@@ -179,10 +181,10 @@ function HomeScreenInner() {
               key={a.id}
               onPress={() => router.push('/announcements')}
               style={s.annoCard}
-              accent={!a.isRead ? colors.navy : undefined}
+              accent={!a.isRead ? colors.primary : undefined}
             >
               <View style={[s.annoTop, rowDir]}>
-                {!a.isRead && <View style={[s.unreadDot, { backgroundColor: colors.navy }]} />}
+                {!a.isRead && <View style={[s.unreadDot, { backgroundColor: colors.primary }]} />}
                 {a.priority !== 'normal' && (
                   <Badge
                     label={t(`priority.${a.priority}`)}
@@ -235,7 +237,7 @@ function HomeScreenInner() {
             <Card
               key={e.id}
               onPress={() => router.push('/exams')}
-              accent={colors.gold}
+              accent={colors.primary}
               style={s.rowCard}
             >
               <Text style={[s.rowTitle, { color: colors.foreground }, align]}>{e.title}</Text>
@@ -249,13 +251,13 @@ function HomeScreenInner() {
 
       {/* ── More CTA ── */}
       <TouchableOpacity
-        style={[s.moreCta, { borderColor: colors.navy }]}
+        style={[s.moreCta, { borderColor: colors.primary }]}
         activeOpacity={0.75}
         onPress={() => router.push('/more')}
       >
-        <Feather name="grid" size={18} color={colors.navy} />
-        <Text style={[s.moreCtaText, { color: colors.navy }]}>{t('home.allModules')}</Text>
-        <Feather name={forwardChevron} size={18} color={colors.navy} />
+        <Feather name="grid" size={18} color={colors.primary} />
+        <Text style={[s.moreCtaText, { color: colors.primary }]}>{t('home.allModules')}</Text>
+        <Feather name={forwardChevron} size={18} color={colors.primary} />
       </TouchableOpacity>
     </ScrollView>
   );
@@ -264,49 +266,85 @@ function HomeScreenInner() {
 const s = StyleSheet.create({
   content: { paddingBottom: 110 },
 
-  // Hero
-  hero: { paddingBottom: spacing.base },
-  heroInner: {
+  // Header
+  header: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.base,
+    boxShadow: '0 4px 20px rgba(15,23,42,0.02)',
+  },
+  headerTop: {
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.base,
-    paddingTop: spacing.base,
-    paddingBottom: spacing.md,
   },
-  heroGreet: { fontSize: fontSize.base, color: 'rgba(255,255,255,0.7)', fontWeight: fontWeight.medium },
-  heroName: { fontSize: fontSize['2xl'], color: '#fff', fontWeight: fontWeight.bold },
-  notifBtn: { position: 'relative', padding: 4 },
-  notifBadge: {
-    position: 'absolute', top: 0, right: 0,
-    width: 16, height: 16, borderRadius: 8,
-    alignItems: 'center', justifyContent: 'center',
+  userInfo: {
+    alignItems: 'center',
+    gap: 12,
   },
-  notifBadgeText: { fontSize: 9, fontWeight: fontWeight.bold, color: '#000' },
-  subPill: {
+  userText: {
+    justifyContent: 'center',
+  },
+  heroGreet: {
+    fontSize: fontSize.xs + 1,
+    fontWeight: fontWeight.medium,
+  },
+  heroName: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    marginTop: 2,
+  },
+  headerActions: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  subPillHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    marginHorizontal: spacing.base,
-    marginBottom: spacing.base,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.full,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
-  subPillText: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
+  subPillTextHeader: {
+    fontSize: 11,
+    fontWeight: fontWeight.bold,
+  },
+  notifBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  notifBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFF',
+  },
+  notifBadgeText: {
+    fontSize: 8,
+    fontWeight: fontWeight.bold,
+    color: '#FFF',
+  },
 
   // Sections
-  section: { paddingHorizontal: spacing.base, marginTop: spacing.lg, gap: spacing.sm },
-  sectionRow: { alignItems: 'center', gap: spacing.sm, marginBottom: spacing.xs },
-  sectionAccent: { width: 3, height: 18, borderRadius: 2 },
-  sectionTitle: { fontSize: fontSize.lg, fontWeight: fontWeight.bold },
+  section: { paddingHorizontal: spacing.base, marginTop: spacing.xl, gap: spacing.sm },
+  sectionRow: { alignItems: 'center', gap: spacing.xs, marginBottom: spacing.xs },
+  sectionTitle: { fontSize: fontSize.lg - 1, fontWeight: fontWeight.bold },
 
   // Session card
   sessionCard: { marginBottom: 0 },
   sessionInner: { alignItems: 'center', gap: spacing.md },
-  timePill: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm, borderRadius: radius.md, alignItems: 'center', minWidth: 52 },
+  timePill: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm, borderRadius: radius.sm, alignItems: 'center', minWidth: 54 },
   timeText: { fontSize: fontSize.sm, fontWeight: fontWeight.bold },
-  timeEnd: { fontSize: 10 },
+  timeEnd: { fontSize: 10, marginTop: 1 },
   sessionBody: { flex: 1 },
   sessionName: { fontSize: fontSize.md, fontWeight: fontWeight.semibold },
   sessionMeta: { fontSize: fontSize.sm, marginTop: 2 },
@@ -332,10 +370,11 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     margin: spacing.base,
-    marginTop: spacing.xl,
-    borderWidth: 1.5,
-    borderRadius: radius.lg,
-    paddingVertical: spacing.base,
+    marginTop: spacing['2xl'],
+    borderWidth: 1,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    paddingVertical: spacing.base - 2,
   },
   moreCtaText: { fontSize: fontSize.md, fontWeight: fontWeight.bold },
 });

@@ -100,9 +100,9 @@ export default function RegisterScreen() {
         {/* Header */}
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={[s.back, { color: colors.navy }]}>→ {t('common.back')}</Text>
+            <Text style={[s.back, { color: colors.primary }]}>→ {t('common.back')}</Text>
           </TouchableOpacity>
-          <Text style={[s.title, { color: colors.navy }]}>{t('auth.registerTitle')}</Text>
+          <Text style={[s.title, { color: colors.primary }]}>{t('auth.registerTitle')}</Text>
           <Text style={[s.subtitle, { color: colors.mutedForeground }]}>{t('auth.joinJamiati')}</Text>
         </View>
 
@@ -148,7 +148,7 @@ export default function RegisterScreen() {
         <TouchableOpacity onPress={() => router.back()} style={s.linkRow}>
           <Text style={[s.linkText, { color: colors.mutedForeground }]}>
             {t('auth.haveAccount')}{' '}
-            <Text style={{ color: colors.navy, fontWeight: fontWeight.semibold }}>{t('auth.login')}</Text>
+            <Text style={{ color: colors.primary, fontWeight: fontWeight.semibold }}>{t('auth.login')}</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>

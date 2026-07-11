@@ -42,7 +42,7 @@ export default function AnnouncementsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -50,7 +50,7 @@ export default function AnnouncementsScreen() {
           data={announcements}
           keyExtractor={(a) => a.id}
           contentContainerStyle={s.list}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
           ListEmptyComponent={
             <EmptyState
               icon="bell"
@@ -61,12 +61,12 @@ export default function AnnouncementsScreen() {
           renderItem={({ item }: { item: Announcement }) => (
             <Card
               onPress={() => !isGuest && !item.isRead && markRead.mutate({ announcementId: item.id })}
-              accent={!isGuest && !item.isRead ? colors.navy : undefined}
+              accent={!isGuest && !item.isRead ? colors.primary : undefined}
               style={s.card}
             >
               <View style={[s.cardTop, rowDir]}>
                 <View style={[s.badgeRow, rowDir]}>
-                  {!isGuest && !item.isRead && <View style={[s.dot, { backgroundColor: colors.navy }]} />}
+                  {!isGuest && !item.isRead && <View style={[s.dot, { backgroundColor: colors.primary }]} />}
                   {item.priority !== 'normal' && (
                     <Badge label={t(`priority.${item.priority}`)} color={PRIORITY_COLOR[item.priority] ?? 'muted'} />
                   )}

@@ -24,7 +24,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { GuestGate } from '@/components/GuestGate';
 import { showAlert } from '@/lib/alert';
-import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
+import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
 function timeAgo(date: string, t: (key: string, vars?: Record<string, any>) => string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
@@ -77,14 +77,14 @@ function CommunityScreenInner() {
         data={posts}
         keyExtractor={(item) => item.id}
         contentContainerStyle={s.list}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
         ListHeaderComponent={
           <TouchableOpacity
-            style={[s.createRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[s.createRow, shadow.sm, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={() => setShowCreate(true)}
           >
             <Avatar name={user?.fullName ?? 'U'} size={36} />
-            <View style={[s.createPlaceholder, { backgroundColor: colors.secondary, borderRadius: radius.full }]}>
+            <View style={[s.createPlaceholder, { backgroundColor: colors.muted, borderRadius: 10, borderCurve: 'continuous' }]}>
               <Text style={[s.createPlaceholderText, { color: colors.mutedForeground }, { textAlign: isRTL ? 'right' : 'left' }]}>{t('community.sharePlaceholder')}</Text>
             </View>
           </TouchableOpacity>
@@ -108,7 +108,7 @@ function CommunityScreenInner() {
                 <Text style={[s.authorName, { color: colors.foreground }, { textAlign: isRTL ? 'right' : 'left' }]}>{item.authorName}</Text>
                 <Text style={[s.postTime, { color: colors.mutedForeground }, { textAlign: isRTL ? 'right' : 'left' }]}>{timeAgo(item.createdAt, t)}</Text>
               </View>
-              {item.isPinned && <Feather name="bookmark" size={16} color={colors.gold} />}
+              {item.isPinned && <Feather name="bookmark" size={16} color={colors.primary} />}
             </View>
             <Text style={[s.postContent, { color: colors.foreground }, { textAlign: isRTL ? 'right' : 'left' }]}>{item.content}</Text>
             <View style={[s.postActions, { borderTopColor: colors.border, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -169,7 +169,7 @@ const s = StyleSheet.create({
   list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
   createRow: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    padding: spacing.md, borderRadius: radius.lg, borderWidth: 1, marginBottom: spacing.xs,
+    padding: spacing.md, borderRadius: 16, borderCurve: 'continuous', borderWidth: 1, marginBottom: spacing.xs,
   },
   createPlaceholder: { flex: 1, paddingHorizontal: spacing.base, paddingVertical: spacing.sm },
   createPlaceholderText: { fontSize: fontSize.md, textAlign: 'right' },

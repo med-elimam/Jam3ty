@@ -52,7 +52,7 @@ function CourseDetailInner() {
   };
 
   if (isLoading) {
-    return <View style={[s.root, s.center]}><ActivityIndicator color={colors.navy} size="large" /></View>;
+    return <View style={[s.root, s.center]}><ActivityIndicator color={colors.primary} size="large" /></View>;
   }
 
   if (isError) {
@@ -64,7 +64,7 @@ function CourseDetailInner() {
   }
 
   return (
-    <ScrollView style={s.root} refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />} contentContainerStyle={{ paddingBottom: 100 }}>
+    <ScrollView style={s.root} refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View style={s.header}>
         {course.code && <View style={s.codeBox}><Text style={s.code}>{course.code}</Text></View>}
@@ -72,9 +72,9 @@ function CourseDetailInner() {
         {course.professorName && <Text style={s.professor}>{t('courses.professorPrefix')}{course.professorName}</Text>}
         <Text style={s.semester}>{course.semester}</Text>
         <View style={s.stats}>
-          <View style={s.stat}><Feather name="file" size={16} color={colors.gold} /><Text style={s.statNum}>{course.fileCount}</Text><Text style={s.statLabel}>{t('course.tabFiles')}</Text></View>
+          <View style={s.stat}><Feather name="file" size={16} color={colors.primary} style={{ marginBottom: 4 }} /><Text style={s.statNum}>{course.fileCount}</Text><Text style={s.statLabel}>{t('course.tabFiles')}</Text></View>
           <View style={s.statDivider} />
-          <View style={s.stat}><Feather name="clipboard" size={16} color={colors.gold} /><Text style={s.statNum}>{course.assignmentCount}</Text><Text style={s.statLabel}>{t('course.tabAssignments')}</Text></View>
+          <View style={s.stat}><Feather name="clipboard" size={16} color={colors.primary} style={{ marginBottom: 4 }} /><Text style={s.statNum}>{course.assignmentCount}</Text><Text style={s.statLabel}>{t('course.tabAssignments')}</Text></View>
         </View>
       </View>
 
@@ -98,7 +98,7 @@ function CourseDetailInner() {
           ) : (
             (course.recentFiles ?? []).map((f) => (
               <TouchableOpacity key={f.id} style={[s.itemCard, rowDir]} activeOpacity={0.7} onPress={() => openFile(f)}>
-                <Feather name="file-text" size={20} color={colors.navy} />
+                <Feather name="file-text" size={20} color={colors.primary} />
                 <Text style={[s.itemTitle, align]} numberOfLines={2}>{f.title}</Text>
                 <Text style={s.itemMeta}>{t(`fileTypes.${f.fileType}`)}</Text>
               </TouchableOpacity>
@@ -110,7 +110,7 @@ function CourseDetailInner() {
           >
             <View style={[s.viewAllInner, rowDir]}>
               <Text style={s.viewAllText}>{t('course.viewAllFiles')}</Text>
-              <Feather name={isRTL ? 'arrow-left' : 'arrow-right'} size={15} color={colors.navy} />
+              <Feather name={isRTL ? 'arrow-left' : 'arrow-right'} size={15} color={colors.primary} />
             </View>
           </TouchableOpacity>
         </View>
@@ -168,31 +168,31 @@ const styles = (colors: ReturnType<typeof useColors>) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
     center: { alignItems: 'center', justifyContent: 'center' },
-    header: { backgroundColor: colors.navy, padding: 20, alignItems: 'center', gap: 6 },
-    codeBox: { backgroundColor: colors.gold, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 },
-    code: { fontSize: 12, fontWeight: '700', color: '#000' },
-    courseName: { fontSize: 20, fontWeight: '700', color: '#fff', textAlign: 'center' },
-    professor: { fontSize: 14, color: 'rgba(255,255,255,0.8)' },
-    semester: { fontSize: 12, color: 'rgba(255,255,255,0.6)' },
+    header: { backgroundColor: colors.card, padding: 20, alignItems: 'center', gap: 6, borderBottomWidth: 1, borderBottomColor: colors.border },
+    codeBox: { backgroundColor: 'rgba(79, 70, 229, 0.08)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 },
+    code: { fontSize: 12, fontWeight: '700', color: colors.primary },
+    courseName: { fontSize: 20, fontWeight: '700', color: colors.foreground, textAlign: 'center' },
+    professor: { fontSize: 14, color: colors.mutedForeground },
+    semester: { fontSize: 12, color: colors.mutedForeground },
     stats: { flexDirection: 'row', gap: 24, marginTop: 8 },
     stat: { alignItems: 'center', gap: 2 },
-    statNum: { fontSize: 20, fontWeight: '700', color: '#fff' },
-    statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.7)' },
-    statDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.2)' },
+    statNum: { fontSize: 20, fontWeight: '700', color: colors.foreground },
+    statLabel: { fontSize: 11, color: colors.mutedForeground },
+    statDivider: { width: 1, backgroundColor: colors.border },
     section: { padding: 16, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
     desc: { fontSize: 14, color: colors.mutedForeground, lineHeight: 21 },
     tabBar: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
     tabBtn: { paddingHorizontal: 16, height: 32, borderRadius: 20, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, justifyContent: 'center', alignItems: 'center' },
-    tabBtnActive: { backgroundColor: colors.navy, borderColor: colors.navy },
+    tabBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
     tabText: { fontSize: 14, fontWeight: '600', color: colors.mutedForeground },
     tabTextActive: { color: '#fff' },
     tabContent: { padding: 16 },
-    itemCard: { alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: 10, padding: 12, marginBottom: 8 },
+    itemCard: { alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: 12, borderCurve: 'continuous', padding: 12, marginBottom: 8, borderWidth: 1, borderColor: colors.border },
     itemCardColumn: { flexDirection: 'column', alignItems: 'stretch', gap: 4 },
     itemTitle: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.foreground },
     itemMeta: { fontSize: 12, color: colors.mutedForeground },
     emptyText: { textAlign: 'center', color: colors.mutedForeground, fontSize: 14, paddingVertical: 20 },
     viewAllBtn: { paddingVertical: 12, alignItems: 'center' },
     viewAllInner: { alignItems: 'center', gap: 6 },
-    viewAllText: { fontSize: 14, fontWeight: '600', color: colors.navy },
+    viewAllText: { fontSize: 14, fontWeight: '600', color: colors.primary },
   });

@@ -5,82 +5,84 @@
 const colors = {
   light: {
     // Legacy aliases
-    text: '#1A1A2E',
-    tint: '#1E3A5F',
+    text: '#0F172A',
+    tint: '#4F46E5',
 
     // Core surfaces
-    background: '#F4F6FA',
-    foreground: '#1A1A2E',
+    background: '#F8FAFC',
+    foreground: '#0F172A',
 
     // Cards / elevated surfaces
     card: '#FFFFFF',
-    cardForeground: '#1A1A2E',
+    cardForeground: '#0F172A',
 
-    // Primary — navy blue
-    primary: '#1E3A5F',
+    // Primary — Indigo
+    primary: '#4F46E5',
     primaryForeground: '#FFFFFF',
 
-    // Secondary
-    secondary: '#EEF2F8',
-    secondaryForeground: '#1A1A2E',
+    // Secondary — Light Indigo
+    secondary: '#6366F1',
+    secondaryForeground: '#FFFFFF',
 
     // Muted
-    muted: '#EEF2F8',
-    mutedForeground: '#6B7280',
+    muted: '#F1F5F9',
+    mutedForeground: '#64748B',
 
-    // Accent — gold
-    accent: '#D4A853',
-    accentForeground: '#1A1A2E',
+    // Accent — Indigo
+    accent: '#4F46E5',
+    accentForeground: '#FFFFFF',
 
     // Destructive
     destructive: '#EF4444',
     destructiveForeground: '#FFFFFF',
 
     // Borders / inputs
-    border: '#DDE3EE',
-    input: '#DDE3EE',
+    border: '#E5E7EB',
+    input: '#E5E7EB',
+    divider: '#E2E8F0',
 
     // Status
     success: '#10B981',
     warning: '#F59E0B',
-    info: '#3B82F6',
+    info: '#6366F1',
 
-    // Brand shorthands
-    gold: '#D4A853',
-    navy: '#1E3A5F',
-    navyDark: '#122539',
-    navyLight: '#2B5480',
+    // Brand shorthands mapped to new Indigo system
+    gold: '#6366F1',
+    navy: '#4F46E5',
+    navyDark: '#4338CA',
+    navyLight: '#818CF8',
   },
 
   dark: {
-    text: '#F0F4FB',
-    tint: '#4E8AC8',
-    background: '#0D1B2A',
-    foreground: '#F0F4FB',
-    card: '#1A2E45',
-    cardForeground: '#F0F4FB',
-    primary: '#4E8AC8',
+    text: '#F1F5F9',
+    tint: '#6366F1',
+    background: '#0B0F19',
+    foreground: '#F1F5F9',
+    card: '#1E293B',
+    cardForeground: '#F1F5F9',
+    primary: '#6366F1',
     primaryForeground: '#FFFFFF',
-    secondary: '#1E3A5F',
-    secondaryForeground: '#F0F4FB',
-    muted: '#1E3A5F',
-    mutedForeground: '#9CA3AF',
-    accent: '#D4A853',
-    accentForeground: '#1A1A2E',
+    secondary: '#4F46E5',
+    secondaryForeground: '#F1F5F9',
+    muted: '#334155',
+    mutedForeground: '#94A3B8',
+    accent: '#6366F1',
+    accentForeground: '#FFFFFF',
     destructive: '#EF4444',
     destructiveForeground: '#FFFFFF',
-    border: '#2B4A6E',
-    input: '#2B4A6E',
+    border: '#334155',
+    input: '#334155',
+    divider: '#334155',
     success: '#10B981',
     warning: '#F59E0B',
     info: '#60A5FA',
-    gold: '#D4A853',
-    navy: '#4E8AC8',
-    navyDark: '#0D1B2A',
-    navyLight: '#2B5480',
+    gold: '#818CF8',
+    navy: '#6366F1',
+    navyDark: '#4F46E5',
+    navyLight: '#818CF8',
   },
 
-  radius: 12,
+  radius: 16,
 };
 
 export default colors;

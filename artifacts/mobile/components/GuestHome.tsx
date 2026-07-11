@@ -17,6 +17,8 @@ import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
  * Account-bound tabs (courses, timetable, community, profile) stay behind
  * GuestGate.
  */
+import { LinearGradient } from 'expo-linear-gradient';
+
 export function GuestHome() {
   const colors = useColors();
   const router = useRouter();
@@ -38,15 +40,15 @@ export function GuestHome() {
     viewAllRoute: '/announcements' | '/events',
   ) => (
     <View style={[s.sectionRow, rowDir]}>
-      <View style={[s.sectionAccent, { backgroundColor: colors.navy }]} />
-      <Feather name={icon} size={16} color={colors.navy} />
+      <View style={[s.sectionAccent, { backgroundColor: colors.primary }]} />
+      <Feather name={icon} size={16} color={colors.primary} />
       <Text style={[s.sectionTitle, { color: colors.foreground }]}>{t(titleKey)}</Text>
       <TouchableOpacity
         style={isRTL ? { marginRight: 'auto' } : { marginLeft: 'auto' }}
         onPress={() => router.push(viewAllRoute)}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Text style={[s.viewAll, { color: colors.navy }]}>{t('guest.viewAll')}</Text>
+        <Text style={[s.viewAll, { color: colors.primary }]}>{t('guest.viewAll')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -57,21 +59,26 @@ export function GuestHome() {
       contentContainerStyle={s.content}
     >
       {/* ── Hero ── */}
-      <View style={[s.hero, { backgroundColor: colors.navy }]}>
-        <View style={[s.badge, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
-          <Feather name="eye" size={12} color={colors.gold} />
-          <Text style={[s.badgeText, { color: colors.gold }]}>{t('guest.badge')}</Text>
+      <LinearGradient
+        colors={[colors.primary, colors.secondary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={s.hero}
+      >
+        <View style={[s.badge, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+          <Feather name="eye" size={12} color="#FFFFFF" />
+          <Text style={[s.badgeText, { color: '#FFFFFF' }]}>{t('guest.badge')}</Text>
         </View>
         <Text style={s.heroTitle}>{t('brand.appName')}</Text>
         <Text style={s.heroBody}>{t('guest.heroBody')}</Text>
         <Button
           label={t('guest.loginCta')}
-          variant="gold"
+          variant="secondary"
           size="md"
           fullWidth={false}
           onPress={() => { logout(); }}
         />
-      </View>
+      </LinearGradient>
 
       {/* ── Public announcements ── */}
       <View style={s.section}>
@@ -107,13 +114,13 @@ export function GuestHome() {
 
       {/* ── Plans & pricing ── */}
       <TouchableOpacity
-        style={[s.plansCta, rowDir, { borderColor: colors.gold, backgroundColor: colors.gold + '10' }]}
+        style={[s.plansCta, rowDir, { borderColor: colors.primary + '30', backgroundColor: colors.primary + '0A' }]}
         activeOpacity={0.75}
         onPress={() => router.push('/subscription')}
       >
-        <Feather name="star" size={18} color={colors.gold} />
+        <Feather name="star" size={18} color={colors.primary} />
         <Text style={[s.plansCtaText, { color: colors.foreground }]}>{t('guest.viewPlans')}</Text>
-        <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={18} color={colors.gold} />
+        <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={18} color={colors.primary} />
       </TouchableOpacity>
     </ScrollView>
   );
@@ -163,8 +170,9 @@ const s = StyleSheet.create({
     gap: spacing.sm,
     margin: spacing.base,
     marginTop: spacing.xl,
-    borderWidth: 1.5,
-    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderRadius: 14,
+    borderCurve: 'continuous',
     paddingVertical: spacing.base,
   },
   plansCtaText: { fontSize: fontSize.md, fontWeight: fontWeight.bold },

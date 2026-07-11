@@ -45,7 +45,7 @@ export default function EventsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -53,15 +53,15 @@ export default function EventsScreen() {
           data={events}
           keyExtractor={(e) => e.id}
           contentContainerStyle={s.list}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
           ListEmptyComponent={
             <EmptyState icon="calendar" title={t('events.empty')} body={t('events.emptyBody')} />
           }
           renderItem={({ item }: { item: Event }) => (
             <Card style={s.card}>
               <View style={[s.cardHeader, rowDir]}>
-                <View style={[s.iconBox, { backgroundColor: colors.navy + '10' }]}>
-                  <Feather name={EVENT_ICON[item.type] ?? 'calendar'} size={22} color={colors.navy} />
+                <View style={[s.iconBox, { backgroundColor: colors.primary + '12' }]}>
+                  <Feather name={EVENT_ICON[item.type] ?? 'calendar'} size={22} color={colors.primary} />
                 </View>
                 <View style={s.cardInfo}>
                   <Text style={[s.eventTitle, { color: colors.foreground }, align]} numberOfLines={2}>
@@ -106,7 +106,7 @@ const s = StyleSheet.create({
   list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
   card: { gap: spacing.sm },
   cardHeader: { gap: spacing.md, alignItems: 'flex-start' },
-  iconBox: { width: 46, height: 46, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  iconBox: { width: 46, height: 46, borderRadius: 10, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   cardInfo: { flex: 1 },
   eventTitle: { fontSize: fontSize.md, fontWeight: fontWeight.bold },
   eventType: { fontSize: fontSize.sm, marginTop: 2 },

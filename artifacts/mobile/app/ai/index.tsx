@@ -67,7 +67,7 @@ function AIScreenInner() {
       {/* Usage indicator */}
       {usage && (
         <View style={s.usageBanner}>
-          <Feather name="zap" size={14} color={colors.gold} />
+          <Feather name="zap" size={14} color={colors.primary} />
           <Text style={s.usageText}>{t('ai.usage', { used: usage.used, limit: usage.limit, plan: usage.plan })}</Text>
         </View>
       )}
@@ -92,7 +92,7 @@ function AIScreenInner() {
 
       {chatMutation.isPending && (
         <View style={s.thinking}>
-          <ActivityIndicator size="small" color={colors.navy} />
+          <ActivityIndicator size="small" color={colors.primary} />
           <Text style={s.thinkingText}>{t('ai.thinking')}</Text>
         </View>
       )}
@@ -124,21 +124,21 @@ function AIScreenInner() {
 const styles = (colors: ReturnType<typeof useColors>) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
-    usageBanner: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.gold + '15', paddingHorizontal: 16, paddingVertical: 8 },
-    usageText: { fontSize: 12, color: colors.gold, fontWeight: '500' },
+    usageBanner: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.primary + '12', paddingHorizontal: 16, paddingVertical: 8 },
+    usageText: { fontSize: 12, color: colors.primary, fontWeight: '500' },
     bubble: { flexDirection: 'row', gap: 8, alignItems: 'flex-end' },
     bubbleUser: { justifyContent: 'flex-end' },
     bubbleAI: { justifyContent: 'flex-start' },
-    aiAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.secondary, alignItems: 'center', justifyContent: 'center' },
+    aiAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.primary + '12', alignItems: 'center', justifyContent: 'center' },
     bubbleContent: { maxWidth: '80%', borderRadius: 16, padding: 12 },
-    contentUser: { backgroundColor: colors.navy, borderBottomRightRadius: 4 },
-    contentAI: { backgroundColor: colors.card, borderBottomLeftRadius: 4, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
+    contentUser: { backgroundColor: colors.primary, borderBottomRightRadius: 4 },
+    contentAI: { backgroundColor: colors.card, borderBottomLeftRadius: 4, shadowColor: '#0F172A', shadowOpacity: 0.04, shadowRadius: 8, elevation: 1, borderWidth: 1, borderColor: colors.border },
     bubbleText: { fontSize: 15, color: colors.foreground, lineHeight: 22 },
     bubbleTextUser: { color: '#fff' },
     thinking: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingBottom: 8 },
     thinkingText: { fontSize: 13, color: colors.mutedForeground },
     inputRow: { flexDirection: 'row', gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background },
-    input: { flex: 1, backgroundColor: colors.card, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.foreground, maxHeight: 100, borderWidth: 1, borderColor: colors.border },
-    sendBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center' },
+    input: { flex: 1, backgroundColor: colors.card, borderRadius: 14, borderCurve: 'continuous', paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.foreground, maxHeight: 100, borderWidth: 1, borderColor: colors.border },
+    sendBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
     sendBtnDisabled: { opacity: 0.4 },
   });

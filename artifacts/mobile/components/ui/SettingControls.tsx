@@ -30,7 +30,7 @@ export function OptionRow({
       ]}
     >
       <Text style={[s.label, { color: colors.foreground, textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
-      {selected && <Feather name="check" size={20} color={colors.navy} />}
+      {selected && <Feather name="check" size={20} color={colors.primary} />}
     </TouchableOpacity>
   );
 }
@@ -61,7 +61,7 @@ export function ToggleRow({
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: colors.border, true: colors.navy }}
+        trackColor={{ false: colors.border, true: colors.primary }}
         thumbColor="#fff"
       />
     </View>

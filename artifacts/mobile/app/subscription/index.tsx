@@ -133,7 +133,7 @@ export default function SubscriptionScreen() {
       {/* Plans */}
       <View style={s.section}>
         <Text style={[s.sectionTitle, align]}>{`💎 ${t('subscription.plansTitle')}`}</Text>
-        {plansQuery.isLoading ? <ActivityIndicator color={colors.navy} /> : plansQuery.isError ? (
+        {plansQuery.isLoading ? <ActivityIndicator color={colors.primary} /> : plansQuery.isError ? (
           <ErrorState onRetry={() => plansQuery.refetch()} />
         ) : (
           plans.filter((p) => p.priceMru > 0).map((plan) => (
@@ -176,8 +176,8 @@ export default function SubscriptionScreen() {
             <View style={{ width: 60 }} />
           </View>
           <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
-            <Text style={[s.payInfo, align]}>{`${t('subscription.plan')}: `}<Text style={{ fontWeight: '700', color: colors.navy }}>{planName(selectedPlan)}</Text></Text>
-            <Text style={[s.payInfo, align]}>{`${t('subscription.amount')}: `}<Text style={{ fontWeight: '700', color: colors.navy }}>{`${selectedPlan?.priceMru ?? 0} ${t('subscription.currency')}`}</Text></Text>
+            <Text style={[s.payInfo, align]}>{`${t('subscription.plan')}: `}<Text style={{ fontWeight: '700', color: colors.primary }}>{planName(selectedPlan)}</Text></Text>
+            <Text style={[s.payInfo, align]}>{`${t('subscription.amount')}: `}<Text style={{ fontWeight: '700', color: colors.primary }}>{`${selectedPlan?.priceMru ?? 0} ${t('subscription.currency')}`}</Text></Text>
 
             <Text style={[s.payLabel, align]}>{t('subscription.payMethod')}</Text>
             <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -237,25 +237,25 @@ export default function SubscriptionScreen() {
 const styles = (colors: ReturnType<typeof useColors>) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
-    currentSub: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.success + '15', margin: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.success + '30' },
+    currentSub: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.success + '12', margin: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.success + '30' },
     currentPlan: { fontSize: 18, fontWeight: '700', color: colors.success },
     currentDays: { fontSize: 13, color: colors.mutedForeground },
-    freeBanner: { backgroundColor: colors.gold + '15', margin: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.gold + '30' },
-    freeBannerTitle: { fontSize: 18, fontWeight: '700', color: colors.gold },
+    freeBanner: { backgroundColor: colors.primary + '12', margin: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.primary + '30' },
+    freeBannerTitle: { fontSize: 18, fontWeight: '700', color: colors.primary },
     freeBannerSub: { fontSize: 13, color: colors.mutedForeground, marginTop: 4 },
     section: { marginHorizontal: 16, marginBottom: 20 },
     sectionTitle: { fontSize: 17, fontWeight: '700', color: colors.foreground, marginBottom: 12 },
     redeemRow: { flexDirection: 'row', gap: 8 },
-    codeInput: { flex: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.foreground, backgroundColor: colors.card, letterSpacing: 2 },
-    redeemBtn: { backgroundColor: colors.navy, borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center' },
+    codeInput: { flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 14, borderCurve: 'continuous', paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.foreground, backgroundColor: colors.card, letterSpacing: 2 },
+    redeemBtn: { backgroundColor: colors.primary, borderRadius: 14, borderCurve: 'continuous', paddingHorizontal: 16, justifyContent: 'center' },
     redeemBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-    planCard: { backgroundColor: colors.card, borderRadius: 12, padding: 16, marginBottom: 12, borderWidth: 1.5, borderColor: colors.border },
-    planName: { fontSize: 20, fontWeight: '700', color: colors.navy },
+    planCard: { backgroundColor: colors.card, borderRadius: 16, borderCurve: 'continuous', padding: 16, marginBottom: 12, borderWidth: 1, borderColor: colors.border },
+    planName: { fontSize: 20, fontWeight: '700', color: colors.primary },
     planPrice: { fontSize: 15, color: colors.foreground, fontWeight: '600', marginTop: 4 },
     featureList: { marginVertical: 8, gap: 6 },
     featureRow: { alignItems: 'center', gap: 8 },
     featureText: { flex: 1, fontSize: 13, color: colors.mutedForeground },
-    buyBtn: { backgroundColor: colors.navy, borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
+    buyBtn: { backgroundColor: colors.primary, borderRadius: 14, borderCurve: 'continuous', paddingVertical: 12, alignItems: 'center', marginTop: 4 },
     buyBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
     btnDisabled: { opacity: 0.5 },
     modal: { flex: 1, backgroundColor: colors.background },
@@ -264,15 +264,15 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     modalTitle: { fontSize: 17, fontWeight: '700', color: colors.foreground },
     payInfo: { fontSize: 15, color: colors.foreground },
     payLabel: { fontSize: 14, fontWeight: '600', color: colors.foreground },
-    methodBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.card },
-    methodBtnActive: { borderColor: colors.navy, backgroundColor: colors.navy + '10' },
+    methodBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card },
+    methodBtnActive: { borderColor: colors.primary, backgroundColor: colors.primary + '10' },
     methodIcon: { fontSize: 18 },
     methodLabel: { fontSize: 14, fontWeight: '600', color: colors.mutedForeground },
-    methodLabelActive: { color: colors.navy },
-    payInput: { borderWidth: 1.5, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.foreground, backgroundColor: colors.card },
-    instructBox: { backgroundColor: colors.secondary, borderRadius: 10, padding: 14, gap: 6 },
+    methodLabelActive: { color: colors.primary },
+    payInput: { borderWidth: 1, borderColor: colors.border, borderRadius: 14, borderCurve: 'continuous', paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.foreground, backgroundColor: colors.card },
+    instructBox: { backgroundColor: colors.muted, borderRadius: 12, padding: 14, gap: 6 },
     instructTitle: { fontSize: 14, fontWeight: '700', color: colors.foreground },
     instructText: { fontSize: 13, color: colors.mutedForeground, lineHeight: 20 },
-    submitBtn: { backgroundColor: colors.navy, borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
+    submitBtn: { backgroundColor: colors.primary, borderRadius: 14, borderCurve: 'continuous', paddingVertical: 16, alignItems: 'center' },
     submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   });

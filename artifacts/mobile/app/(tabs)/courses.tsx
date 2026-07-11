@@ -17,7 +17,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { GuestGate } from '@/components/GuestGate';
-import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
+import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
 export default function CoursesScreen() {
   return (
@@ -41,7 +41,7 @@ function CoursesScreenInner() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Search bar */}
-      <View style={[s.searchBar, rowDir, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[s.searchBar, rowDir, shadow.sm, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Feather name="search" size={18} color={colors.mutedForeground} />
         <TextInput
           style={[s.searchInput, { color: colors.foreground }]}
@@ -59,7 +59,7 @@ function CoursesScreenInner() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -105,7 +105,7 @@ function CoursesScreenInner() {
                     )}
                   </View>
                 </View>
-                <View style={[s.courseIcon, { backgroundColor: colors.navy }]}>
+                <View style={[s.courseIcon, { backgroundColor: colors.primary }]}>
                   <Text style={s.courseCode}>{(item.code ?? item.name ?? '?').slice(0, 4)}</Text>
                 </View>
               </View>
@@ -123,8 +123,9 @@ const s = StyleSheet.create({
     gap: spacing.sm,
     margin: spacing.base,
     paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-    borderRadius: radius.lg,
+    paddingVertical: spacing.md - 1,
+    borderRadius: 16,
+    borderCurve: 'continuous',
     borderWidth: 1,
   },
   searchInput: { flex: 1, fontSize: fontSize.md },
@@ -132,7 +133,7 @@ const s = StyleSheet.create({
   courseCard: {},
   cardInner: { alignItems: 'center', gap: spacing.md },
   courseIcon: {
-    width: 52, height: 52, borderRadius: radius.md,
+    width: 52, height: 52, borderRadius: 12, borderCurve: 'continuous',
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   courseCode: { fontSize: fontSize.xs, fontWeight: fontWeight.bold, color: '#fff', textAlign: 'center' },

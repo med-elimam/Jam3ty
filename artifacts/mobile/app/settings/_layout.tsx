@@ -15,8 +15,8 @@ export default function SettingsLayout() {
     <Stack
       screenOptions={{
         headerShown: true,
-        headerStyle: { backgroundColor: colors.navy },
-        headerTintColor: '#fff',
+        headerStyle: { backgroundColor: colors.card },
+        headerTintColor: colors.foreground,
         headerBackButtonDisplayMode: 'minimal',
       }}
     >

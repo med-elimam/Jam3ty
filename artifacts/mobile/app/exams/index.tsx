@@ -34,7 +34,7 @@ function ExamsScreenInner() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -42,7 +42,7 @@ function ExamsScreenInner() {
           data={exams}
           keyExtractor={(e) => e.id}
           contentContainerStyle={s.list}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
           ListEmptyComponent={
             <EmptyState icon="bar-chart-2" title={t('exams.empty')} body={t('exams.emptyBody')} />
           }
@@ -50,7 +50,7 @@ function ExamsScreenInner() {
             const dLeft = Math.ceil((new Date(item.date).getTime() - Date.now()) / 86400000);
             const urgent = dLeft <= 3;
             return (
-              <Card accent={urgent ? colors.destructive : colors.gold} style={s.card}>
+              <Card accent={urgent ? colors.destructive : colors.primary} style={s.card}>
                 <View style={[s.cardTop, rowDir]}>
                   <Badge label={t(`examTypes.${item.type}`)} color={EXAM_TYPE_COLOR[item.type] ?? 'primary'} />
                   <Text style={[s.daysLeft, { color: urgent ? colors.destructive : colors.mutedForeground }]}>
@@ -60,7 +60,7 @@ function ExamsScreenInner() {
                 <Text style={[s.examTitle, { color: colors.foreground }, align]} numberOfLines={2}>
                   {item.title}
                 </Text>
-                <Text style={[s.examCourse, { color: colors.navy }, align]}>{item.courseName}</Text>
+                <Text style={[s.examCourse, { color: colors.primary }, align]}>{item.courseName}</Text>
                 <View style={[s.metaRow, rowDir]}>
                   <Text style={[s.meta, { color: colors.mutedForeground }]}>📅 {item.date}</Text>
                   {item.startTime && <Text style={[s.meta, { color: colors.mutedForeground }]}>🕐 {item.startTime.slice(0, 5)}</Text>}

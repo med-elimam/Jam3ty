@@ -65,15 +65,15 @@ function NotificationsScreenInner() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {unreadCount > 0 && (
         <TouchableOpacity
-          style={[s.markAllBar, rowDir, { backgroundColor: colors.navy + '10' }]}
+          style={[s.markAllBar, rowDir, { backgroundColor: colors.primary + '0A' }]}
           onPress={() => markAll.mutate()}
         >
-          <Feather name="check" size={14} color={colors.navy} />
-          <Text style={[s.markAllText, { color: colors.navy }]}>{t('notifications.markAllRead', { n: unreadCount })}</Text>
+          <Feather name="check" size={14} color={colors.primary} />
+          <Text style={[s.markAllText, { color: colors.primary }]}>{t('notifications.markAllRead', { n: unreadCount })}</Text>
         </TouchableOpacity>
       )}
       {isLoading ? (
-        <ActivityIndicator color={colors.navy} size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : (
@@ -81,7 +81,7 @@ function NotificationsScreenInner() {
           data={notifications}
           keyExtractor={(n) => n.id}
           contentContainerStyle={s.list}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.navy} />}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
           ListEmptyComponent={
             <EmptyState icon="bell-off" title={t('notifications.empty')} body={t('notifications.emptyBody')} />
           }
@@ -89,19 +89,19 @@ function NotificationsScreenInner() {
             const route = NOTIF_ROUTE[item.type];
             return (
               <Card
-                accent={!item.isRead ? colors.navy : undefined}
+                accent={!item.isRead ? colors.primary : undefined}
                 onPress={route ? () => router.push(route) : undefined}
                 style={[s.card, rowDir]}
               >
-                <View style={[s.iconBox, { backgroundColor: colors.navy + '10' }]}>
-                  <Feather name={NOTIF_ICON[item.type] ?? 'bell'} size={20} color={colors.navy} />
+                <View style={[s.iconBox, { backgroundColor: colors.primary + '12' }]}>
+                  <Feather name={NOTIF_ICON[item.type] ?? 'bell'} size={20} color={colors.primary} />
                 </View>
                 <View style={s.cardBody}>
                   <Text style={[s.notifTitle, { color: colors.foreground }, align]} numberOfLines={2}>{item.title}</Text>
                   {item.body && <Text style={[s.notifBody, { color: colors.mutedForeground }, align]} numberOfLines={2}>{item.body}</Text>}
                   <Text style={[s.notifTime, { color: colors.mutedForeground }, align]}>{timeAgo(item.createdAt, t)}</Text>
                 </View>
-                {!item.isRead && <View style={[s.unreadDot, { backgroundColor: colors.navy }]} />}
+                {!item.isRead && <View style={[s.unreadDot, { backgroundColor: colors.primary }]} />}
               </Card>
             );
           }}
@@ -116,7 +116,7 @@ const s = StyleSheet.create({
   markAllText: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
   list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
   card: { alignItems: 'flex-start', gap: spacing.md },
-  iconBox: { width: 42, height: 42, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 },
+  iconBox: { width: 42, height: 42, borderRadius: 10, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 },
   cardBody: { flex: 1 },
   notifTitle: { fontSize: fontSize.base, fontWeight: fontWeight.semibold },
   notifBody: { fontSize: fontSize.sm, marginTop: 2, lineHeight: fontSize.sm * 1.5 },

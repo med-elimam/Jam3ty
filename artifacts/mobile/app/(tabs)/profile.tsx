@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/Button';
 import { GuestGate } from '@/components/GuestGate';
 import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
+import { LinearGradient } from 'expo-linear-gradient';
+
 type FeatherName = React.ComponentProps<typeof Feather>['name'];
 
 interface MenuItem {
@@ -34,6 +36,7 @@ function ProfileScreenInner() {
   const router = useRouter();
   const { t, isRTL } = usePreferences();
   const { user, logout } = useAuth();
+  const isDark = colors.background === '#0B0F19';
 
   const profileQuery = useGetProfile();
   const subQuery = useGetMySubscription();
@@ -52,7 +55,7 @@ function ProfileScreenInner() {
   if (profileQuery.isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={colors.navy} />
+        <ActivityIndicator color={colors.primary} />
       </View>
     );
   }
@@ -68,14 +71,17 @@ function ProfileScreenInner() {
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={s.content}
     >
-      {/* ── Hero ── */}
-      <View style={[s.hero, { backgroundColor: colors.navy }]}>
+      {/* ── Gradient Hero ── */}
+      <LinearGradient
+        colors={['#4F46E5', '#6366F1']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={s.hero}
+      >
         <Avatar
           name={fullName}
-          size={72}
-          bg={colors.gold + '22'}
-          fg={colors.gold}
-          style={[s.avatar, { borderColor: colors.gold }]}
+          size={80}
+          style={s.avatar}
         />
         <Text style={s.heroName}>{fullName}</Text>
         <Text style={s.heroEmail}>{email}</Text>
@@ -87,12 +93,12 @@ function ProfileScreenInner() {
           </View>
         )}
         {university && <Text style={s.heroUniv}>{university}</Text>}
-      </View>
+      </LinearGradient>
 
       <View style={s.body}>
         {/* ── Subscription card ── */}
         {sub ? (
-          <Card style={[s.subCard, { borderColor: colors.success + '40' }]}>
+          <Card style={[s.subCard, { borderColor: colors.success }]}>
             <View style={s.subRow}>
               <View>
                 <Text style={[s.subPlan, { color: colors.success }]}>{sub.planName}</Text>
@@ -110,16 +116,16 @@ function ProfileScreenInner() {
             activeOpacity={0.8}
             onPress={() => router.push('/subscription' as any)}
           >
-            <Card style={[s.subCard, { borderColor: colors.gold + '50' }]}>
+            <Card style={[s.subCard, { borderColor: colors.primary }]}>
               <View style={s.subRow}>
                 <View>
-                  <Text style={[s.subPlan, { color: colors.gold }]}>{t('profile.freePlan')}</Text>
+                  <Text style={[s.subPlan, { color: colors.primary }]}>{t('profile.freePlan')}</Text>
                   <Text style={[s.subMeta, { color: colors.mutedForeground }]}>
                     {t('profile.upgradeTap')}
                   </Text>
                 </View>
-                <View style={[s.subIcon, { backgroundColor: colors.gold + '15' }]}>
-                  <Feather name="star" size={22} color={colors.gold} />
+                <View style={[s.subIcon, { backgroundColor: colors.primary + '15' }]}>
+                  <Feather name="star" size={22} color={colors.primary} />
                 </View>
               </View>
             </Card>
@@ -141,13 +147,13 @@ function ProfileScreenInner() {
             >
               <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={18} color={colors.mutedForeground} />
               {item.badge && (
-                <View style={[s.menuBadge, { backgroundColor: colors.gold }]}>
-                  <Text style={s.menuBadgeText}>{item.badge}</Text>
+                <View style={[s.menuBadge, { backgroundColor: colors.primary + '20' }]}>
+                  <Text style={[s.menuBadgeText, { color: colors.primary }]}>{item.badge}</Text>
                 </View>
               )}
               <Text style={[s.menuLabel, { color: colors.foreground }, { textAlign: isRTL ? 'right' : 'left' }]}>{item.label}</Text>
-              <View style={[s.menuIconBox, { backgroundColor: colors.navy + '10' }]}>
-                <Feather name={item.icon} size={18} color={colors.navy} />
+              <View style={[s.menuIconBox, { backgroundColor: colors.primary + '12' }]}>
+                <Feather name={item.icon} size={18} color={colors.primary} />
               </View>
             </TouchableOpacity>
           ))}
@@ -170,34 +176,35 @@ const s = StyleSheet.create({
 
   // Hero
   hero: {
-    paddingTop: spacing.base,
+    paddingTop: 54,
     paddingBottom: spacing.lg,
     alignItems: 'center',
     gap: spacing.sm,
   },
-  avatar: { borderWidth: 3, marginBottom: spacing.xs },
+  avatar: { marginBottom: spacing.xs },
   heroName: { fontSize: fontSize.xl, fontWeight: fontWeight.bold, color: '#fff' },
-  heroEmail: { fontSize: fontSize.sm, color: 'rgba(255,255,255,0.65)' },
+  heroEmail: { fontSize: fontSize.sm, color: 'rgba(255,255,255,0.75)' },
   acadRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs, flexWrap: 'wrap', justifyContent: 'center' },
   acadChip: {
     fontSize: fontSize.xs,
-    color: 'rgba(255,255,255,0.85)',
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: radius.full,
+    color: '#FFF',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderCurve: 'continuous',
   },
-  heroUniv: { fontSize: fontSize.xs, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
+  heroUniv: { fontSize: fontSize.xs, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
 
   // Body
   body: { padding: spacing.base, gap: spacing.md },
 
   // Subscription card
-  subCard: { borderWidth: 1.5 },
+  subCard: { borderWidth: 1 },
   subRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  subPlan: { fontSize: fontSize.lg, fontWeight: fontWeight.bold },
+  subPlan: { fontSize: fontSize.lg - 1, fontWeight: fontWeight.bold },
   subMeta: { fontSize: fontSize.sm, marginTop: 2 },
-  subIcon: { width: 44, height: 44, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
+  subIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
 
   // Menu
   menuCard: { padding: 0, overflow: 'hidden' },
@@ -208,9 +215,10 @@ const s = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   menuIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.md,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    borderCurve: 'continuous',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -218,7 +226,7 @@ const s = StyleSheet.create({
   menuBadge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
-    borderRadius: radius.full,
+    borderRadius: 6,
   },
-  menuBadgeText: { fontSize: fontSize.xs, fontWeight: fontWeight.bold, color: '#fff' },
+  menuBadgeText: { fontSize: fontSize.xs - 1, fontWeight: fontWeight.bold },
 });
