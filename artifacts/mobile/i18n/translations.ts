@@ -44,7 +44,7 @@ const ar = {
     courses: 'المواد',
     timetable: 'الجدول',
     community: 'المجتمع',
-    profile: 'الملف',
+    profile: 'الملف الشخصي',
     more: 'المزيد',
   },
   screens: {

@@ -80,7 +80,7 @@ function ProfileScreenInner() {
       >
         <Avatar
           name={fullName}
-          size={80}
+          size={64}
           style={s.avatar}
         />
         <Text style={s.heroName}>{fullName}</Text>
@@ -176,15 +176,15 @@ const s = StyleSheet.create({
 
   // Hero
   hero: {
-    paddingTop: 54,
-    paddingBottom: spacing.lg,
+    paddingTop: 24,
+    paddingBottom: 14,
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: 6,
   },
-  avatar: { marginBottom: spacing.xs },
+  avatar: { marginBottom: 2 },
   heroName: { fontSize: fontSize.xl, fontWeight: fontWeight.bold, color: '#fff' },
   heroEmail: { fontSize: fontSize.sm, color: 'rgba(255,255,255,0.75)' },
-  acadRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs, flexWrap: 'wrap', justifyContent: 'center' },
+  acadRow: { flexDirection: 'row', gap: spacing.sm, marginTop: 2, flexWrap: 'wrap', justifyContent: 'center' },
   acadChip: {
     fontSize: fontSize.xs,
     color: '#FFF',

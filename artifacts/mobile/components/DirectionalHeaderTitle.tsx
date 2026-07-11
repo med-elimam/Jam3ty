@@ -53,17 +53,17 @@ export function HeaderBackButton({ isRTL }: { isRTL: boolean }) {
   );
 }
 
-export function directionalHeaderOptions(title: string, isRTL: boolean) {
+export function directionalHeaderOptions(title: string, isRTL: boolean, isTabScreen = false) {
   return {
     title,
     headerTitleAlign: 'center' as const,
     headerBackVisible: false,
-    headerLeft: isRTL
-      ? () => null
-      : () => <HeaderBackButton isRTL={false} />,
-    headerRight: isRTL
-      ? () => <HeaderBackButton isRTL={true} />
-      : () => null,
+    headerLeft: isTabScreen
+      ? undefined
+      : (isRTL ? () => null : () => <HeaderBackButton isRTL={false} />),
+    headerRight: isTabScreen
+      ? undefined
+      : (isRTL ? () => <HeaderBackButton isRTL={true} /> : () => null),
   };
 }
 

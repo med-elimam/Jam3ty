@@ -78,7 +78,7 @@ export default function TabLayout() {
           key={tab.name}
           name={tab.name}
           options={{
-            ...directionalHeaderOptions(t(tab.titleKey), isRTL),
+            ...directionalHeaderOptions(t(tab.titleKey), isRTL, true),
             headerShown: tab.name !== 'index', // Hide header for Home tab
             tabBarIcon: ({ color }) => (
               <TabIcon name={tab.icon} color={color} />
