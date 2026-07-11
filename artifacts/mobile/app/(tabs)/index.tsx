@@ -18,7 +18,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
-import { GuestGate } from '@/components/GuestGate';
+import { GuestHome } from '@/components/GuestHome';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 function formatTime(t: string) {
@@ -45,11 +45,12 @@ function SectionTitle({ title, icon }: { title: string; icon: React.ComponentPro
 }
 
 export default function HomeScreen() {
-  return (
-    <GuestGate>
-      <HomeScreenInner />
-    </GuestGate>
-  );
+  const { isGuest } = useAuth();
+  // Guests get a browsable public home (announcements, events, plans) with a
+  // login CTA — not a dead lock screen. The personalized dashboard hooks below
+  // never mount for guests.
+  if (isGuest) return <GuestHome />;
+  return <HomeScreenInner />;
 }
 
 function HomeScreenInner() {

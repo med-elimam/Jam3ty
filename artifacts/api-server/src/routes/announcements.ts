@@ -1,19 +1,23 @@
 import { Router } from "express";
 import { db, announcementsTable, usersTable, profilesTable, announcementReadsTable, coursesTable } from "@workspace/db";
 import { eq, and, or, sql, count, isNull, inArray } from "drizzle-orm";
-import { requireAuth } from "../middlewares/auth";
+import { requireAuth, optionalAuth } from "../middlewares/auth";
 
 const router = Router();
 
 // GET /announcements
-router.get("/announcements", requireAuth, async (req, res) => {
+// Anonymous visitors (guest mode) get GLOBAL-scope announcements only.
+// Authenticated students additionally get rows matching their profile scopes.
+router.get("/announcements", optionalAuth, async (req, res) => {
   try {
     const { page = "1", limit = "20" } = req.query as Record<string, string>;
     const pageNum = Math.max(1, parseInt(page));
     const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
     const offset = (pageNum - 1) * limitNum;
 
-    const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!)).limit(1);
+    const [profile] = req.userId
+      ? await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId)).limit(1)
+      : [undefined];
     // Course-scoped announcements follow the same course scoping rule as GET /courses:
     // courses matching the student's profile departmentId + levelId.
     const scopedCourseIds = db
@@ -42,7 +46,9 @@ router.get("/announcements", requireAuth, async (req, res) => {
     const [totalRow] = await db.select({ count: count() }).from(announcementsTable).where(and(...conditions));
     const total = totalRow?.count ?? 0;
 
-    const readIds = await db.select({ announcementId: announcementReadsTable.announcementId }).from(announcementReadsTable).where(eq(announcementReadsTable.userId, req.userId!));
+    const readIds = req.userId
+      ? await db.select({ announcementId: announcementReadsTable.announcementId }).from(announcementReadsTable).where(eq(announcementReadsTable.userId, req.userId))
+      : [];
     const readSet = new Set(readIds.map((r) => r.announcementId));
 
     const enriched = await Promise.all(announcements.map(async (a) => {

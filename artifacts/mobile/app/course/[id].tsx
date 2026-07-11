@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { showAlert } from '@/lib/alert';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useGetCourse, AcademicFile } from '@workspace/api-client-react';
@@ -43,11 +44,11 @@ function CourseDetailInner() {
   const openFile = async (file: AcademicFile) => {
     const url = resolveFileUrl(file.fileUrl);
     if (!url) {
-      Alert.alert(t('common.error'), t('files.noUrl'));
+      showAlert(t('common.error'), t('files.noUrl'));
       return;
     }
     const opened = await openExternalUrl(url);
-    if (!opened) Alert.alert(t('common.error'), t('files.openError'));
+    if (!opened) showAlert(t('common.error'), t('files.openError'));
   };
 
   if (isLoading) {

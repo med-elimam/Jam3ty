@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   RefreshControl,
@@ -24,6 +23,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { GuestGate } from '@/components/GuestGate';
+import { showAlert } from '@/lib/alert';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
 function timeAgo(date: string, t: (key: string, vars?: Record<string, any>) => string) {
@@ -60,7 +60,7 @@ function CommunityScreenInner() {
         setNewPost('');
         setShowCreate(false);
       },
-      onError: () => Alert.alert(t('common.error'), t('community.postError')),
+      onError: () => showAlert(t('common.error'), t('community.postError')),
     },
   });
 

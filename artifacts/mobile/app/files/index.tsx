@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { showAlert } from '@/lib/alert';
 import { useLocalSearchParams } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useListFiles, useToggleFileFavorite, ListFilesType, AcademicFile } from '@workspace/api-client-react';
@@ -55,11 +56,11 @@ function FilesScreenInner() {
   const openFile = async (file: AcademicFile) => {
     const url = resolveFileUrl(file.fileUrl);
     if (!url) {
-      Alert.alert(t('common.error'), t('files.noUrl'));
+      showAlert(t('common.error'), t('files.noUrl'));
       return;
     }
     const opened = await openExternalUrl(url);
-    if (!opened) Alert.alert(t('common.error'), t('files.openError'));
+    if (!opened) showAlert(t('common.error'), t('files.openError'));
   };
 
   return (

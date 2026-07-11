@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { showAlert } from '@/lib/alert';
 import { Image } from 'expo-image';
 import { useColors } from '@/hooks/useColors';
 import { useListClubs, useJoinClub, Club } from '@workspace/api-client-react';
@@ -32,9 +33,9 @@ function ClubsScreenInner() {
     mutation: {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListClubsQueryKey() });
-        Alert.alert(t('clubs.requestSent'), t('clubs.requestSentBody'));
+        showAlert(t('clubs.requestSent'), t('clubs.requestSentBody'));
       },
-      onError: () => Alert.alert(t('common.error'), t('clubs.requestError')),
+      onError: () => showAlert(t('common.error'), t('clubs.requestError')),
     },
   });
   const clubs: Club[] = data?.data ?? [];

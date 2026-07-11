@@ -118,6 +118,7 @@ async function refreshAccessToken(): Promise<{ accessToken: string; refreshToken
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────
+const GUEST_TOKEN = 'guest';
 const GUEST_USER: AuthUser = {
   id: 'guest',
   fullName: 'Guest / زائر',
@@ -158,6 +159,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setAuthTokenGetter(async () => {
       let token = accessTokenRef.current;
+      // Guest sessions are anonymous: never send the placeholder as a Bearer
+      // token — public routes (optionalAuth) serve them public content.
+      if (token === GUEST_TOKEN) return null;
       if (!token) {
         // Try to restore from SecureStore/localStorage
         token = await getToken(ACCESS_KEY);
@@ -255,8 +259,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loginAsGuest = useCallback(() => {
-    accessTokenRef.current = 'guest';
-    setState({ user: GUEST_USER, accessToken: 'guest', isLoading: false, isAuthenticated: true });
+    accessTokenRef.current = GUEST_TOKEN;
+    setState({ user: GUEST_USER, accessToken: GUEST_TOKEN, isLoading: false, isAuthenticated: true });
   }, []);
 
   const logout = useCallback(async () => {

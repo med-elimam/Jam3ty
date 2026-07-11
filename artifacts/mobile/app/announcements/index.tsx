@@ -8,9 +8,9 @@ import { Card } from '@/components/ui/Card';
 import { Badge, BadgeColor } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
-import { GuestGate } from '@/components/GuestGate';
 import { spacing, fontSize, fontWeight } from '@/constants/theme';
 import { usePreferences } from '@/contexts/PreferencesContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 function timeAgo(date: string, t: (key: string, vars?: Record<string, string | number>) => string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
@@ -23,17 +23,12 @@ function timeAgo(date: string, t: (key: string, vars?: Record<string, string | n
 // Colors keyed by the real announcementPriorityEnum values (normal/important/urgent)
 const PRIORITY_COLOR: Record<AnnouncementPriority, BadgeColor> = { urgent: 'danger', important: 'warning', normal: 'muted' };
 
+// Guest-visible: the API serves global-scope announcements anonymously.
+// Only the mark-read action is account-bound.
 export default function AnnouncementsScreen() {
-  return (
-    <GuestGate>
-      <AnnouncementsScreenInner />
-    </GuestGate>
-  );
-}
-
-function AnnouncementsScreenInner() {
   const colors = useColors();
   const { t, isRTL } = usePreferences();
+  const { isGuest } = useAuth();
   const qc = useQueryClient();
   const { data, isLoading, isError, refetch, isRefetching } = useListAnnouncements();
   const markRead = useMarkAnnouncementRead({
@@ -65,13 +60,13 @@ function AnnouncementsScreenInner() {
           }
           renderItem={({ item }: { item: Announcement }) => (
             <Card
-              onPress={() => !item.isRead && markRead.mutate({ announcementId: item.id })}
-              accent={!item.isRead ? colors.navy : undefined}
+              onPress={() => !isGuest && !item.isRead && markRead.mutate({ announcementId: item.id })}
+              accent={!isGuest && !item.isRead ? colors.navy : undefined}
               style={s.card}
             >
               <View style={[s.cardTop, rowDir]}>
                 <View style={[s.badgeRow, rowDir]}>
-                  {!item.isRead && <View style={[s.dot, { backgroundColor: colors.navy }]} />}
+                  {!isGuest && !item.isRead && <View style={[s.dot, { backgroundColor: colors.navy }]} />}
                   {item.priority !== 'normal' && (
                     <Badge label={t(`priority.${item.priority}`)} color={PRIORITY_COLOR[item.priority] ?? 'muted'} />
                   )}

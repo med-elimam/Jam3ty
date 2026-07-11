@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { showAlert } from '@/lib/alert';
 import { useColors } from '@/hooks/useColors';
 import { useListOpportunities, ListOpportunitiesType, Opportunity } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
@@ -57,7 +58,7 @@ function OpportunitiesScreenInner() {
 
   const openLink = async (link: string) => {
     const opened = await openExternalUrl(link);
-    if (!opened) Alert.alert(t('common.error'), t('files.openError'));
+    if (!opened) showAlert(t('common.error'), t('files.openError'));
   };
 
   return (

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -21,6 +20,7 @@ import {
   useCompleteOnboarding,
 } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/Button';
+import { showAlert } from '@/lib/alert';
 import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 
 const STEPS = ['University', 'Faculty', 'Department', 'Level', 'Language'] as const;
@@ -59,7 +59,7 @@ export default function OnboardingScreen() {
         updateUser({ profile: { onboardingComplete: true } });
         router.replace('/(tabs)');
       },
-      onError: () => Alert.alert(t('common.error'), t('onboarding.saveError')),
+      onError: () => showAlert(t('common.error'), t('onboarding.saveError')),
     },
   });
 

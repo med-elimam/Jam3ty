@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { showAlert } from '@/lib/alert';
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,11 +35,11 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!fullName.trim() || !email.trim() || !password) {
-      Alert.alert(t('common.error'), t('auth.allFieldsRequired'));
+      showAlert(t('common.error'), t('auth.allFieldsRequired'));
       return;
     }
     if (password.length < 8) {
-      Alert.alert(t('common.error'), t('auth.passwordTooShort'));
+      showAlert(t('common.error'), t('auth.passwordTooShort'));
       return;
     }
 
@@ -61,9 +61,16 @@ export default function RegisterScreen() {
         let msg = t('auth.unexpectedError');
         try {
           const parsed = JSON.parse(rawText);
-          msg = parsed?.error?.message ?? parsed?.message ?? msg;
+          // Localize known error codes instead of surfacing raw backend text.
+          if (parsed?.error?.code === 'EMAIL_EXISTS') {
+            msg = t('auth.emailExists');
+          } else if (parsed?.error?.code === 'WEAK_PASSWORD') {
+            msg = t('auth.passwordTooShort');
+          } else {
+            msg = parsed?.error?.message ?? parsed?.message ?? msg;
+          }
         } catch {}
-        Alert.alert(t('auth.registerFailed'), msg);
+        showAlert(t('auth.registerFailed'), msg);
         return;
       }
 
@@ -72,10 +79,10 @@ export default function RegisterScreen() {
       if (d?.user && d?.tokens) {
         await login(d.user as AuthUser, d.tokens.accessToken, d.tokens.refreshToken);
       } else {
-        Alert.alert(t('common.error'), t('auth.unexpectedResponse'));
+        showAlert(t('common.error'), t('auth.unexpectedResponse'));
       }
-    } catch (err: any) {
-      Alert.alert(t('auth.connectionError'), err?.message ?? String(err));
+    } catch (err) {
+      showAlert(t('auth.connectionError'), err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }

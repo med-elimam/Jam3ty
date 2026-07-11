@@ -1,5 +1,6 @@
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { showAlert, showConfirm } from '@/lib/alert';
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,25 +71,22 @@ export default function SettingsScreen() {
   const align = { textAlign: isRTL ? 'right' : 'left' } as const;
 
   const handleLogout = () => {
-    Alert.alert(t('settings.logout'), t('settings.logoutConfirm'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('settings.logout'), style: 'destructive', onPress: () => logout() },
-    ]);
+    showConfirm(t('settings.logout'), t('settings.logoutConfirm'), t('settings.logout'), t('common.cancel'), () => logout(), true);
   };
 
   const handleChangePassword = () => {
-    Alert.alert(t('settings.changePassword'), t('settings.changePwDevDisabled'));
+    showAlert(t('settings.changePassword'), t('settings.changePwDevDisabled'));
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(t('settings.deleteConfirmTitle'), t('settings.deleteConfirmBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => Alert.alert(t('settings.deleteConfirmTitle'), t('settings.deleteDevDisabled')),
-      },
-    ]);
+    showConfirm(
+      t('settings.deleteConfirmTitle'),
+      t('settings.deleteConfirmBody'),
+      t('common.delete'),
+      t('common.cancel'),
+      () => showAlert(t('settings.deleteConfirmTitle'), t('settings.deleteDevDisabled')),
+      true,
+    );
   };
 
   const langValue = language === 'ar' ? t('settings.languageArabic') : t('settings.languageFrench');
@@ -145,7 +143,7 @@ export default function SettingsScreen() {
               label={t('settings.help')}
               isRTL={isRTL}
               last
-              onPress={() => Alert.alert(t('settings.help'), 'support@jamiati.mr')}
+              onPress={() => showAlert(t('settings.help'), 'support@jamiati.mr')}
             />
           </Card>
         </View>

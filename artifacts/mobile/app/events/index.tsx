@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { showAlert } from '@/lib/alert';
 import { useColors } from '@/hooks/useColors';
 import { useListEvents, useRegisterForEvent, Event } from '@workspace/api-client-react';
 import { getListEventsQueryKey } from '@workspace/api-client-react';
@@ -9,7 +10,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
-import { GuestGate } from '@/components/GuestGate';
+import { useRequireAccount } from '@/components/GuestGate';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { spacing, fontSize, fontWeight, radius } from '@/constants/theme';
 
@@ -19,26 +20,21 @@ const EVENT_ICON: Record<string, React.ComponentProps<typeof Feather>['name']> =
   workshop: 'tool', conference: 'mic', other: 'calendar',
 };
 
+// Guest-visible: the API serves platform-wide events anonymously.
+// Only registration is account-bound (prompted via useRequireAccount).
 export default function EventsScreen() {
-  return (
-    <GuestGate>
-      <EventsScreenInner />
-    </GuestGate>
-  );
-}
-
-function EventsScreenInner() {
   const colors = useColors();
   const { t, isRTL, language } = usePreferences();
   const qc = useQueryClient();
+  const requireAccount = useRequireAccount();
   const { data, isLoading, isError, refetch, isRefetching } = useListEvents();
   const register = useRegisterForEvent({
     mutation: {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListEventsQueryKey() });
-        Alert.alert(t('events.registeredTitle'), t('events.registeredBody'));
+        showAlert(t('events.registeredTitle'), t('events.registeredBody'));
       },
-      onError: () => Alert.alert(t('common.error'), t('events.registerError')),
+      onError: () => showAlert(t('common.error'), t('events.registerError')),
     },
   });
   const events: Event[] = data?.data ?? [];
@@ -92,7 +88,10 @@ function EventsScreenInner() {
                   variant="primary"
                   size="sm"
                   loading={register.isPending}
-                  onPress={() => register.mutate({ eventId: item.id })}
+                  onPress={() => {
+                    if (requireAccount()) return;
+                    register.mutate({ eventId: item.id });
+                  }}
                 />
               )}
             </Card>

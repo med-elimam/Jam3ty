@@ -70,7 +70,9 @@ pnpm --dir artifacts/mobile exec tsc -p tsconfig.json --noEmit   # NOT covered b
 cd artifacts/mobile && pnpm run dev                              # expo start
 npx expo export -p web                                           # web build → dist/
 ```
-After a mobile change destined for production web: root `pnpm run build:student-web` + `pnpm run copy:builds`, then commit `artifacts/api-server/public/student/**` (Railway doesn't run copy:builds).
+Production web builds happen on Railway (`pnpm run build:all` runs the export + `copy:builds`), so pushing source changes is enough — `artifacts/api-server/public/student` is untracked and rebuilt at deploy time.
+
+**Web platform gotcha**: react-native-web does NOT implement `Alert` — `Alert.alert` silently no-ops in the browser. Always use `showAlert`/`showConfirm` from `lib/alert.ts` (this once made all login/register errors invisible on the deployed web app).
 
 ## Current limitations (updated after Phase 1 fixes, 2026-07 — fix knowingly, don't rediscover)
 

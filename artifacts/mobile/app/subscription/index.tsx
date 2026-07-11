@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { showAlert } from '@/lib/alert';
 import { useColors } from '@/hooks/useColors';
 import { useListPlans, useGetMySubscription, useRedeemActivationCode, useSubmitPaymentProof, Plan, PaymentProofInputMethod } from '@workspace/api-client-react';
 import { getGetMySubscriptionQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePreferences } from '@/contexts/PreferencesContext';
-import { GuestGate } from '@/components/GuestGate';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRequireAccount } from '@/components/GuestGate';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Feather } from '@expo/vector-icons';
 
@@ -16,17 +18,14 @@ const PAYMENT_METHODS: { id: PaymentProofInputMethod; label?: string; labelKey?:
   { id: PaymentProofInputMethod.cash_agent, labelKey: 'subscription.cashAgent', icon: '💵' },
 ];
 
+// Guest-visible: plans & pricing are public (GET /plans requires no auth).
+// The my-subscription query is skipped for guests; redeeming a code and
+// subscribing prompt for an account.
 export default function SubscriptionScreen() {
-  return (
-    <GuestGate>
-      <SubscriptionScreenInner />
-    </GuestGate>
-  );
-}
-
-function SubscriptionScreenInner() {
   const colors = useColors();
   const { t, isRTL, language } = usePreferences();
+  const { isGuest } = useAuth();
+  const requireAccount = useRequireAccount();
   const qc = useQueryClient();
   const [redeemCode, setRedeemCode] = useState('');
   const [showPayment, setShowPayment] = useState(false);
@@ -36,7 +35,7 @@ function SubscriptionScreenInner() {
   const [transactionRef, setTransactionRef] = useState('');
 
   const plansQuery = useListPlans();
-  const subQuery = useGetMySubscription();
+  const subQuery = useGetMySubscription({ query: { enabled: !isGuest, queryKey: getGetMySubscriptionQueryKey() } });
   const plans: Plan[] = plansQuery.data?.data ?? [];
   const sub = subQuery.data?.data;
 
@@ -44,10 +43,10 @@ function SubscriptionScreenInner() {
     mutation: {
       onSuccess: (data) => {
         qc.invalidateQueries({ queryKey: getGetMySubscriptionQueryKey() });
-        Alert.alert(t('subscription.activatedTitle'), t('subscription.activatedBody', { plan: data.data.planName, days: data.data.daysRemaining }));
+        showAlert(t('subscription.activatedTitle'), t('subscription.activatedBody', { plan: data.data.planName, days: data.data.daysRemaining }));
         setRedeemCode('');
       },
-      onError: () => Alert.alert(t('common.error'), t('subscription.invalidCode')),
+      onError: () => showAlert(t('common.error'), t('subscription.invalidCode')),
     },
   });
 
@@ -57,9 +56,9 @@ function SubscriptionScreenInner() {
         setShowPayment(false);
         setPhone('');
         setTransactionRef('');
-        Alert.alert(t('subscription.paymentSentTitle'), t('subscription.paymentSentBody'));
+        showAlert(t('subscription.paymentSentTitle'), t('subscription.paymentSentBody'));
       },
-      onError: () => Alert.alert(t('common.error'), t('subscription.paymentError')),
+      onError: () => showAlert(t('common.error'), t('subscription.paymentError')),
     },
   });
 
@@ -118,7 +117,10 @@ function SubscriptionScreenInner() {
           />
           <TouchableOpacity
             style={[s.redeemBtn, (!redeemCode.trim() || redeemMutation.isPending) && s.btnDisabled]}
-            onPress={() => redeemMutation.mutate({ data: { code: redeemCode.trim() } })}
+            onPress={() => {
+              if (requireAccount()) return;
+              redeemMutation.mutate({ data: { code: redeemCode.trim() } });
+            }}
             disabled={!redeemCode.trim() || redeemMutation.isPending}
           >
             {redeemMutation.isPending
@@ -148,7 +150,14 @@ function SubscriptionScreenInner() {
                   ))}
                 </View>
               )}
-              <TouchableOpacity style={s.buyBtn} onPress={() => { setSelectedPlan(plan); setShowPayment(true); }}>
+              <TouchableOpacity
+                style={s.buyBtn}
+                onPress={() => {
+                  if (requireAccount()) return;
+                  setSelectedPlan(plan);
+                  setShowPayment(true);
+                }}
+              >
                 <Text style={s.buyBtnText}>{t('subscription.subscribeNow', { price: plan.priceMru })}</Text>
               </TouchableOpacity>
             </View>
