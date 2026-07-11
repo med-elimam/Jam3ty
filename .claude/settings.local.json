@@ -3,7 +3,9 @@
     "allow": [
       "Bash(node \"C:\\\\Users\\\\HP ZBOOK\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\" --target artifacts/mobile)",
       "Bash(npx tsc *)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "PowerShell(pnpm install --frozen-lockfile 2>&1)",
+      "PowerShell(node -e \"console.log\\(require\\('C:/Users/HP ZBOOK/Desktop/Jam3ty/node_modules/express-rate-limit/package.json'\\).version\\)\")"
     ]
   },
   "hooks": {

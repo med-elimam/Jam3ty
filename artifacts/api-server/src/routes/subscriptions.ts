@@ -6,10 +6,10 @@ import { resolveEntitlements } from "../services/subscription-service";
 import { attachManualEvidence, createManualPaymentOrder, submitManualEvidenceDetails } from "../services/manual-payment-service";
 import { storeManualPaymentEvidence } from "../lib/manual-payment-evidence";
 import { UploadError } from "../lib/admin-upload";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 
 const router = Router();
-const evidenceUploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 6, standardHeaders: true, legacyHeaders: false, keyGenerator: (req) => req.userId ?? req.ip ?? "anonymous" }) as unknown as RequestHandler;
+const evidenceUploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 6, standardHeaders: true, legacyHeaders: false, keyGenerator: (req) => req.userId ?? (req.ip ? ipKeyGenerator(req.ip) : "anonymous") }) as unknown as RequestHandler;
 
 function paymentError(req: Request, res: Response, err: unknown, context: string) {
   const code = err instanceof Error ? err.message : "SERVER_ERROR";
