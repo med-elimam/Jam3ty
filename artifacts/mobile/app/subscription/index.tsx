@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { showAlert } from '@/lib/alert';
 import { useColors } from '@/hooks/useColors';
-import { useListPlans, useGetMySubscription, useRedeemActivationCode, useSubmitPaymentProof, Plan, PaymentProofInputMethod } from '@workspace/api-client-react';
+import { customFetch, useListPlans, useGetMySubscription, useRedeemActivationCode, Plan, ManualPaymentCheckout, ManualPaymentOrder } from '@workspace/api-client-react';
 import { getGetMySubscriptionQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePreferences } from '@/contexts/PreferencesContext';
@@ -11,11 +12,10 @@ import { useRequireAccount } from '@/components/GuestGate';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Feather } from '@expo/vector-icons';
 
-const PAYMENT_METHODS: { id: PaymentProofInputMethod; label?: string; labelKey?: string; icon: keyof typeof Feather.glyphMap }[] = [
-  { id: PaymentProofInputMethod.bankily, label: 'Bankily', icon: 'credit-card' },
-  { id: PaymentProofInputMethod.masrvi, label: 'Masrvi', icon: 'smartphone' },
-  { id: PaymentProofInputMethod.sedad, label: 'Sedad', icon: 'shield' },
-  { id: PaymentProofInputMethod.cash_agent, labelKey: 'subscription.cashAgent', icon: 'dollar-sign' },
+const PAYMENT_METHODS = [
+  { id: 'bankily' as const, label: 'Bankily', icon: 'credit-card' as const },
+  { id: 'masrvi' as const, label: 'Masrvi', icon: 'smartphone' as const },
+  { id: 'sedad' as const, label: 'Sedad', icon: 'shield' as const },
 ];
 
 // Guest-visible: plans & pricing are public (GET /plans requires no auth).
@@ -30,14 +30,24 @@ export default function SubscriptionScreen() {
   const [redeemCode, setRedeemCode] = useState('');
   const [showPayment, setShowPayment] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [payMethod, setPayMethod] = useState<PaymentProofInputMethod>(PaymentProofInputMethod.bankily);
+  const [payMethod, setPayMethod] = useState<'bankily' | 'masrvi' | 'sedad'>('bankily');
+  const [checkout, setCheckout] = useState<ManualPaymentCheckout | null>(null);
+  const [evidence, setEvidence] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [senderName, setSenderName] = useState('');
   const [phone, setPhone] = useState('');
   const [transactionRef, setTransactionRef] = useState('');
+  const [paymentBusy, setPaymentBusy] = useState(false);
+  const [manualOrders, setManualOrders] = useState<ManualPaymentOrder[]>([]);
 
   const plansQuery = useListPlans();
   const subQuery = useGetMySubscription({ query: { enabled: !isGuest, queryKey: getGetMySubscriptionQueryKey() } });
   const plans: Plan[] = plansQuery.data?.data ?? [];
   const sub = subQuery.data?.data;
+  const loadManualOrders = async () => {
+    if (isGuest) return;
+    try { const response = await customFetch<{ success: true; data: ManualPaymentOrder[] }>('/api/subscriptions/manual-payment-orders', { responseType: 'json' }); setManualOrders(response.data); } catch { /* subscription screen remains usable */ }
+  };
+  useEffect(() => { void loadManualOrders(); }, [isGuest]);
 
   const redeemMutation = useRedeemActivationCode({
     mutation: {
@@ -50,18 +60,6 @@ export default function SubscriptionScreen() {
     },
   });
 
-  const paymentMutation = useSubmitPaymentProof({
-    mutation: {
-      onSuccess: () => {
-        setShowPayment(false);
-        setPhone('');
-        setTransactionRef('');
-        showAlert(t('subscription.paymentSentTitle'), t('subscription.paymentSentBody'));
-      },
-      onError: () => showAlert(t('common.error'), t('subscription.paymentError')),
-    },
-  });
-
   const s = styles(colors);
   const align = { textAlign: isRTL ? 'right' : 'left' } as const;
 
@@ -71,17 +69,36 @@ export default function SubscriptionScreen() {
     return language === 'fr' ? (plan.nameFr || plan.name) : (plan.nameAr || plan.name);
   };
 
-  const submitPayment = () => {
-    if (!selectedPlan || !phone.trim()) return;
-    paymentMutation.mutate({
-      data: {
-        planId: selectedPlan.id,
-        amountMru: selectedPlan.priceMru,
-        method: payMethod,
-        phoneNumber: phone.trim(),
-        transactionRef: transactionRef.trim() || null,
-      },
-    });
+  const createOrder = async () => {
+    if (!selectedPlan) return;
+    setPaymentBusy(true);
+    try {
+      const response = await customFetch<{ success: true; data: ManualPaymentCheckout }>('/api/subscriptions/manual-payment-orders', { method: 'POST', body: JSON.stringify({ planId: selectedPlan.id, method: payMethod, language }), responseType: 'json' });
+      setCheckout(response.data);
+    } catch { showAlert(t('common.error'), t('subscription.paymentError')); }
+    finally { setPaymentBusy(false); }
+  };
+
+  const pickEvidence = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return showAlert(t('common.error'), language === 'fr' ? "L’accès aux photos est requis." : 'يلزم السماح بالوصول إلى الصور.');
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.85 });
+    if (!result.canceled) setEvidence(result.assets[0]);
+  };
+
+  const submitPayment = async () => {
+    if (!checkout || !evidence || !phone.trim()) return;
+    setPaymentBusy(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', { uri: evidence.uri, name: evidence.fileName || 'payment-evidence.jpg', type: evidence.mimeType || 'image/jpeg' } as unknown as Blob);
+      const uploaded = await customFetch<{ success: true; data: { evidenceId: string; duplicateEvidence: boolean } }>(`/api/subscriptions/manual-payment-orders/${checkout.id}/evidence`, { method: 'POST', body: formData, responseType: 'json' });
+      await customFetch(`/api/subscriptions/manual-payment-orders/${checkout.id}/submit`, { method: 'POST', body: JSON.stringify({ evidenceId: uploaded.data.evidenceId, senderName: senderName.trim() || undefined, senderPhone: phone.trim(), transactionReference: transactionRef.trim() || undefined, paymentDate: new Date().toISOString() }), responseType: 'json' });
+      setShowPayment(false); setCheckout(null); setEvidence(null); setPhone(''); setSenderName(''); setTransactionRef('');
+      await loadManualOrders();
+      showAlert(t('subscription.paymentSentTitle'), language === 'fr' ? "Votre justificatif a été envoyé pour vérification. L’abonnement n’est pas encore activé." : 'تم إرسال إثبات الدفع للمراجعة. لم يتم تفعيل الاشتراك بعد.');
+    } catch { showAlert(t('common.error'), t('subscription.paymentError')); }
+    finally { setPaymentBusy(false); }
   };
 
   return (
@@ -101,6 +118,14 @@ export default function SubscriptionScreen() {
           <Text style={[s.freeBannerSub, align]}>{t('subscription.freeUpgrade')}</Text>
         </View>
       )}
+
+      {manualOrders.length > 0 ? <View style={s.section}>
+        <Text style={[s.sectionTitle, align]}>{language==='fr'?'Demandes de paiement':'طلبات الدفع'}</Text>
+        {manualOrders.slice(0, 5).map(order => <View key={order.id} style={s.orderRow}>
+          <View style={{flex:1}}><Text selectable style={[s.orderRef, align]}>{order.clientReference}</Text><Text style={[s.orderMeta, align]}>{order.amountMru} MRU · {order.manualPaymentMethod}</Text></View>
+          <Text style={[s.orderStatus, {color: order.manualReviewStatus==='verified'?colors.success:order.manualReviewStatus==='rejected'?colors.destructive:colors.primary}]}>{order.manualReviewStatus.replaceAll('_',' ')}</Text>
+        </View>)}
+      </View> : null}
 
       {/* Redeem code */}
       <View style={s.section}>
@@ -155,6 +180,7 @@ export default function SubscriptionScreen() {
                 onPress={() => {
                   if (requireAccount()) return;
                   setSelectedPlan(plan);
+                  setCheckout(null);
                   setShowPayment(true);
                 }}
               >
@@ -177,17 +203,30 @@ export default function SubscriptionScreen() {
           </View>
           <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
             <Text style={[s.payInfo, align]}>{`${t('subscription.plan')}: `}<Text style={{ fontWeight: '700', color: colors.primary }}>{planName(selectedPlan)}</Text></Text>
-            <Text style={[s.payInfo, align]}>{`${t('subscription.amount')}: `}<Text style={{ fontWeight: '700', color: colors.primary }}>{`${selectedPlan?.priceMru ?? 0} ${t('subscription.currency')}`}</Text></Text>
+            <Text style={[s.payInfo, align]}>{`${t('subscription.amount')}: `}<Text style={{ fontWeight: '700', color: colors.primary }}>{`${checkout?.amountMru ?? selectedPlan?.priceMru ?? 0} ${t('subscription.currency')}`}</Text></Text>
 
             <Text style={[s.payLabel, align]}>{t('subscription.payMethod')}</Text>
             <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', flexWrap: 'wrap', gap: 8 }}>
               {PAYMENT_METHODS.map((m) => (
-                <TouchableOpacity key={m.id} style={[s.methodBtn, payMethod === m.id && s.methodBtnActive, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setPayMethod(m.id)}>
+                <TouchableOpacity key={m.id} disabled={!!checkout} style={[s.methodBtn, payMethod === m.id && s.methodBtnActive, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setPayMethod(m.id)}>
                   <Feather name={m.icon} size={14} color={payMethod === m.id ? colors.primary : colors.mutedForeground} style={isRTL ? { marginLeft: 6 } : { marginRight: 6 }} />
                   <Text style={[s.methodLabel, payMethod === m.id && s.methodLabelActive]}>{methodLabel(m)}</Text>
                 </TouchableOpacity>
               ))}
             </View>
+
+            {!checkout ? <TouchableOpacity style={[s.submitBtn, paymentBusy && s.btnDisabled]} disabled={paymentBusy} onPress={createOrder}>{paymentBusy?<ActivityIndicator color="#fff"/>:<Text style={s.submitBtnText}>{language==='fr'?'Créer la commande sécurisée':'إنشاء طلب دفع آمن'}</Text>}</TouchableOpacity> : <>
+            <View style={s.instructBox}>
+              <Text selectable style={[s.instructTitle, align]}>{checkout.recipientName}</Text>
+              <Text selectable style={[s.instructText, align]}>{checkout.recipientAccount}</Text>
+              <Text selectable style={[s.instructText, align]}>{checkout.clientReference}</Text>
+              <Text style={[s.instructText, align]}>{checkout.instructions}</Text>
+              <Text style={[s.instructText, align]}>{language==='fr'?`Expire le ${new Date(checkout.expiresAt).toLocaleString('fr')}`:`ينتهي في ${new Date(checkout.expiresAt).toLocaleString('ar')}`}</Text>
+              <Text style={[s.instructText, align, { color: colors.destructive }]}>{language==='fr'?"L’accès reste verrouillé jusqu’à la vérification réelle.":'يبقى الوصول مقفلاً حتى التحقق الفعلي من وصول المال.'}</Text>
+            </View>
+
+            <Text style={[s.payLabel, align]}>{language==='fr'?'Nom de l’expéditeur (optionnel)':'اسم المرسل (اختياري)'}</Text>
+            <TextInput style={s.payInput} value={senderName} onChangeText={setSenderName} textAlign={isRTL?'right':'left'} />
 
             <Text style={[s.payLabel, align]}>{t('subscription.yourPhone')}</Text>
             <TextInput
@@ -211,22 +250,18 @@ export default function SubscriptionScreen() {
               textAlign={isRTL ? 'right' : 'left'}
             />
 
-            <View style={s.instructBox}>
-              <Text style={[s.instructTitle, align]}>{t('subscription.payInstructions')}</Text>
-              <Text style={[s.instructText, align]}>{t('subscription.payStep1', { amount: selectedPlan?.priceMru ?? 0, method: methodLabel(PAYMENT_METHODS.find((m) => m.id === payMethod) ?? {}) })}</Text>
-              <Text style={[s.instructText, align]}>{t('subscription.payStep2')}</Text>
-              <Text style={[s.instructText, align]}>{t('subscription.payStep3')}</Text>
-            </View>
+            <TouchableOpacity style={s.evidenceBtn} onPress={pickEvidence}><Feather name="image" size={18} color={colors.primary}/><Text style={{color:colors.primary,fontWeight:'600'}}>{evidence?.fileName || (language==='fr'?'Choisir le justificatif privé':'اختيار إثبات الدفع الخاص')}</Text></TouchableOpacity>
 
             <TouchableOpacity
-              style={[s.submitBtn, (!phone.trim() || paymentMutation.isPending) && s.btnDisabled]}
+              style={[s.submitBtn, (!phone.trim() || !evidence || paymentBusy) && s.btnDisabled]}
               onPress={submitPayment}
-              disabled={!phone.trim() || paymentMutation.isPending}
+              disabled={!phone.trim() || !evidence || paymentBusy}
             >
-              {paymentMutation.isPending
+              {paymentBusy
                 ? <ActivityIndicator color="#fff" />
                 : <Text style={s.submitBtnText}>{t('subscription.submitProof')}</Text>}
             </TouchableOpacity>
+            </>}
           </ScrollView>
         </View>
       </Modal>
@@ -273,6 +308,11 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     instructBox: { backgroundColor: colors.muted, borderRadius: 12, padding: 14, gap: 6 },
     instructTitle: { fontSize: 14, fontWeight: '700', color: colors.foreground },
     instructText: { fontSize: 13, color: colors.mutedForeground, lineHeight: 20 },
+    evidenceBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: colors.primary, borderRadius: 14, borderCurve: 'continuous', paddingVertical: 14 },
+    orderRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: 12 },
+    orderRef: { fontSize: 13, fontWeight: '700', color: colors.foreground },
+    orderMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
+    orderStatus: { fontSize: 11, fontWeight: '700', textTransform: 'capitalize' },
     submitBtn: { backgroundColor: colors.primary, borderRadius: 14, borderCurve: 'continuous', paddingVertical: 16, alignItems: 'center' },
     submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   });

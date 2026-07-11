@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { showAlert } from '@/lib/alert';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useGetCourse, AcademicFile } from '@workspace/api-client-react';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { GuestGate } from '@/components/GuestGate';
 import { ErrorState } from '@/components/ui/ErrorState';
-import { resolveFileUrl, openExternalUrl } from '@/lib/urls';
 import { Feather } from '@expo/vector-icons';
 
 const TABS = ['files', 'announcements', 'assignments', 'exams'] as const;
@@ -41,14 +39,10 @@ function CourseDetailInner() {
   const align = { textAlign: isRTL ? 'right' : 'left' } as const;
   const rowDir = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
 
-  const openFile = async (file: AcademicFile) => {
-    const url = resolveFileUrl(file.fileUrl);
-    if (!url) {
-      showAlert(t('common.error'), t('files.noUrl'));
-      return;
-    }
-    const opened = await openExternalUrl(url);
-    if (!opened) showAlert(t('common.error'), t('files.openError'));
+  // Unified content system: every file opens through /content/[id] — never externally.
+  // (Href cast: the typed-routes d.ts is machine-generated on dev start and may lag new routes.)
+  const openFile = (file: AcademicFile) => {
+    router.push({ pathname: '/content/[id]', params: { id: file.id } } as unknown as Href);
   };
 
   if (isLoading) {

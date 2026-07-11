@@ -60,6 +60,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" />
       {headerScreen('more/index', 'screens.more')}
       {headerScreen('course/[id]', 'screens.course')}
+      {headerScreen('content/[id]', 'screens.content')}
       {headerScreen('files/index', 'screens.files')}
       {headerScreen('announcements/index', 'screens.announcements')}
       {headerScreen('assignments/index', 'screens.assignments')}

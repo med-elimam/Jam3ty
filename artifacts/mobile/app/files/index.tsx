@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { showAlert } from '@/lib/alert';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useListFiles, useToggleFileFavorite, ListFilesType, AcademicFile } from '@workspace/api-client-react';
 import { getListFilesQueryKey } from '@workspace/api-client-react';
@@ -11,15 +10,11 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { GuestGate } from '@/components/GuestGate';
-import { resolveFileUrl, openExternalUrl } from '@/lib/urls';
+import { FILE_ICON } from '@/lib/content';
 import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 import { usePreferences } from '@/contexts/PreferencesContext';
 
 const FILE_TYPES: string[] = ['all', 'lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book'];
-const FILE_ICON: Record<string, React.ComponentProps<typeof Feather>['name']> = {
-  lecture: 'book-open', td: 'edit-3', tp: 'tool', summary: 'align-left',
-  exam: 'file-text', correction: 'check-square', book: 'book', other: 'file',
-};
 
 export default function FilesScreen() {
   return (
@@ -31,6 +26,7 @@ export default function FilesScreen() {
 
 function FilesScreenInner() {
   const colors = useColors();
+  const router = useRouter();
   const { t, isRTL } = usePreferences();
   const qc = useQueryClient();
   const params = useLocalSearchParams<{ courseId?: string; courseName?: string }>();
@@ -54,14 +50,10 @@ function FilesScreenInner() {
   const align = { textAlign: isRTL ? 'right' : 'left' } as const;
   const forwardChevron = isRTL ? 'chevron-left' : 'chevron-right';
 
-  const openFile = async (file: AcademicFile) => {
-    const url = resolveFileUrl(file.fileUrl);
-    if (!url) {
-      showAlert(t('common.error'), t('files.noUrl'));
-      return;
-    }
-    const opened = await openExternalUrl(url);
-    if (!opened) showAlert(t('common.error'), t('files.openError'));
+  // Unified content system: every file opens through /content/[id] — never externally.
+  // (Href cast: the typed-routes d.ts is machine-generated on dev start and may lag new routes.)
+  const openFile = (file: AcademicFile) => {
+    router.push({ pathname: '/content/[id]', params: { id: file.id } } as unknown as Href);
   };
 
   return (
