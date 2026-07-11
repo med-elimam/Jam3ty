@@ -20,6 +20,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PreferencesProvider, usePreferences } from '@/contexts/PreferencesContext';
 import { useColors } from '@/hooks/useColors';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { directionalHeaderOptions } from '@/components/DirectionalHeaderTitle';
 
 // Suppress harmless "Codegen didn't run" warnings (expected in Expo Go with newArchEnabled)
@@ -78,6 +79,7 @@ function RootLayoutNav() {
 
 function Gate() {
   const { ready } = usePreferences();
+  usePushNotifications();
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
