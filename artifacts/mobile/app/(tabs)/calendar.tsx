@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { usePreferences } from '@/contexts/PreferencesContext';
@@ -8,7 +8,7 @@ import { GuestGate } from '@/components/GuestGate';
 import { Card } from '@/components/ui/Card';
 import { Feather } from '@expo/vector-icons';
 
-const SESSION_COLORS = ['#4F46E5', '#6366F1', '#10B981', '#F59E0B', '#64748B'];
+const SESSION_COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#64748B'];
 const TODAY_DOW = new Date().getDay();
 
 export default function CalendarScreen() {
@@ -22,7 +22,8 @@ export default function CalendarScreen() {
 function CalendarScreenInner() {
   const colors = useColors();
   const { t, tArray, isRTL, language } = usePreferences();
-  const [selectedDay, setSelectedDay] = useState(TODAY_DOW);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showMonthView, setShowMonthView] = useState(false);
   const { data, isLoading, isError, refetch, isRefetching } = useGetTimetable();
 
   const daysFull = tArray('days.full');
@@ -38,6 +39,7 @@ function CalendarScreenInner() {
     return acc;
   }, {} as Record<number, typeof sessions>);
 
+  const selectedDay = selectedDate.getDay();
   const daySessions = dayMap[selectedDay] ?? [];
 
   const typeLabel = (type: string) => {
@@ -45,13 +47,18 @@ function CalendarScreenInner() {
     return t(`timetable.${key}`);
   };
 
-  // Build a date number for each day-of-week slot relative to this week
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
+  // Sync focus month/year when selectedDate changes
+  const [focusMonth, setFocusMonth] = useState(selectedDate.getMonth());
+  const [focusYear, setFocusYear] = useState(selectedDate.getFullYear());
 
-  const selectedDate = new Date(startOfWeek);
-  selectedDate.setDate(startOfWeek.getDate() + selectedDay);
+  useEffect(() => {
+    setFocusMonth(selectedDate.getMonth());
+    setFocusYear(selectedDate.getFullYear());
+  }, [selectedDate]);
+
+  // Build start of week relative to selectedDate
+  const startOfSelectedWeek = new Date(selectedDate);
+  startOfSelectedWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
 
   const dateLocale = language === 'ar' ? 'ar' : 'fr';
   const formattedDate = selectedDate.toLocaleDateString(dateLocale, {
@@ -60,14 +67,31 @@ function CalendarScreenInner() {
     month: 'long',
   });
 
-  const relativeText =
-    selectedDay === TODAY_DOW
-      ? t('common.today')
-      : selectedDay === (TODAY_DOW + 1) % 7
-      ? t('common.tomorrow')
-      : t('timetable.thisWeek');
+  const isTodayDate = selectedDate.toDateString() === new Date().toDateString();
+  const isTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return selectedDate.toDateString() === tomorrow.toDateString();
+  };
 
-  const s = styles(colors);
+  const relativeText = isTodayDate
+    ? t('common.today')
+    : isTomorrowDate()
+    ? t('common.tomorrow')
+    : t('timetable.thisWeek');
+
+  const monthYearTitle = selectedDate.toLocaleDateString(dateLocale, {
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const focusMonthDate = new Date(focusYear, focusMonth, 1);
+  const focusMonthTitle = focusMonthDate.toLocaleDateString(dateLocale, {
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const s = styles(colors, isRTL);
 
   if (isLoading) {
     return (
@@ -106,45 +130,76 @@ function CalendarScreenInner() {
     );
   }
 
-  // Calculate upcoming 3 days list
-  const upcomingOffsets = [1, 2, 3];
+  // Calculate upcoming 5 days relative to selectedDate
+  const upcomingOffsets = [1, 2, 3, 4, 5];
   const upcomingDays = upcomingOffsets.map((offset) => {
-    const dayIdx = (selectedDay + offset) % 7;
-    const dayDate = new Date(startOfWeek);
-    dayDate.setDate(startOfWeek.getDate() + dayIdx);
-    const daySessions = dayMap[dayIdx] ?? [];
-    return { dayIdx, date: dayDate, sessions: daySessions };
+    const nextDate = new Date(selectedDate);
+    nextDate.setDate(selectedDate.getDate() + offset);
+    const daySessions = dayMap[nextDate.getDay()] ?? [];
+    return { date: nextDate, sessions: daySessions };
   });
+
+  // Monthly calendar calculation helpers
+  const prevMonth = () => {
+    if (focusMonth === 0) {
+      setFocusMonth(11);
+      setFocusYear((y) => y - 1);
+    } else {
+      setFocusMonth((m) => m - 1);
+    }
+  };
+
+  const nextMonth = () => {
+    if (focusMonth === 11) {
+      setFocusMonth(0);
+      setFocusYear((y) => y + 1);
+    } else {
+      setFocusMonth((m) => m + 1);
+    }
+  };
+
+  const firstDay = new Date(focusYear, focusMonth, 1).getDay();
+  const daysInM = new Date(focusYear, focusMonth + 1, 0).getDate();
+  const slots: (number | null)[] = [];
+  for (let i = 0; i < firstDay; i++) {
+    slots.push(null);
+  }
+  for (let d = 1; d <= daysInM; d++) {
+    slots.push(d);
+  }
+
+  const weekHeaders = language === 'ar'
+    ? ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']
+    : ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'];
 
   return (
     <View style={s.root}>
       {/* Week day selector */}
       <View style={[s.weekRow, rowDir]}>
         {daysShort.map((label, i) => {
-          const isActive = selectedDay === i;
-          const isToday = i === TODAY_DOW;
-          const dayDate = new Date(startOfWeek);
-          dayDate.setDate(startOfWeek.getDate() + i);
+          const dayDate = new Date(startOfSelectedWeek);
+          dayDate.setDate(startOfSelectedWeek.getDate() + i);
           const dateNum = dayDate.getDate();
+          const isActive = selectedDate.getDate() === dateNum && selectedDate.getMonth() === dayDate.getMonth();
+          const isToday = dayDate.toDateString() === new Date().toDateString();
+
           return (
             <TouchableOpacity
               key={i}
               activeOpacity={0.75}
               style={[
                 s.dayCell,
-                {
-                  backgroundColor: isActive ? colors.primary + '0D' : 'transparent',
-                  borderColor: isActive ? colors.primary : 'transparent',
-                },
+                isActive && { backgroundColor: colors.primary },
               ]}
-              onPress={() => setSelectedDay(i)}
+              onPress={() => setSelectedDate(dayDate)}
             >
-              <Text style={[s.dayAbbr, { color: isActive ? colors.primary : colors.mutedForeground }]}>
+              <Text style={[s.dayAbbr, { color: isActive ? '#fff' : colors.mutedForeground }]}>
                 {label}
               </Text>
-              <Text style={[s.dayNum, { color: isActive ? colors.primary : isToday ? colors.primary : colors.foreground }]}>
+              <Text style={[s.dayNum, { color: isActive ? '#fff' : isToday ? colors.primary : colors.foreground }]}>
                 {dateNum}
               </Text>
+              {isActive && <View style={s.activeDot} />}
             </TouchableOpacity>
           );
         })}
@@ -155,24 +210,41 @@ function CalendarScreenInner() {
         contentContainerStyle={s.content}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
       >
-        {/* Large Date Header */}
-        <View style={s.headerArea}>
-          <Text style={[s.dateHeader, align]}>{formattedDate}</Text>
-          <Text style={[s.relativeHeader, { color: colors.primary }, align]}>{relativeText}</Text>
+        {/* Large Date Header & Month Picker Trigger */}
+        <View style={[s.headerArea, rowDir]}>
+          {/* Right side (RTL): Date info */}
+          <View style={{ flex: 1 }}>
+            <Text style={[s.dateHeader, align]}>{formattedDate}</Text>
+            <Text style={[s.relativeHeader, align]}>{relativeText}</Text>
+          </View>
+
+          {/* Left side (RTL): Month toggle button */}
+          <TouchableOpacity
+            onPress={() => setShowMonthView(true)}
+            style={[rowDir, s.monthToggleBtn]}
+          >
+            <Feather name="chevron-down" size={14} color={colors.foreground} />
+            <Text style={[s.monthToggleText, { color: colors.foreground }]}>{monthYearTitle}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Daily Schedule Timeline Area */}
         <View style={s.section}>
           {daySessions.length === 0 ? (
-            <View style={s.freeCard}>
-              <Feather name="check" size={16} color={colors.success} style={isRTL ? { marginLeft: 10 } : { marginRight: 10 }} />
+            <View style={[s.freeCard, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              {/* Text side */}
               <View style={{ flex: 1 }}>
                 <Text style={[s.freeTitle, align]}>
-                  {language === 'ar' ? '✓ يوم شاغر' : '✓ Journée libre'}
+                  {language === 'ar' ? 'يوم شاغر' : 'Journée libre'}
                 </Text>
                 <Text style={[s.freeText, align]}>
                   {language === 'ar' ? 'لا توجد محاضرات مجدولة اليوم.' : 'Aucun cours programmé aujourd\'hui.'}
                 </Text>
+              </View>
+
+              {/* Green circle icon side */}
+              <View style={[s.freeIconBg, { backgroundColor: '#E8F8F5' }]}>
+                <Feather name="refresh-cw" size={18} color="#10B981" />
               </View>
             </View>
           ) : (
@@ -214,56 +286,150 @@ function CalendarScreenInner() {
         {/* Upcoming Days Section */}
         <View style={s.section}>
           <Text style={[s.sectionTitle, align]}>
-            {language === 'ar' ? 'نظرة على الأيام القادمة' : 'Upcoming Days'}
+            {language === 'ar' ? 'الأيام القادمة' : 'Upcoming Days'}
           </Text>
 
-          {upcomingDays.map(({ dayIdx, date, sessions: nextSessions }) => {
-            const dayName = date.toLocaleDateString(dateLocale, { weekday: 'long' });
-            const dateStr = date.toLocaleDateString(dateLocale, { day: 'numeric', month: 'long' });
-            const headerText = `${dayName} • ${dateStr}`;
-            return (
-              <View key={dayIdx} style={s.upcomingDayItem}>
-                <View style={[s.upcomingDayHeader, rowDir]}>
-                  <Text style={s.upcomingDayTitle}>{headerText}</Text>
-                  <Text style={s.upcomingCountBadge}>
-                    {nextSessions.length > 0
-                      ? t('timetable.sessionsCount', { n: nextSessions.length })
-                      : language === 'ar'
-                      ? 'يوم شاغر'
-                      : 'Libre'}
-                  </Text>
-                </View>
-                {nextSessions.length === 0 ? (
-                  <Text style={[s.upcomingFreeText, align]}>
-                    {language === 'ar' ? 'لا توجد محاضرات' : 'Aucun cours'}
-                  </Text>
-                ) : (
-                  nextSessions.map((session) => (
-                    <View key={session.id} style={[s.upcomingLectureRow, rowDir]}>
-                      <Text style={[s.upcomingLectureTime, align]}>
-                        {String(session.startTime).slice(0, 5)}–{String(session.endTime).slice(0, 5)}
+          <Card style={s.upcomingCard}>
+            {upcomingDays.map(({ date, sessions: nextSessions }, idx) => {
+              const dayName = date.toLocaleDateString(dateLocale, { weekday: 'long' });
+              const dateStr = date.toLocaleDateString(dateLocale, { day: 'numeric', month: 'long' });
+              const hasSessions = nextSessions.length > 0;
+              const accent = SESSION_COLORS[idx % SESSION_COLORS.length];
+
+              return (
+                <TouchableOpacity
+                  key={idx}
+                  activeOpacity={0.7}
+                  onPress={() => setSelectedDate(date)}
+                  style={[
+                    rowDir,
+                    s.upcomingRow,
+                    idx < upcomingDays.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border },
+                  ]}
+                >
+                  {/* Right Column (RTL): Day & Date */}
+                  <View style={s.upcomingRightCol}>
+                    <Text style={[s.upcomingDayName, align]}>{dayName}</Text>
+                    <Text style={[s.upcomingDateText, align]}>{dateStr}</Text>
+                  </View>
+
+                  {/* Center Column: Colored Indicator + Course Lists */}
+                  <View style={s.upcomingCenterCol}>
+                    {nextSessions.length === 0 ? (
+                      <Text style={[s.upcomingFreeText, align]}>
+                        {language === 'ar' ? 'لا توجد محاضرات.' : 'Aucun cours.'}
                       </Text>
-                      <Text style={[s.upcomingLectureName, align]} numberOfLines={1}>
-                        {session.courseName}
-                      </Text>
-                      {session.room && (
-                        <Text style={s.upcomingLectureRoom}>
-                          [{t('timetable.room')} {session.room}]
-                        </Text>
-                      )}
-                    </View>
-                  ))
-                )}
-              </View>
-            );
-          })}
+                    ) : (
+                      nextSessions.map((session, sidx) => (
+                        <View key={session.id} style={[rowDir, s.upcomingLectureRow, sidx > 0 && { marginTop: 4 }]}>
+                          <Text style={s.upcomingLectureTime}>
+                            {String(session.startTime).slice(0, 5)} - {String(session.endTime).slice(0, 5)}
+                          </Text>
+                          <View style={[s.verticalIndicator, { backgroundColor: accent }]} />
+                          <Text style={[s.upcomingLectureName, align]} numberOfLines={1}>
+                            {session.courseName}
+                          </Text>
+                        </View>
+                      ))
+                    )}
+                  </View>
+
+                  {/* Left Column (RTL): Count tag & chevron */}
+                  <View style={[rowDir, s.upcomingLeftCol]}>
+                    <Text style={[s.upcomingCountBadge, { color: hasSessions ? '#5C52E5' : colors.mutedForeground }]}>
+                      {nextSessions.length > 0
+                        ? t('timetable.sessionsCount', { n: nextSessions.length })
+                        : language === 'ar'
+                        ? 'يوم شاغر'
+                        : 'Libre'}
+                    </Text>
+                    <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={16} color={colors.mutedForeground} />
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </Card>
         </View>
       </ScrollView>
+
+      {/* Month Calendar Bottom Sheet overlay */}
+      {showMonthView && (
+        <>
+          <TouchableOpacity
+            style={s.backdrop}
+            activeOpacity={1}
+            onPress={() => setShowMonthView(false)}
+          />
+          <View style={s.bottomSheet}>
+            <View style={s.grabHandle} />
+            <View style={[rowDir, s.sheetHeader]}>
+              <TouchableOpacity onPress={prevMonth}>
+                <Feather name={isRTL ? 'chevron-right' : 'chevron-left'} size={20} color={colors.primary} />
+              </TouchableOpacity>
+              <Text style={s.sheetTitle}>{focusMonthTitle}</Text>
+              <TouchableOpacity onPress={nextMonth}>
+                <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={20} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={s.monthGrid}>
+              {weekHeaders.map((h, idx) => (
+                <Text key={idx} style={s.monthHeaderCell}>{h}</Text>
+              ))}
+              {slots.map((dayNum, idx) => {
+                if (dayNum === null) {
+                  return <View key={idx} style={s.monthDayCell} />;
+                }
+                const targetDate = new Date(focusYear, focusMonth, dayNum);
+                const isSelected =
+                  selectedDate.getDate() === dayNum &&
+                  selectedDate.getMonth() === focusMonth &&
+                  selectedDate.getFullYear() === focusYear;
+                const isToday =
+                  new Date().getDate() === dayNum &&
+                  new Date().getMonth() === focusMonth &&
+                  new Date().getFullYear() === focusYear;
+
+                // Mark days with lectures
+                const dayOfWeek = targetDate.getDay();
+                const hasSessions = (dayMap[dayOfWeek]?.length ?? 0) > 0;
+
+                return (
+                  <TouchableOpacity
+                    key={idx}
+                    style={[
+                      s.monthDayCell,
+                      isSelected && { backgroundColor: '#4F46E5' },
+                    ]}
+                    onPress={() => {
+                      setSelectedDate(targetDate);
+                      setShowMonthView(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        s.monthDayText,
+                        { color: isSelected ? '#fff' : isToday ? colors.primary : colors.foreground },
+                        isToday && !isSelected && { fontWeight: '700' },
+                      ]}
+                    >
+                      {dayNum}
+                    </Text>
+                    {hasSessions && !isSelected && (
+                      <View style={s.dotUnderDay} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </>
+      )}
     </View>
   );
 }
 
-const styles = (colors: ReturnType<typeof useColors>) =>
+const styles = (colors: ReturnType<typeof useColors>, isRTL: boolean) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
     center: { alignItems: 'center', justifyContent: 'center' },
@@ -280,30 +446,53 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     },
     dayCell: {
       width: 44,
-      height: 54,
+      height: 58,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 10,
-      borderWidth: 1,
-      gap: 2,
+      borderRadius: 14,
+      borderWidth: 0,
+      paddingVertical: 8,
     },
-    dayAbbr: { fontSize: 10, fontWeight: '600' },
-    dayNum: { fontSize: 14, fontWeight: '700' },
+    dayAbbr: { fontSize: 10, fontWeight: '600', marginBottom: 2 },
+    dayNum: { fontSize: 15, fontWeight: '700' },
+    activeDot: {
+      width: 3,
+      height: 3,
+      borderRadius: 1.5,
+      backgroundColor: '#fff',
+      marginTop: 2,
+    },
     // Header section
     headerArea: {
       paddingHorizontal: 16,
       paddingTop: 16,
       paddingBottom: 8,
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     dateHeader: {
-      fontSize: 24,
+      fontSize: 20,
       fontWeight: '700',
       color: colors.foreground,
     },
     relativeHeader: {
-      fontSize: 14,
-      color: colors.mutedForeground,
+      fontSize: 12,
+      color: '#5C52E5',
       marginTop: 2,
+      fontWeight: '700',
+    },
+    monthToggleBtn: {
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 10,
+      backgroundColor: colors.card,
+      gap: 6,
+    },
+    monthToggleText: {
+      fontSize: 12,
       fontWeight: '600',
     },
     // Sections
@@ -362,13 +551,13 @@ const styles = (colors: ReturnType<typeof useColors>) =>
     },
     // Free card
     freeCard: {
-      flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 16,
-      padding: 14,
+      padding: 16,
+      gap: 16,
     },
     freeTitle: {
       fontSize: 15,
@@ -380,57 +569,144 @@ const styles = (colors: ReturnType<typeof useColors>) =>
       color: colors.mutedForeground,
       marginTop: 2,
     },
-    // Upcoming Days
-    upcomingDayItem: {
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 16,
-      padding: 14,
-      marginBottom: 10,
-    },
-    upcomingDayHeader: {
-      justifyContent: 'space-between',
+    freeIconBg: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
       alignItems: 'center',
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-      paddingBottom: 8,
-      marginBottom: 8,
+      justifyContent: 'center',
     },
-    upcomingDayTitle: {
+    // Upcoming card layout
+    upcomingCard: {
+      padding: 0,
+      overflow: 'hidden',
+    },
+    upcomingRow: {
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 14,
+    },
+    upcomingRightCol: {
+      width: 70,
+    },
+    upcomingDayName: {
       fontSize: 13,
       fontWeight: '700',
       color: colors.foreground,
     },
-    upcomingCountBadge: {
+    upcomingDateText: {
       fontSize: 11,
-      fontWeight: '600',
-      color: colors.primary,
-    },
-    upcomingLectureRow: {
-      alignItems: 'center',
-      gap: 8,
-      paddingVertical: 4,
-    },
-    upcomingLectureTime: {
-      fontSize: 12,
-      fontWeight: '600',
       color: colors.mutedForeground,
-      width: 76,
+      marginTop: 2,
     },
-    upcomingLectureName: {
-      fontSize: 12,
-      color: colors.foreground,
+    upcomingCenterCol: {
       flex: 1,
-    },
-    upcomingLectureRoom: {
-      fontSize: 11,
-      color: colors.mutedForeground,
+      paddingHorizontal: 8,
     },
     upcomingFreeText: {
       fontSize: 12,
       color: colors.mutedForeground,
-      fontStyle: 'italic',
-      paddingVertical: 4,
+    },
+    upcomingLectureRow: {
+      alignItems: 'center',
+    },
+    upcomingLectureTime: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.mutedForeground,
+      width: 72,
+    },
+    verticalIndicator: {
+      width: 2,
+      height: 12,
+      marginHorizontal: 8,
+    },
+    upcomingLectureName: {
+      fontSize: 12,
+      color: colors.foreground,
+      fontWeight: '500',
+      flex: 1,
+    },
+    upcomingLeftCol: {
+      alignItems: 'center',
+      gap: 6,
+    },
+    upcomingCountBadge: {
+      fontSize: 11,
+      fontWeight: '600',
+    },
+    // Month picker Sheet Overlay
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+      zIndex: 999,
+    },
+    bottomSheet: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingBottom: 40,
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      zIndex: 1000,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 20,
+    },
+    grabHandle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.border,
+      alignSelf: 'center',
+      marginBottom: 16,
+    },
+    sheetHeader: {
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingHorizontal: 8,
+    },
+    sheetTitle: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    monthGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    monthHeaderCell: {
+      width: '14.28%',
+      textAlign: 'center',
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.mutedForeground,
+      paddingVertical: 6,
+    },
+    monthDayCell: {
+      width: '14.28%',
+      height: 38,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 19,
+      marginVertical: 2,
+    },
+    monthDayText: {
+      fontSize: 13,
+      fontWeight: '500',
+    },
+    dotUnderDay: {
+      width: 3,
+      height: 3,
+      borderRadius: 1.5,
+      backgroundColor: colors.primary,
+      marginTop: 2,
     },
   });
