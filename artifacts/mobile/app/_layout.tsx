@@ -47,9 +47,9 @@ function RootLayoutNav() {
       options={{
         headerShown: true,
         ...directionalHeaderOptions(t(titleKey), isRTL),
-        headerBackTitle: ' ',
-        headerStyle: { backgroundColor: colors.navy },
-        headerTintColor: '#fff',
+        headerStyle: { backgroundColor: colors.card },
+        headerTintColor: colors.foreground,
+        headerShadowVisible: false,
       }}
     />
   );

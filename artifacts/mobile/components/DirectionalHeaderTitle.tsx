@@ -28,13 +28,8 @@ function DirectionalHeaderTitle({ title, isRTL }: DirectionalHeaderTitleProps) {
 export function directionalHeaderOptions(title: string, isRTL: boolean) {
   return {
     title,
-    headerTitleAlign: 'left' as const,
-    headerTitle: isRTL
-      ? () => null
-      : () => <DirectionalHeaderTitle title={title} isRTL={false} />,
-    headerRight: isRTL
-      ? () => <DirectionalHeaderTitle title={title} isRTL />
-      : undefined,
+    headerTitleAlign: 'center' as const,
+    headerBackTitle: '',
   };
 }
 

@@ -11,11 +11,11 @@ import { useRequireAccount } from '@/components/GuestGate';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Feather } from '@expo/vector-icons';
 
-const PAYMENT_METHODS: { id: PaymentProofInputMethod; label?: string; labelKey?: string; icon: string }[] = [
-  { id: PaymentProofInputMethod.bankily, label: 'Bankily', icon: '🏦' },
-  { id: PaymentProofInputMethod.masrvi, label: 'Masrvi', icon: '📱' },
-  { id: PaymentProofInputMethod.sedad, label: 'Sedad', icon: '💳' },
-  { id: PaymentProofInputMethod.cash_agent, labelKey: 'subscription.cashAgent', icon: '💵' },
+const PAYMENT_METHODS: { id: PaymentProofInputMethod; label?: string; labelKey?: string; icon: keyof typeof Feather.glyphMap }[] = [
+  { id: PaymentProofInputMethod.bankily, label: 'Bankily', icon: 'credit-card' },
+  { id: PaymentProofInputMethod.masrvi, label: 'Masrvi', icon: 'smartphone' },
+  { id: PaymentProofInputMethod.sedad, label: 'Sedad', icon: 'shield' },
+  { id: PaymentProofInputMethod.cash_agent, labelKey: 'subscription.cashAgent', icon: 'dollar-sign' },
 ];
 
 // Guest-visible: plans & pricing are public (GET /plans requires no auth).
@@ -104,7 +104,7 @@ export default function SubscriptionScreen() {
 
       {/* Redeem code */}
       <View style={s.section}>
-        <Text style={[s.sectionTitle, align]}>{`🎟 ${t('subscription.redeemTitle')}`}</Text>
+        <Text style={[s.sectionTitle, align]}>{t('subscription.redeemTitle')}</Text>
         <View style={s.redeemRow}>
           <TextInput
             style={s.codeInput}
@@ -132,7 +132,7 @@ export default function SubscriptionScreen() {
 
       {/* Plans */}
       <View style={s.section}>
-        <Text style={[s.sectionTitle, align]}>{`💎 ${t('subscription.plansTitle')}`}</Text>
+        <Text style={[s.sectionTitle, align]}>{t('subscription.plansTitle')}</Text>
         {plansQuery.isLoading ? <ActivityIndicator color={colors.primary} /> : plansQuery.isError ? (
           <ErrorState onRetry={() => plansQuery.refetch()} />
         ) : (
@@ -182,8 +182,8 @@ export default function SubscriptionScreen() {
             <Text style={[s.payLabel, align]}>{t('subscription.payMethod')}</Text>
             <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', flexWrap: 'wrap', gap: 8 }}>
               {PAYMENT_METHODS.map((m) => (
-                <TouchableOpacity key={m.id} style={[s.methodBtn, payMethod === m.id && s.methodBtnActive]} onPress={() => setPayMethod(m.id)}>
-                  <Text style={s.methodIcon}>{m.icon}</Text>
+                <TouchableOpacity key={m.id} style={[s.methodBtn, payMethod === m.id && s.methodBtnActive, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setPayMethod(m.id)}>
+                  <Feather name={m.icon} size={14} color={payMethod === m.id ? colors.primary : colors.mutedForeground} style={isRTL ? { marginLeft: 6 } : { marginRight: 6 }} />
                   <Text style={[s.methodLabel, payMethod === m.id && s.methodLabelActive]}>{methodLabel(m)}</Text>
                 </TouchableOpacity>
               ))}
@@ -212,7 +212,7 @@ export default function SubscriptionScreen() {
             />
 
             <View style={s.instructBox}>
-              <Text style={[s.instructTitle, align]}>{`📋 ${t('subscription.payInstructions')}`}</Text>
+              <Text style={[s.instructTitle, align]}>{t('subscription.payInstructions')}</Text>
               <Text style={[s.instructText, align]}>{t('subscription.payStep1', { amount: selectedPlan?.priceMru ?? 0, method: methodLabel(PAYMENT_METHODS.find((m) => m.id === payMethod) ?? {}) })}</Text>
               <Text style={[s.instructText, align]}>{t('subscription.payStep2')}</Text>
               <Text style={[s.instructText, align]}>{t('subscription.payStep3')}</Text>

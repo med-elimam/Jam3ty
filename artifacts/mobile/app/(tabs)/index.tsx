@@ -21,6 +21,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { GuestHome } from '@/components/GuestHome';
 import { spacing, fontSize, fontWeight, radius, shadow } from '@/constants/theme';
 import { Avatar } from '@/components/ui/Avatar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function formatTime(t: string) {
   return t?.slice(0, 5) ?? '';
@@ -63,6 +64,7 @@ function HomeScreenInner() {
   const { t, isRTL, language } = usePreferences();
   const { user } = useAuth();
   const { data, isLoading, isError, refetch, isRefetching } = useGetDashboardHome();
+  const insets = useSafeAreaInsets();
 
   const d: DashboardHome | undefined = data?.data;
   const firstName = (user?.fullName ?? d?.student?.fullName ?? t('home.studentFallback')).split(' ')[0];
@@ -102,7 +104,7 @@ function HomeScreenInner() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* ── Compact Apple Header ── */}
-      <View style={[s.header, rowDir, { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+      <View style={[s.header, rowDir, { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border, paddingTop: insets.top, height: 56 + insets.top }]}>
         <Text style={[s.headerTitle, { color: colors.foreground }]}>{t('brand.appName')}</Text>
         <View style={[s.headerActions, rowDir]}>
           <TouchableOpacity

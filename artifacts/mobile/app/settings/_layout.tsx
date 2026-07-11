@@ -17,7 +17,8 @@ export default function SettingsLayout() {
         headerShown: true,
         headerStyle: { backgroundColor: colors.card },
         headerTintColor: colors.foreground,
-        headerBackButtonDisplayMode: 'minimal',
+        headerBackTitle: '',
+        headerShadowVisible: false,
       }}
     >
       <Stack.Screen name="index" options={headerOptions('screens.settings')} />

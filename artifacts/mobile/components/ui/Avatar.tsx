@@ -48,7 +48,6 @@ export function Avatar({ name, size = 40, style, bg, fg }: AvatarProps) {
       borderRadius: size / 2,
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
-      boxShadow: '0 2px 8px rgba(15,23,42,0.06)',
       overflow: 'hidden' as const,
     },
     style,
@@ -63,14 +62,16 @@ export function Avatar({ name, size = 40, style, bg, fg }: AvatarProps) {
   }
 
   return (
-    <LinearGradient
-      colors={['#4F46E5', '#6366F1']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={containerStyle}
-    >
-      {innerContent}
-    </LinearGradient>
+    <View style={containerStyle}>
+      <LinearGradient
+        colors={['#4F46E5', '#6366F1']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[StyleSheet.absoluteFill, s.root]}
+      >
+        {innerContent}
+      </LinearGradient>
+    </View>
   );
 }
 

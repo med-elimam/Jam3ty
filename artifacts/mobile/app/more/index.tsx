@@ -81,10 +81,6 @@ export default function MoreScreen() {
         style={{ flex: 1, backgroundColor: colors.background }}
         contentContainerStyle={s.content}
       >
-        <Text style={[s.screenTitle, { color: colors.foreground, textAlign: isRTL ? 'right' : 'left' }]}>
-          {t('screens.more')}
-        </Text>
-
         <View style={s.section}>
           <Text style={[s.sectionTitle, { color: colors.mutedForeground, textAlign: isRTL ? 'right' : 'left' }]}>
             {quickAccessTitle}
