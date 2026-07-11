@@ -72,7 +72,7 @@ if (process.env.NODE_ENV === "production") {
   // Serve admin dashboard at /admin
   const adminPath = path.join(__dirname, "../public/admin");
   if (fs.existsSync(adminPath)) {
-    app.use("/admin", express.static(adminPath));
+    app.use("/admin", express.static(adminPath, { dotfiles: "allow" }));
     // SPA fallback for admin - use regex instead of wildcard
     app.get(/^\/admin($|\/.*)/, (req, res) => {
       // If it's a request for a file (has extension), let it fall through to static or 404
@@ -87,10 +87,19 @@ if (process.env.NODE_ENV === "production") {
   // Serve student web at root /
   const studentPath = path.join(__dirname, "../public/student");
   if (fs.existsSync(studentPath)) {
-    app.use("/", express.static(studentPath));
-    // SPA fallback for student web (catch-all, but don't intercept API routes)
+    // dotfiles: "allow" is REQUIRED — the Expo web export stores fonts/assets
+    // under /assets/__node_modules/.pnpm/..., and express.static's default
+    // ("ignore") refuses any path containing a dot-segment, which made every
+    // icon font fall through to the SPA fallback and load as HTML (tofu □).
+    app.use("/", express.static(studentPath, { dotfiles: "allow" }));
+    // SPA fallback for student web (catch-all, but don't intercept API routes).
+    // Asset-like paths (with an extension) 404 instead of silently returning
+    // index.html — a missing font/image should fail loudly, not parse as HTML.
     app.get(/^(?!\/api).*/, (req, res) => {
-      res.sendFile(path.join(studentPath, "index.html"));
+      if (req.path.includes(".") && !req.path.endsWith(".html") && req.path !== "/") {
+        return res.status(404).end();
+      }
+      return res.sendFile(path.join(studentPath, "index.html"));
     });
     logger.info("Student web served at /");
   }
