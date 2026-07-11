@@ -99,6 +99,7 @@ function FilesScreenInner() {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[s.chipRow, rowDir]}
+        style={{ flexGrow: 0 }}
       >
         {FILE_TYPES.map((key) => {
           const active = activeType === key;

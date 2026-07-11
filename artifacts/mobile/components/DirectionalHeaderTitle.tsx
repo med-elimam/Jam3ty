@@ -1,6 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useColors } from '@/hooks/useColors';
+import { useRouter, useNavigation } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 
 interface DirectionalHeaderTitleProps {
   title: string;
@@ -20,16 +22,48 @@ function DirectionalHeaderTitle({ title, isRTL }: DirectionalHeaderTitleProps) {
   );
 }
 
-/**
- * React Navigation's native-stack web header supports left/center title alignment,
- * but not right. Keep the real route title for labels/document metadata and render
- * Arabic titles in the header's right slot so they reach the far edge on web.
- */
+export function HeaderBackButton({ isRTL }: { isRTL: boolean }) {
+  const router = useRouter();
+  const navigation = useNavigation();
+  const colors = useColors();
+  const chevron = isRTL ? 'chevron-right' : 'chevron-left';
+
+  // Only render if navigation stack has a history to go back to
+  if (!navigation.canGoBack()) {
+    return null;
+  }
+
+  return (
+    <TouchableOpacity
+      onPress={() => router.back()}
+      activeOpacity={0.7}
+      style={{
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.card,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Feather name={chevron} size={18} color={colors.foreground} />
+    </TouchableOpacity>
+  );
+}
+
 export function directionalHeaderOptions(title: string, isRTL: boolean) {
   return {
     title,
     headerTitleAlign: 'center' as const,
-    headerBackTitle: '',
+    headerBackVisible: false,
+    headerLeft: isRTL
+      ? () => null
+      : () => <HeaderBackButton isRTL={false} />,
+    headerRight: isRTL
+      ? () => <HeaderBackButton isRTL={true} />
+      : () => null,
   };
 }
 
