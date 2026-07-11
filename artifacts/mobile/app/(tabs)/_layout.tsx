@@ -6,6 +6,7 @@ import { useResolvedScheme } from '@/contexts/PreferencesContext';
 import { Feather } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
+import { directionalHeaderOptions } from '@/components/DirectionalHeaderTitle';
 
 type FeatherName = React.ComponentProps<typeof Feather>['name'];
 
@@ -47,7 +48,6 @@ export default function TabLayout() {
         headerShown: true,
         headerStyle: { backgroundColor: colors.navy },
         headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: '700', fontSize: 17 },
         tabBarStyle: {
           flexDirection: 'row',
           position: 'absolute',
@@ -79,7 +79,7 @@ export default function TabLayout() {
           key={tab.name}
           name={tab.name}
           options={{
-            title: t(tab.titleKey),
+            ...directionalHeaderOptions(t(tab.titleKey), isRTL),
             tabBarIcon: ({ color, focused }) => (
               <TabIcon name={tab.icon} color={color} focused={focused} />
             ),

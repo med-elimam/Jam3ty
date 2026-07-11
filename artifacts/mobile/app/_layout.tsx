@@ -20,6 +20,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PreferencesProvider, usePreferences } from '@/contexts/PreferencesContext';
 import { useColors } from '@/hooks/useColors';
+import { directionalHeaderOptions } from '@/components/DirectionalHeaderTitle';
 
 // Suppress harmless "Codegen didn't run" warnings (expected in Expo Go with newArchEnabled)
 LogBox.ignoreLogs([/Codegen didn't run/]);
@@ -37,7 +38,7 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
-  const { t } = usePreferences();
+  const { t, isRTL } = usePreferences();
   const colors = useColors();
 
   const headerScreen = (name: string, titleKey: string) => (
@@ -45,11 +46,10 @@ function RootLayoutNav() {
       name={name}
       options={{
         headerShown: true,
-        title: t(titleKey),
+        ...directionalHeaderOptions(t(titleKey), isRTL),
         headerBackTitle: ' ',
         headerStyle: { backgroundColor: colors.navy },
         headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: '700', fontSize: 17 },
       }}
     />
   );
