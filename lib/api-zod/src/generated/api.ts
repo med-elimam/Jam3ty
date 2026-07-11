@@ -640,6 +640,7 @@ export const GetCourseResponse = zod.object({
   "uploaderName": zod.string(),
   "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
   "downloadCount": zod.number(),
+  "viewCount": zod.number(),
   "isFavorited": zod.boolean(),
   "createdAt": zod.coerce.date()
 })),
@@ -710,6 +711,7 @@ export const ListFilesResponse = zod.object({
   "uploaderName": zod.string(),
   "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
   "downloadCount": zod.number(),
+  "viewCount": zod.number(),
   "isFavorited": zod.boolean(),
   "createdAt": zod.coerce.date()
 })),
@@ -733,6 +735,50 @@ export const ToggleFileFavoriteResponse = zod.object({
   "success": zod.boolean(),
   "data": zod.object({
   "isFavorited": zod.boolean()
+})
+})
+
+
+/**
+ * @summary Get details of a single file
+ */
+export const GetFileParams = zod.object({
+  "fileId": zod.coerce.string()
+})
+
+export const GetFileResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "fileType": zod.enum(['lecture', 'td', 'tp', 'summary', 'exam', 'correction', 'book', 'other']),
+  "mimeType": zod.string(),
+  "fileSize": zod.number(),
+  "fileUrl": zod.string(),
+  "courseId": zod.string().nullish(),
+  "courseName": zod.string().nullish(),
+  "uploadedById": zod.string(),
+  "uploaderName": zod.string(),
+  "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
+  "downloadCount": zod.number(),
+  "viewCount": zod.number(),
+  "isFavorited": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Record a view event on a file
+ */
+export const RecordFileViewParams = zod.object({
+  "fileId": zod.coerce.string()
+})
+
+export const RecordFileViewResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "viewCount": zod.number()
 })
 })
 
@@ -1192,6 +1238,120 @@ export const ListMyPaymentsResponse = zod.object({
 
 
 /**
+ * @summary Create a manual payment order
+ */
+export const CreateManualPaymentOrderBody = zod.object({
+  "planId": zod.string().uuid(),
+  "method": zod.enum(['bankily', 'masrvi', 'sedad', 'other']),
+  "language": zod.enum(['ar', 'fr']).optional()
+})
+
+export const CreateManualPaymentOrderResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
+  "planId": zod.string().uuid(),
+  "amountMru": zod.number(),
+  "currency": zod.string(),
+  "provider": zod.string(),
+  "paymentMode": zod.string(),
+  "manualPaymentMethod": zod.string().optional(),
+  "manualReviewStatus": zod.string().optional(),
+  "clientReference": zod.string(),
+  "status": zod.string(),
+  "expiresAt": zod.string(),
+  "paidAt": zod.string().nullish(),
+  "planName": zod.string(),
+  "recipientName": zod.string(),
+  "recipientAccount": zod.string(),
+  "instructions": zod.string(),
+  "evidenceRequired": zod.boolean(),
+  "transactionReferenceRequired": zod.boolean()
+})
+})
+
+
+/**
+ * @summary List manual payment orders for current user
+ */
+export const ListManualPaymentOrdersResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
+  "planId": zod.string().uuid(),
+  "amountMru": zod.number(),
+  "currency": zod.string(),
+  "provider": zod.string(),
+  "paymentMode": zod.string(),
+  "manualPaymentMethod": zod.string().optional(),
+  "manualReviewStatus": zod.string(),
+  "clientReference": zod.string(),
+  "status": zod.string(),
+  "expiresAt": zod.string(),
+  "paidAt": zod.string().nullish(),
+  "createdAt": zod.string().optional(),
+  "updatedAt": zod.string().optional()
+}))
+})
+
+
+/**
+ * @summary Upload evidence of manual payment
+ */
+export const UploadManualPaymentEvidenceParams = zod.object({
+  "paymentOrderId": zod.coerce.string()
+})
+
+export const UploadManualPaymentEvidenceResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "evidenceId": zod.string().uuid(),
+  "duplicateEvidence": zod.boolean()
+})
+})
+
+
+/**
+ * @summary Submit details of manual payment evidence
+ */
+export const SubmitManualPaymentEvidenceParams = zod.object({
+  "paymentOrderId": zod.coerce.string()
+})
+
+export const SubmitManualPaymentEvidenceBody = zod.object({
+  "evidenceId": zod.string().uuid(),
+  "senderName": zod.string().optional(),
+  "senderPhone": zod.string(),
+  "transactionReference": zod.string().optional(),
+  "paymentDate": zod.string().optional()
+})
+
+export const SubmitManualPaymentEvidenceResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
+  "planId": zod.string().uuid(),
+  "amountMru": zod.number(),
+  "currency": zod.string(),
+  "provider": zod.string(),
+  "paymentMode": zod.string(),
+  "manualPaymentMethod": zod.string().optional(),
+  "manualReviewStatus": zod.string(),
+  "clientReference": zod.string(),
+  "status": zod.string(),
+  "expiresAt": zod.string(),
+  "paidAt": zod.string().nullish(),
+  "createdAt": zod.string().optional(),
+  "updatedAt": zod.string().optional()
+}),
+  "message": zod.string().optional()
+})
+
+
+/**
  * @summary List notifications for current user
  */
 export const ListNotificationsQueryParams = zod.object({
@@ -1216,6 +1376,20 @@ export const ListNotificationsResponse = zod.object({
  * @summary Mark all notifications as read
  */
 export const MarkAllNotificationsReadResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().optional()
+})
+
+
+/**
+ * @summary Register or update a user's push token
+ */
+export const RegisterPushTokenBody = zod.object({
+  "token": zod.string(),
+  "platform": zod.enum(['ios', 'android', 'web'])
+})
+
+export const RegisterPushTokenResponse = zod.object({
   "success": zod.boolean(),
   "message": zod.string().optional()
 })
@@ -1388,6 +1562,7 @@ export const GetDashboardHomeResponse = zod.object({
   "uploaderName": zod.string(),
   "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
   "downloadCount": zod.number(),
+  "viewCount": zod.number(),
   "isFavorited": zod.boolean(),
   "createdAt": zod.coerce.date()
 })),
@@ -1434,6 +1609,23 @@ export const GetAdminDashboardStatsResponse = zod.object({
   "totalFiles": zod.number(),
   "activeSubscriptions": zod.number()
 })
+})
+
+
+/**
+ * @summary Send a custom push notification (super_admin only)
+ */
+export const SendAdminNotificationBody = zod.object({
+  "title": zod.string(),
+  "body": zod.string(),
+  "userId": zod.string().uuid().optional(),
+  "departmentId": zod.string().uuid().optional(),
+  "levelId": zod.string().uuid().optional()
+})
+
+export const SendAdminNotificationResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().optional()
 })
 
 
@@ -2147,6 +2339,7 @@ export const ListAdminFilesResponse = zod.object({
   "uploaderName": zod.string(),
   "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
   "downloadCount": zod.number(),
+  "viewCount": zod.number(),
   "isFavorited": zod.boolean(),
   "createdAt": zod.coerce.date()
 }).and(zod.object({
@@ -2185,6 +2378,7 @@ export const CreateAdminFileResponse = zod.object({
   "uploaderName": zod.string(),
   "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
   "downloadCount": zod.number(),
+  "viewCount": zod.number(),
   "isFavorited": zod.boolean(),
   "createdAt": zod.coerce.date()
 }).and(zod.object({
@@ -2227,6 +2421,7 @@ export const UpdateAdminFileResponse = zod.object({
   "uploaderName": zod.string(),
   "approvalStatus": zod.enum(['pending', 'approved', 'rejected']),
   "downloadCount": zod.number(),
+  "viewCount": zod.number(),
   "isFavorited": zod.boolean(),
   "createdAt": zod.coerce.date()
 }).and(zod.object({

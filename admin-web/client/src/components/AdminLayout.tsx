@@ -34,8 +34,11 @@ const navItems = [
   { path: '/admin/clubs', label: 'nav.clubs', icon: '🎯' },
   { path: '/admin/subscriptions', label: 'nav.subscriptions', icon: '⭐' },
   { path: '/admin/payments', label: 'nav.payments', icon: '💳' },
+  { path: '/admin/manual-payments', label: 'nav.manualPayments', icon: '✓' },
+  { path: '/admin/payment-methods', label: 'nav.paymentMethods', icon: '⚙' },
   { path: '/admin/agents', label: 'nav.agents', icon: '🤝' },
   { path: '/admin/settings', label: 'nav.settings', icon: '⚙️' },
+  { path: '/admin/notifications', label: 'nav.notifications', icon: '🔔' },
 ];
 
 const LANGUAGES: { code: Lang; label: string }[] = [

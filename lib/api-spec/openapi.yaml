@@ -542,6 +542,64 @@ paths:
                     required: [isFavorited]
                 required: [success, data]
 
+  /files/{fileId}:
+    get:
+      operationId: getFile
+      tags: [files]
+      summary: Get details of a single file
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/AcademicFile"
+                required: [success, data]
+
+  /files/{fileId}/view:
+    post:
+      operationId: recordFileView
+      tags: [files]
+      summary: Record a view event on a file
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: View recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      viewCount:
+                        type: integer
+                    required: [viewCount]
+                required: [success, data]
+
   # ─── ANNOUNCEMENTS ───────────────────────────────────────────────────────────
   /announcements:
     get:
@@ -1086,6 +1144,158 @@ paths:
                       $ref: "#/components/schemas/Payment"
                 required: [success, data]
 
+  /subscriptions/manual-payment-orders:
+    post:
+      operationId: createManualPaymentOrder
+      tags: [subscriptions]
+      summary: Create a manual payment order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                planId:
+                  type: string
+                  format: uuid
+                method:
+                  type: string
+                  enum: [bankily, masrvi, sedad, other]
+                language:
+                  type: string
+                  enum: [ar, fr]
+              required: [planId, method]
+      responses:
+        "201":
+          description: Manual payment order created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/ManualPaymentCheckout"
+                required: [success, data]
+    get:
+      operationId: listManualPaymentOrders
+      tags: [subscriptions]
+      summary: List manual payment orders for current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Manual payment orders list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ManualPaymentOrder"
+                required: [success, data]
+
+  /subscriptions/manual-payment-orders/{paymentOrderId}/evidence:
+    post:
+      operationId: uploadManualPaymentEvidence
+      tags: [subscriptions]
+      summary: Upload evidence of manual payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: paymentOrderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: [file]
+      responses:
+        "201":
+          description: Evidence uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      evidenceId:
+                        type: string
+                        format: uuid
+                      duplicateEvidence:
+                        type: boolean
+                    required: [evidenceId, duplicateEvidence]
+                required: [success, data]
+
+  /subscriptions/manual-payment-orders/{paymentOrderId}/submit:
+    post:
+      operationId: submitManualPaymentEvidence
+      tags: [subscriptions]
+      summary: Submit details of manual payment evidence
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: paymentOrderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                evidenceId:
+                  type: string
+                  format: uuid
+                senderName:
+                  type: string
+                senderPhone:
+                  type: string
+                transactionReference:
+                  type: string
+                paymentDate:
+                  type: string
+              required: [evidenceId, senderPhone]
+      responses:
+        "202":
+          description: Payment details submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/ManualPaymentOrder"
+                  message:
+                    type: string
+                required: [success, data]
+
   # ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
   /notifications:
     get:
@@ -1127,6 +1337,34 @@ paths:
       responses:
         "200":
           description: All marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /notifications/push-token:
+    post:
+      operationId: registerPushToken
+      tags: [notifications]
+      summary: Register or update a user's push token
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                platform:
+                  type: string
+                  enum: [ios, android, web]
+              required: [token, platform]
+      responses:
+        "200":
+          description: Token registered
           content:
             application/json:
               schema:
@@ -1251,6 +1489,42 @@ paths:
                   data:
                     $ref: "#/components/schemas/AdminDashboardStats"
                 required: [success, data]
+
+  /admin/notifications/send:
+    post:
+      operationId: sendAdminNotification
+      tags: [admin]
+      summary: Send a custom push notification (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                userId:
+                  type: string
+                  format: uuid
+                departmentId:
+                  type: string
+                  format: uuid
+                levelId:
+                  type: string
+                  format: uuid
+              required: [title, body]
+      responses:
+        "200":
+          description: Notification sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
 
   /admin/users:
     get:
@@ -4262,12 +4536,14 @@ components:
           enum: [pending, approved, rejected]
         downloadCount:
           type: integer
+        viewCount:
+          type: integer
         isFavorited:
           type: boolean
         createdAt:
           type: string
           format: date-time
-      required: [id, title, fileType, mimeType, fileSize, fileUrl, uploadedById, uploaderName, approvalStatus, downloadCount, isFavorited, createdAt]
+      required: [id, title, fileType, mimeType, fileSize, fileUrl, uploadedById, uploaderName, approvalStatus, downloadCount, viewCount, isFavorited, createdAt]
 
     AdminFile:
       allOf:
@@ -5715,3 +5991,89 @@ components:
         unreadNotificationsCount:
           type: integer
       required: [student, todaysSessions, latestAnnouncements, upcomingAssignments, upcomingExams, recentFiles, upcomingEvents, featuredOpportunities, unreadNotificationsCount]
+
+    ManualPaymentCheckout:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        planId:
+          type: string
+          format: uuid
+        amountMru:
+          type: integer
+        currency:
+          type: string
+        provider:
+          type: string
+        paymentMode:
+          type: string
+        manualPaymentMethod:
+          type: string
+        manualReviewStatus:
+          type: string
+        clientReference:
+          type: string
+        status:
+          type: string
+        expiresAt:
+          type: string
+        paidAt:
+          type: string
+          nullable: true
+        planName:
+          type: string
+        recipientName:
+          type: string
+        recipientAccount:
+          type: string
+        instructions:
+          type: string
+        evidenceRequired:
+          type: boolean
+        transactionReferenceRequired:
+          type: boolean
+      required: [id, userId, planId, amountMru, currency, provider, paymentMode, clientReference, status, expiresAt, planName, recipientName, recipientAccount, instructions, evidenceRequired, transactionReferenceRequired]
+
+    ManualPaymentOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        planId:
+          type: string
+          format: uuid
+        amountMru:
+          type: integer
+        currency:
+          type: string
+        provider:
+          type: string
+        paymentMode:
+          type: string
+        manualPaymentMethod:
+          type: string
+        manualReviewStatus:
+          type: string
+        clientReference:
+          type: string
+        status:
+          type: string
+        expiresAt:
+          type: string
+        paidAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, userId, planId, amountMru, currency, provider, paymentMode, manualReviewStatus, clientReference, status, expiresAt]

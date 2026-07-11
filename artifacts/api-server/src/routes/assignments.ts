@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, assignmentsTable, assignmentSubmissionsTable, coursesTable, profilesTable } from "@workspace/db";
 import { eq, and, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { requireEntitlement } from "../middlewares/entitlements";
 
 const router = Router();
 
@@ -10,7 +11,7 @@ const router = Router();
 // matching the student's profile departmentId + levelId (same rule as GET /courses).
 // No academic placement → no assignments. An explicit courseId is honored as-is
 // (course pages are reachable by id).
-router.get("/assignments", requireAuth, async (req, res) => {
+router.get("/assignments", requireAuth, requireEntitlement("assignments.view"), async (req, res) => {
   try {
     const { courseId, status } = req.query as Record<string, string>;
     const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!)).limit(1);
@@ -47,7 +48,7 @@ router.get("/assignments", requireAuth, async (req, res) => {
 });
 
 // GET /assignments/:assignmentId
-router.get("/assignments/:assignmentId", requireAuth, async (req, res) => {
+router.get("/assignments/:assignmentId", requireAuth, requireEntitlement("assignments.view"), async (req, res) => {
   try {
     const { assignmentId } = req.params as { assignmentId: string };
     const [assignment] = await db.select().from(assignmentsTable).where(eq(assignmentsTable.id, assignmentId)).limit(1);

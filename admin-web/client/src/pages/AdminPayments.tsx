@@ -6,7 +6,6 @@ import AdminLayout from '@/components/AdminLayout';
 import { toast } from 'sonner';
 import {
   useListAdminPayments,
-  useApproveAdminPayment,
   useRejectAdminPayment,
   getListAdminPaymentsQueryKey,
 } from '@workspace/api-client-react';
@@ -25,26 +24,12 @@ export default function AdminPayments() {
   const { t } = useAdminI18n();
   const queryClient = useQueryClient();
   const { data, isLoading } = useListAdminPayments();
-  const approveMutation = useApproveAdminPayment();
   const rejectMutation = useRejectAdminPayment();
 
   const payments = data?.data ?? [];
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: getListAdminPaymentsQueryKey() });
-  };
-
-  const handleApprove = (paymentId: string) => {
-    approveMutation.mutate(
-      { paymentId },
-      {
-        onSuccess: () => {
-          toast.success(t('common.success'));
-          invalidate();
-        },
-        onError: () => toast.error(t('common.error')),
-      },
-    );
   };
 
   const handleReject = (paymentId: string) => {
@@ -74,6 +59,10 @@ export default function AdminPayments() {
     <AdminLayout>
       <div className="p-6 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('payments.title')}</h1>
+        <Card className="mb-6 border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+          <p dir="rtl">هذه السجلات مطالبات دفع غير موثّقة ولا يمكن اعتمادها أو تفعيل اشتراك منها.</p>
+          <p>Ces entrées sont des déclarations non vérifiées et ne peuvent pas activer un abonnement.</p>
+        </Card>
 
         {payments.length > 0 ? (
           <div className="overflow-x-auto">
@@ -106,16 +95,9 @@ export default function AdminPayments() {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            disabled={approveMutation.isPending || rejectMutation.isPending}
-                            onClick={() => handleApprove(payment.id)}
-                          >
-                            {t('payments.approve')}
-                          </Button>
-                          <Button
-                            size="sm"
                             variant="outline"
                             className="text-red-600"
-                            disabled={approveMutation.isPending || rejectMutation.isPending}
+                            disabled={rejectMutation.isPending}
                             onClick={() => handleReject(payment.id)}
                           >
                             {t('payments.reject')}

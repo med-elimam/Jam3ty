@@ -56,6 +56,8 @@ import type {
   CreateFacultyInput,
   CreateGroupInput,
   CreateLevelInput,
+  CreateManualPaymentOrder201,
+  CreateManualPaymentOrderBody,
   CreatePost201,
   CreatePostInput,
   CreateUniversityInput,
@@ -76,6 +78,7 @@ import type {
   GetAssignment200,
   GetCourse200,
   GetDashboardHome200,
+  GetFile200,
   GetMySubscription200,
   GetProfile200,
   GetTimetable200,
@@ -140,6 +143,7 @@ import type {
   ListFilesParams,
   ListGroups200,
   ListLevels200,
+  ListManualPaymentOrders200,
   ListMyPayments200,
   ListNotifications200,
   ListNotificationsParams,
@@ -155,12 +159,17 @@ import type {
   OnboardingInput,
   PaymentProofInput,
   ReactToPostBody,
+  RecordFileView200,
   RedeemActivationCode200,
   RedeemActivationCodeBody,
   RefreshTokensBody,
   RegisterInput,
+  RegisterPushTokenBody,
   RejectAdminPayment200,
   RejectAdminPaymentBody,
+  SendAdminNotificationBody,
+  SubmitManualPaymentEvidence202,
+  SubmitManualPaymentEvidenceBody,
   SubmitPaymentProof201,
   SuccessResponse,
   ToggleFileFavorite200,
@@ -211,6 +220,8 @@ import type {
   UpdateUniversityInput,
   UploadAdminFile201,
   UploadAdminFileBody,
+  UploadManualPaymentEvidence201,
+  UploadManualPaymentEvidenceBody,
   UserResponse
 } from './api.schemas';
 
@@ -1677,6 +1688,154 @@ export const useToggleFileFavorite = <TError = ErrorType<unknown>,
       return useMutation(getToggleFileFavoriteMutationOptions(options));
     }
 
+export const getGetFileUrl = (fileId: string,) => {
+
+
+
+
+  return `/api/files/${fileId}`
+}
+
+/**
+ * @summary Get details of a single file
+ */
+export const getFile = async (fileId: string, options?: RequestInit): Promise<GetFile200> => {
+
+  return customFetch<GetFile200>(getGetFileUrl(fileId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetFileQueryKey = (fileId: string,) => {
+    return [
+    `/api/files/${fileId}`
+    ] as const;
+    }
+
+
+export const getGetFileQueryOptions = <TData = Awaited<ReturnType<typeof getFile>>, TError = ErrorType<unknown>>(fileId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFileQueryKey(fileId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFile>>> = ({ signal }) => getFile(fileId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: fileId !== null && fileId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetFileQueryResult = NonNullable<Awaited<ReturnType<typeof getFile>>>
+export type GetFileQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get details of a single file
+ */
+
+export function useGetFile<TData = Awaited<ReturnType<typeof getFile>>, TError = ErrorType<unknown>>(
+ fileId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetFileQueryOptions(fileId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRecordFileViewUrl = (fileId: string,) => {
+
+
+
+
+  return `/api/files/${fileId}/view`
+}
+
+/**
+ * @summary Record a view event on a file
+ */
+export const recordFileView = async (fileId: string, options?: RequestInit): Promise<RecordFileView200> => {
+
+  return customFetch<RecordFileView200>(getRecordFileViewUrl(fileId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRecordFileViewMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordFileView>>, TError,{fileId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordFileView>>, TError,{fileId: string}, TContext> => {
+
+const mutationKey = ['recordFileView'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordFileView>>, {fileId: string}> = (props) => {
+          const {fileId} = props ?? {};
+
+          return  recordFileView(fileId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordFileViewMutationResult = NonNullable<Awaited<ReturnType<typeof recordFileView>>>
+
+    export type RecordFileViewMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Record a view event on a file
+ */
+export const useRecordFileView = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordFileView>>, TError,{fileId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordFileView>>,
+        TError,
+        {fileId: string},
+        TContext
+      > => {
+      return useMutation(getRecordFileViewMutationOptions(options));
+    }
+
 export const getListAnnouncementsUrl = (params?: ListAnnouncementsParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -3141,6 +3300,300 @@ export function useListMyPayments<TData = Awaited<ReturnType<typeof listMyPaymen
 
 
 
+export const getCreateManualPaymentOrderUrl = () => {
+
+
+
+
+  return `/api/subscriptions/manual-payment-orders`
+}
+
+/**
+ * @summary Create a manual payment order
+ */
+export const createManualPaymentOrder = async (createManualPaymentOrderBody: CreateManualPaymentOrderBody, options?: RequestInit): Promise<CreateManualPaymentOrder201> => {
+
+  return customFetch<CreateManualPaymentOrder201>(getCreateManualPaymentOrderUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createManualPaymentOrderBody)
+  }
+);}
+
+
+
+
+
+export const getCreateManualPaymentOrderMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createManualPaymentOrder>>, TError,{data: BodyType<CreateManualPaymentOrderBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createManualPaymentOrder>>, TError,{data: BodyType<CreateManualPaymentOrderBody>}, TContext> => {
+
+const mutationKey = ['createManualPaymentOrder'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createManualPaymentOrder>>, {data: BodyType<CreateManualPaymentOrderBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createManualPaymentOrder(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateManualPaymentOrderMutationResult = NonNullable<Awaited<ReturnType<typeof createManualPaymentOrder>>>
+    export type CreateManualPaymentOrderMutationBody = BodyType<CreateManualPaymentOrderBody>
+    export type CreateManualPaymentOrderMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a manual payment order
+ */
+export const useCreateManualPaymentOrder = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createManualPaymentOrder>>, TError,{data: BodyType<CreateManualPaymentOrderBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createManualPaymentOrder>>,
+        TError,
+        {data: BodyType<CreateManualPaymentOrderBody>},
+        TContext
+      > => {
+      return useMutation(getCreateManualPaymentOrderMutationOptions(options));
+    }
+
+export const getListManualPaymentOrdersUrl = () => {
+
+
+
+
+  return `/api/subscriptions/manual-payment-orders`
+}
+
+/**
+ * @summary List manual payment orders for current user
+ */
+export const listManualPaymentOrders = async ( options?: RequestInit): Promise<ListManualPaymentOrders200> => {
+
+  return customFetch<ListManualPaymentOrders200>(getListManualPaymentOrdersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListManualPaymentOrdersQueryKey = () => {
+    return [
+    `/api/subscriptions/manual-payment-orders`
+    ] as const;
+    }
+
+
+export const getListManualPaymentOrdersQueryOptions = <TData = Awaited<ReturnType<typeof listManualPaymentOrders>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listManualPaymentOrders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListManualPaymentOrdersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listManualPaymentOrders>>> = ({ signal }) => listManualPaymentOrders({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listManualPaymentOrders>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListManualPaymentOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof listManualPaymentOrders>>>
+export type ListManualPaymentOrdersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List manual payment orders for current user
+ */
+
+export function useListManualPaymentOrders<TData = Awaited<ReturnType<typeof listManualPaymentOrders>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listManualPaymentOrders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListManualPaymentOrdersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUploadManualPaymentEvidenceUrl = (paymentOrderId: string,) => {
+
+
+
+
+  return `/api/subscriptions/manual-payment-orders/${paymentOrderId}/evidence`
+}
+
+/**
+ * @summary Upload evidence of manual payment
+ */
+export const uploadManualPaymentEvidence = async (paymentOrderId: string,
+    uploadManualPaymentEvidenceBody: UploadManualPaymentEvidenceBody, options?: RequestInit): Promise<UploadManualPaymentEvidence201> => {
+    const formData = new FormData();
+formData.append(`file`, uploadManualPaymentEvidenceBody.file);
+
+  return customFetch<UploadManualPaymentEvidence201>(getUploadManualPaymentEvidenceUrl(paymentOrderId),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+
+export const getUploadManualPaymentEvidenceMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadManualPaymentEvidence>>, TError,{paymentOrderId: string;data: BodyType<UploadManualPaymentEvidenceBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadManualPaymentEvidence>>, TError,{paymentOrderId: string;data: BodyType<UploadManualPaymentEvidenceBody>}, TContext> => {
+
+const mutationKey = ['uploadManualPaymentEvidence'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadManualPaymentEvidence>>, {paymentOrderId: string;data: BodyType<UploadManualPaymentEvidenceBody>}> = (props) => {
+          const {paymentOrderId,data} = props ?? {};
+
+          return  uploadManualPaymentEvidence(paymentOrderId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadManualPaymentEvidenceMutationResult = NonNullable<Awaited<ReturnType<typeof uploadManualPaymentEvidence>>>
+    export type UploadManualPaymentEvidenceMutationBody = BodyType<UploadManualPaymentEvidenceBody>
+    export type UploadManualPaymentEvidenceMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Upload evidence of manual payment
+ */
+export const useUploadManualPaymentEvidence = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadManualPaymentEvidence>>, TError,{paymentOrderId: string;data: BodyType<UploadManualPaymentEvidenceBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof uploadManualPaymentEvidence>>,
+        TError,
+        {paymentOrderId: string;data: BodyType<UploadManualPaymentEvidenceBody>},
+        TContext
+      > => {
+      return useMutation(getUploadManualPaymentEvidenceMutationOptions(options));
+    }
+
+export const getSubmitManualPaymentEvidenceUrl = (paymentOrderId: string,) => {
+
+
+
+
+  return `/api/subscriptions/manual-payment-orders/${paymentOrderId}/submit`
+}
+
+/**
+ * @summary Submit details of manual payment evidence
+ */
+export const submitManualPaymentEvidence = async (paymentOrderId: string,
+    submitManualPaymentEvidenceBody: SubmitManualPaymentEvidenceBody, options?: RequestInit): Promise<SubmitManualPaymentEvidence202> => {
+
+  return customFetch<SubmitManualPaymentEvidence202>(getSubmitManualPaymentEvidenceUrl(paymentOrderId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(submitManualPaymentEvidenceBody)
+  }
+);}
+
+
+
+
+
+export const getSubmitManualPaymentEvidenceMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitManualPaymentEvidence>>, TError,{paymentOrderId: string;data: BodyType<SubmitManualPaymentEvidenceBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitManualPaymentEvidence>>, TError,{paymentOrderId: string;data: BodyType<SubmitManualPaymentEvidenceBody>}, TContext> => {
+
+const mutationKey = ['submitManualPaymentEvidence'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitManualPaymentEvidence>>, {paymentOrderId: string;data: BodyType<SubmitManualPaymentEvidenceBody>}> = (props) => {
+          const {paymentOrderId,data} = props ?? {};
+
+          return  submitManualPaymentEvidence(paymentOrderId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitManualPaymentEvidenceMutationResult = NonNullable<Awaited<ReturnType<typeof submitManualPaymentEvidence>>>
+    export type SubmitManualPaymentEvidenceMutationBody = BodyType<SubmitManualPaymentEvidenceBody>
+    export type SubmitManualPaymentEvidenceMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Submit details of manual payment evidence
+ */
+export const useSubmitManualPaymentEvidence = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitManualPaymentEvidence>>, TError,{paymentOrderId: string;data: BodyType<SubmitManualPaymentEvidenceBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitManualPaymentEvidence>>,
+        TError,
+        {paymentOrderId: string;data: BodyType<SubmitManualPaymentEvidenceBody>},
+        TContext
+      > => {
+      return useMutation(getSubmitManualPaymentEvidenceMutationOptions(options));
+    }
+
 export const getListNotificationsUrl = (params?: ListNotificationsParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -3294,6 +3747,77 @@ export const useMarkAllNotificationsRead = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getMarkAllNotificationsReadMutationOptions(options));
+    }
+
+export const getRegisterPushTokenUrl = () => {
+
+
+
+
+  return `/api/notifications/push-token`
+}
+
+/**
+ * @summary Register or update a user's push token
+ */
+export const registerPushToken = async (registerPushTokenBody: RegisterPushTokenBody, options?: RequestInit): Promise<SuccessResponse> => {
+
+  return customFetch<SuccessResponse>(getRegisterPushTokenUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(registerPushTokenBody)
+  }
+);}
+
+
+
+
+
+export const getRegisterPushTokenMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerPushToken>>, TError,{data: BodyType<RegisterPushTokenBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerPushToken>>, TError,{data: BodyType<RegisterPushTokenBody>}, TContext> => {
+
+const mutationKey = ['registerPushToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerPushToken>>, {data: BodyType<RegisterPushTokenBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  registerPushToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterPushTokenMutationResult = NonNullable<Awaited<ReturnType<typeof registerPushToken>>>
+    export type RegisterPushTokenMutationBody = BodyType<RegisterPushTokenBody>
+    export type RegisterPushTokenMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Register or update a user's push token
+ */
+export const useRegisterPushToken = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerPushToken>>, TError,{data: BodyType<RegisterPushTokenBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof registerPushToken>>,
+        TError,
+        {data: BodyType<RegisterPushTokenBody>},
+        TContext
+      > => {
+      return useMutation(getRegisterPushTokenMutationOptions(options));
     }
 
 export const getAiChatUrl = () => {
@@ -3597,6 +4121,77 @@ export function useGetAdminDashboardStats<TData = Awaited<ReturnType<typeof getA
 
 
 
+
+export const getSendAdminNotificationUrl = () => {
+
+
+
+
+  return `/api/admin/notifications/send`
+}
+
+/**
+ * @summary Send a custom push notification (super_admin only)
+ */
+export const sendAdminNotification = async (sendAdminNotificationBody: SendAdminNotificationBody, options?: RequestInit): Promise<SuccessResponse> => {
+
+  return customFetch<SuccessResponse>(getSendAdminNotificationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(sendAdminNotificationBody)
+  }
+);}
+
+
+
+
+
+export const getSendAdminNotificationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendAdminNotification>>, TError,{data: BodyType<SendAdminNotificationBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendAdminNotification>>, TError,{data: BodyType<SendAdminNotificationBody>}, TContext> => {
+
+const mutationKey = ['sendAdminNotification'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendAdminNotification>>, {data: BodyType<SendAdminNotificationBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  sendAdminNotification(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendAdminNotificationMutationResult = NonNullable<Awaited<ReturnType<typeof sendAdminNotification>>>
+    export type SendAdminNotificationMutationBody = BodyType<SendAdminNotificationBody>
+    export type SendAdminNotificationMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Send a custom push notification (super_admin only)
+ */
+export const useSendAdminNotification = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendAdminNotification>>, TError,{data: BodyType<SendAdminNotificationBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendAdminNotification>>,
+        TError,
+        {data: BodyType<SendAdminNotificationBody>},
+        TContext
+      > => {
+      return useMutation(getSendAdminNotificationMutationOptions(options));
+    }
 
 export const getListAdminUsersUrl = (params?: ListAdminUsersParams,) => {
   const normalizedParams = new URLSearchParams();

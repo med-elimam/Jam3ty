@@ -22,6 +22,8 @@ const zodTransformer: InputTransformerFn = (config) => {
   if (uploadPost) {
     delete uploadPost.requestBody;
   }
+  const evidencePost = config.paths?.["/subscriptions/manual-payment-orders/{paymentOrderId}/evidence"]?.post;
+  if (evidencePost) delete evidencePost.requestBody;
 
   return config;
 };

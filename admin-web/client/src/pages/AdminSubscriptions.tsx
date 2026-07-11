@@ -34,6 +34,7 @@ import {
   useListAdminSubscriptions,
   useUpdateAdminSubscription,
   useUpdateAdminSubscriptionPlan,
+  customFetch,
 } from '@workspace/api-client-react';
 import type {
   AdminSubscription,
@@ -45,6 +46,7 @@ import type {
 
 const ALL = '__all__';
 const STATUSES = ['active', 'expired', 'cancelled'] as const;
+const ENTITLEMENT_KEYS = ['ai.use','files.view','files.download','exams.view','corrections.view','assignments.view','premium_content.view','offline.download','video.view','audio.view','document.view','community.premium_features'] as const;
 
 const EMPTY_PLAN_FORM = {
   name: '',
@@ -134,6 +136,23 @@ export default function AdminSubscriptions() {
   const [editingPlan, setEditingPlan] = useState<AdminSubscriptionPlan | null>(null);
   const [planDialogOpen, setPlanDialogOpen] = useState(false);
   const [planForm, setPlanForm] = useState(EMPTY_PLAN_FORM);
+  const [entitlementPlan, setEntitlementPlan] = useState<AdminSubscriptionPlan | null>(null);
+  const [entitlementKeys, setEntitlementKeys] = useState<string[]>([]);
+  const [savingEntitlements, setSavingEntitlements] = useState(false);
+
+  async function openEntitlements(plan: AdminSubscriptionPlan) {
+    setEntitlementPlan(plan);
+    try { const response = await customFetch<{ data: Array<{ entitlementKey: string }> }>(`/api/admin/subscription-plans/${plan.id}/entitlements`, { responseType: 'json' }); setEntitlementKeys(response.data.map(item => item.entitlementKey)); }
+    catch { toast.error(c.planLoadError); }
+  }
+
+  async function saveEntitlements() {
+    if (!entitlementPlan) return;
+    setSavingEntitlements(true);
+    try { await customFetch(`/api/admin/subscription-plans/${entitlementPlan.id}/entitlements`, { method: 'PUT', body: JSON.stringify({ entitlements: entitlementKeys }), responseType: 'json' }); toast.success(c.saved); setEntitlementPlan(null); }
+    catch { toast.error(c.saveError); }
+    finally { setSavingEntitlements(false); }
+  }
 
   const params: ListAdminSubscriptionsParams = {
     status: statusFilter === ALL ? undefined : statusFilter as ListAdminSubscriptionsParams['status'],
@@ -318,7 +337,7 @@ export default function AdminSubscriptions() {
                       <p className="mt-1 text-sm text-muted-foreground">{plan.priceMru} MRU - {plan.durationDays} {c.daysRemaining}</p>
                       <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{plan.features.join(', ') || '-'}</p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => openEditPlan(plan)}>{t('common.edit')}</Button>
+                    <div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => openEntitlements(plan)}>Entitlements</Button><Button variant="outline" size="sm" onClick={() => openEditPlan(plan)}>{t('common.edit')}</Button></div>
                   </div>
                 </Card>
               ))
@@ -413,6 +432,9 @@ export default function AdminSubscriptions() {
             </DialogFooter>
           </form>
         </DialogContent>
+      </Dialog>
+      <Dialog open={Boolean(entitlementPlan)} onOpenChange={(open) => !open && setEntitlementPlan(null)}>
+        <DialogContent className="sm:max-w-xl"><DialogHeader><DialogTitle>{entitlementPlan?.name} · Entitlements</DialogTitle><DialogDescription>{lang === 'ar' ? 'هذه المفاتيح هي التي يسمح بها الخادم فعليًا.' : 'Ces capacités sont réellement autorisées par le serveur.'}</DialogDescription></DialogHeader><div className="grid gap-2 sm:grid-cols-2">{ENTITLEMENT_KEYS.map(key => <label key={key} className="flex items-center gap-2 rounded-md border border-border p-3 text-sm"><input type="checkbox" checked={entitlementKeys.includes(key)} onChange={event => setEntitlementKeys(current => event.target.checked ? [...current, key] : current.filter(item => item !== key))}/><span className="font-mono text-xs">{key}</span></label>)}</div><DialogFooter><Button variant="outline" onClick={()=>setEntitlementPlan(null)}>{t('common.cancel')}</Button><Button onClick={saveEntitlements} disabled={savingEntitlements}>{t('common.save')}</Button></DialogFooter></DialogContent>
       </Dialog>
     </AdminLayout>
   );

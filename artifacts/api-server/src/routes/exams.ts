@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, examsTable, coursesTable, profilesTable } from "@workspace/db";
 import { eq, and, gte, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { requireEntitlement } from "../middlewares/entitlements";
 
 const router = Router();
 
@@ -9,7 +10,7 @@ const router = Router();
 // Scoping rule: without an explicit courseId, exams are limited to courses matching
 // the student's profile departmentId + levelId (same rule as GET /courses).
 // No academic placement → no exams. An explicit courseId is honored as-is.
-router.get("/exams", requireAuth, async (req, res) => {
+router.get("/exams", requireAuth, requireEntitlement("exams.view"), async (req, res) => {
   try {
     const { courseId, upcoming } = req.query as Record<string, string>;
     const conditions = [];

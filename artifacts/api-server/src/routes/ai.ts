@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, aiUsageLogsTable, subscriptionsTable, plansTable } from "@workspace/db";
 import { eq, and, gt, count } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { requireEntitlement } from "../middlewares/entitlements";
 
 const router = Router();
 
@@ -19,7 +20,7 @@ async function getUserPlan(userId: string): Promise<"free" | "plus" | "premium_a
 }
 
 // POST /ai/chat
-router.post("/chat", requireAuth, async (req, res) => {
+router.post("/chat", requireAuth, requireEntitlement("ai.use"), async (req, res) => {
   try {
     const { message, context } = req.body as { message?: string; context?: string };
     if (!message?.trim()) {

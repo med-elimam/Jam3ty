@@ -46,14 +46,25 @@ import {
   plansTable,
   userRoleEnum,
   paymentStatusEnum,
+  paymentOrdersTable,
+  paymentTransactionsTable,
+  manualPaymentEvidenceTable,
+  manualPaymentMethodsTable,
+  manualPaymentReviewEventsTable,
+  auditLogsTable,
+  planEntitlementsTable,
+  manualReviewStatusEnum,
 } from "@workspace/db";
-import { eq, and, gt, count, sql, ilike, inArray } from "drizzle-orm";
-import { requireAuth, requireRole } from "../middlewares/auth";
+import { eq, and, gt, count, sql, ilike, inArray, desc } from "drizzle-orm";
+import { requireAuth, requirePermission, requireRole } from "../middlewares/auth";
 import {
   UploadError,
   parseAdminUpload,
   storeAdminUpload,
 } from "../lib/admin-upload";
+import { resolveManualEvidencePath } from "../lib/manual-payment-evidence";
+import { reviewManualPayment } from "../services/manual-payment-service";
+import { verifyManualPayment } from "../services/subscription-service";
 
 const router = Router();
 
@@ -90,13 +101,6 @@ function safeUser(user: typeof usersTable.$inferSelect) {
   const { passwordHash: _, ...safe } = user;
   return safe;
 }
-
-const paymentMethodToSubscriptionSource = {
-  bankily: "bankily_manual",
-  masrvi: "masrvi_manual",
-  sedad: "sedad_manual",
-  cash_agent: "cash_agent",
-} as const;
 
 // GET /admin/dashboard/stats
 router.get("/dashboard/stats", async (req, res) => {
@@ -2733,6 +2737,13 @@ router.patch("/subscriptions/:subscriptionId", async (req, res) => {
         res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Invalid subscription status" } });
         return;
       }
+      if (body.status === "active" && existing.status !== "active") {
+        res.status(409).json({
+          success: false,
+          error: { code: "AUDITED_GRANT_REQUIRED", message: "A subscription cannot be activated by direct status editing. Use the audited grant workflow." },
+        });
+        return;
+      }
       update.status = body.status as SubscriptionStatus;
     }
     if (body.planId !== undefined) {
@@ -2844,6 +2855,29 @@ router.patch("/subscription-plans/:planId", async (req, res) => {
   }
 });
 
+router.get("/subscription-plans/:planId/entitlements", async (req, res) => {
+  const rows = await db.select().from(planEntitlementsTable).where(eq(planEntitlementsTable.planId, String(req.params.planId))).orderBy(planEntitlementsTable.entitlementKey);
+  res.json({ success: true, data: rows });
+});
+
+router.put("/subscription-plans/:planId/entitlements", async (req, res) => {
+  try {
+    const planId = String(req.params.planId);
+    const values = Array.isArray(req.body.entitlements) ? req.body.entitlements : [];
+    const entitlements = values.map((value: unknown) => typeof value === "string" ? { key: value.trim(), limitValue: null } : { key: String((value as { key?: unknown }).key ?? "").trim(), limitValue: (value as { limitValue?: unknown }).limitValue == null ? null : Number((value as { limitValue?: unknown }).limitValue) }).filter((value: { key: string }) => /^[a-z][a-z0-9_.-]{1,80}$/.test(value.key));
+    if (entitlements.length !== values.length) { res.status(400).json({ success: false, error: { code: "INVALID_ENTITLEMENT", message: "Invalid entitlement key or limit" } }); return; }
+    const saved = await db.transaction(async (tx) => {
+      const oldState = await tx.select().from(planEntitlementsTable).where(eq(planEntitlementsTable.planId, planId));
+      await tx.delete(planEntitlementsTable).where(eq(planEntitlementsTable.planId, planId));
+      if (entitlements.length) await tx.insert(planEntitlementsTable).values(entitlements.map((item: { key: string; limitValue: number | null }) => ({ planId, entitlementKey: item.key, limitValue: item.limitValue })));
+      const newState = await tx.select().from(planEntitlementsTable).where(eq(planEntitlementsTable.planId, planId));
+      await tx.insert(auditLogsTable).values({ userId: req.userId!, action: "subscription_plans.entitlements.update", targetType: "plan", targetId: planId, metadata: { oldState, newState }, ipAddress: req.ip });
+      return newState;
+    });
+    res.json({ success: true, data: saved });
+  } catch (err) { req.log.error({ err }, "UpdatePlanEntitlements error"); res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } }); }
+});
+
 // GET /admin/payments
 router.get("/payments", async (req, res) => {
   try {
@@ -2872,53 +2906,14 @@ router.get("/payments", async (req, res) => {
 
 // POST /admin/payments/:paymentId/approve
 router.post("/payments/:paymentId/approve", async (req, res) => {
-  try {
-    const { paymentId } = req.params as { paymentId: string };
-    const [payment] = await db.select().from(paymentsTable).where(eq(paymentsTable.id, paymentId)).limit(1);
-    if (!payment) {
-      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Payment not found" } });
-      return;
-    }
-    if (payment.status !== "pending" && payment.status !== "under_review") {
-      res.status(400).json({ success: false, error: { code: "INVALID_STATE", message: `Payment already ${payment.status}` } });
-      return;
-    }
-
-    const [plan] = await db.select().from(plansTable).where(eq(plansTable.id, payment.planId)).limit(1);
-    if (!plan) {
-      res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Plan not found" } });
-      return;
-    }
-
-    const [updatedPayment] = await db.update(paymentsTable).set({
-      status: "approved",
-      reviewedBy: req.userId!,
-      reviewedAt: new Date(),
-    }).where(eq(paymentsTable.id, paymentId)).returning();
-
-    const expiresAt = new Date(Date.now() + plan.durationDays * 24 * 60 * 60 * 1000);
-    const [subscription] = await db.insert(subscriptionsTable).values({
-      userId: payment.userId,
-      planId: payment.planId,
-      status: "active",
-      source: paymentMethodToSubscriptionSource[payment.method],
-      startsAt: new Date(),
-      expiresAt,
-    }).returning();
-
-    const daysRemaining = Math.max(0, Math.ceil((subscription.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
-
-    res.json({
-      success: true,
-      data: {
-        payment: { ...updatedPayment, planName: plan.name },
-        subscription: { ...subscription, planName: plan.name, daysRemaining },
-      },
-    });
-  } catch (err) {
-    req.log.error({ err }, "AdminApprovePayment error");
-    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
-  }
+  req.log.warn({ paymentId: req.params.paymentId, actorId: req.userId }, "Blocked unsafe manual payment approval");
+  res.status(409).json({
+    success: false,
+    error: {
+      code: "VERIFIED_PAYMENT_REQUIRED",
+      message: "Manual claims cannot be marked paid or activate subscriptions. A verified provider event or server reconciliation is required.",
+    },
+  });
 });
 
 // POST /admin/payments/:paymentId/reject
@@ -2952,4 +2947,237 @@ router.post("/payments/:paymentId/reject", async (req, res) => {
   }
 });
 
+// Manual payment verification is separate from legacy payment claims.
+router.get("/manual-payment-reviews", requirePermission("payments.manual.review"), async (req, res) => {
+  try {
+    const status = typeof req.query.status === "string" ? req.query.status : undefined;
+    const conditions = [eq(paymentOrdersTable.paymentMode, "manual")];
+    if (status) {
+      if (!(manualReviewStatusEnum.enumValues as readonly string[]).includes(status)) { res.status(400).json({ success: false, error: { code: "INVALID_STATUS", message: "Unknown manual review status" } }); return; }
+      conditions.push(eq(paymentOrdersTable.manualReviewStatus, status as (typeof manualReviewStatusEnum.enumValues)[number]));
+    }
+    const orders = await db.select().from(paymentOrdersTable).where(and(...conditions)).orderBy(desc(paymentOrdersTable.createdAt));
+    const data = await Promise.all(orders.map(async (order) => {
+      const [[user], [plan], duplicateEvidence, duplicateSubmittedReference] = await Promise.all([
+        db.select({ fullName: usersTable.fullName, email: usersTable.email, phone: usersTable.phone }).from(usersTable).where(eq(usersTable.id, order.userId)).limit(1),
+        db.select({ name: plansTable.name }).from(plansTable).where(eq(plansTable.id, order.planId)).limit(1),
+        order.evidenceHash ? db.select({ id: manualPaymentEvidenceTable.id }).from(manualPaymentEvidenceTable).where(eq(manualPaymentEvidenceTable.sha256, order.evidenceHash)).limit(2) : Promise.resolve([]),
+        order.submittedTransactionReference ? db.select({ id: paymentOrdersTable.id }).from(paymentOrdersTable).where(eq(paymentOrdersTable.submittedTransactionReference, order.submittedTransactionReference)).limit(2) : Promise.resolve([]),
+      ]);
+      return {
+        ...order,
+        evidenceStorageKey: undefined,
+        user,
+        planName: plan?.name ?? "Plan",
+        evidencePreviewPath: order.evidenceStorageKey ? `/api/admin/manual-payment-reviews/${order.id}/evidence` : null,
+        riskIndicators: { duplicateEvidence: duplicateEvidence.length > 1, duplicateSubmittedReference: duplicateSubmittedReference.length > 1, expired: order.expiresAt <= new Date() },
+      };
+    }));
+    res.json({ success: true, data });
+  } catch (err) { req.log.error({ err }, "ListManualPaymentReviews error"); res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } }); }
+});
+
+router.get("/manual-payment-reviews/:paymentOrderId", requirePermission("payments.manual.review"), async (req, res) => {
+  try {
+    const paymentOrderId = String(req.params.paymentOrderId);
+    const [order] = await db.select().from(paymentOrdersTable).where(and(eq(paymentOrdersTable.id, paymentOrderId), eq(paymentOrdersTable.paymentMode, "manual"))).limit(1);
+    if (!order) { res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Payment order not found" } }); return; }
+    const [[user], [plan], evidence, history, transactions, priorOrders] = await Promise.all([
+      db.select({ id: usersTable.id, fullName: usersTable.fullName, email: usersTable.email, phone: usersTable.phone }).from(usersTable).where(eq(usersTable.id, order.userId)).limit(1),
+      db.select().from(plansTable).where(eq(plansTable.id, order.planId)).limit(1),
+      db.select({ id: manualPaymentEvidenceTable.id, mimeType: manualPaymentEvidenceTable.mimeType, sizeBytes: manualPaymentEvidenceTable.sizeBytes, sha256: manualPaymentEvidenceTable.sha256, createdAt: manualPaymentEvidenceTable.createdAt }).from(manualPaymentEvidenceTable).where(eq(manualPaymentEvidenceTable.paymentOrderId, order.id)).orderBy(desc(manualPaymentEvidenceTable.createdAt)),
+      db.select().from(manualPaymentReviewEventsTable).where(eq(manualPaymentReviewEventsTable.paymentOrderId, order.id)).orderBy(desc(manualPaymentReviewEventsTable.createdAt)),
+      db.select().from(paymentTransactionsTable).where(eq(paymentTransactionsTable.paymentOrderId, order.id)),
+      db.select({ id: paymentOrdersTable.id, status: paymentOrdersTable.status, manualReviewStatus: paymentOrdersTable.manualReviewStatus, amountMru: paymentOrdersTable.amountMru, createdAt: paymentOrdersTable.createdAt }).from(paymentOrdersTable).where(and(eq(paymentOrdersTable.userId, order.userId), eq(paymentOrdersTable.paymentMode, "manual"))).orderBy(desc(paymentOrdersTable.createdAt)).limit(10),
+    ]);
+    res.json({ success: true, data: { ...order, evidenceStorageKey: undefined, user, plan, evidence, history, transactions, priorOrders, evidencePreviewPath: order.evidenceStorageKey ? `/api/admin/manual-payment-reviews/${order.id}/evidence` : null } });
+  } catch (err) { req.log.error({ err }, "GetManualPaymentReview error"); res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } }); }
+});
+
+router.get("/manual-payment-reviews/:paymentOrderId/evidence", requirePermission("payments.manual.review"), async (req, res) => {
+  const [order] = await db.select({ storageKey: paymentOrdersTable.evidenceStorageKey, mimeType: paymentOrdersTable.evidenceMimeType }).from(paymentOrdersTable).where(and(eq(paymentOrdersTable.id, String(req.params.paymentOrderId)), eq(paymentOrdersTable.paymentMode, "manual"))).limit(1);
+  if (!order?.storageKey) { res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Evidence not found" } }); return; }
+  res.type(order.mimeType ?? "application/octet-stream");
+  res.setHeader("Cache-Control", "private, no-store");
+  res.sendFile(resolveManualEvidencePath(order.storageKey));
+});
+
+router.post("/manual-payment-reviews/:paymentOrderId/request-more-information", requirePermission("payments.manual.review"), async (req, res) => {
+  try { const result = await reviewManualPayment(String(req.params.paymentOrderId), req.userId!, "request_more_information", String(req.body.reason ?? ""), req.ip); res.json({ success: true, data: result }); }
+  catch (err) { res.status(409).json({ success: false, error: { code: err instanceof Error ? err.message : "REVIEW_FAILED", message: "Unable to update review" } }); }
+});
+
+router.post("/manual-payment-reviews/:paymentOrderId/reject", requirePermission("payments.manual.review"), async (req, res) => {
+  try { const result = await reviewManualPayment(String(req.params.paymentOrderId), req.userId!, "reject", String(req.body.reason ?? ""), req.ip); res.json({ success: true, data: result }); }
+  catch (err) { res.status(409).json({ success: false, error: { code: err instanceof Error ? err.message : "REVIEW_FAILED", message: "Unable to reject review" } }); }
+});
+
+router.post("/manual-payment-reviews/:paymentOrderId/verify", requirePermission("payments.manual.verify"), async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    if (body.confirmReceived !== true) { res.status(400).json({ success: false, error: { code: "EXPLICIT_CONFIRMATION_REQUIRED", message: "Merchant account receipt confirmation is required" } }); return; }
+    const subscription = await verifyManualPayment({
+      paymentOrderId: String(req.params.paymentOrderId),
+      actorId: req.userId!,
+      receivedAmountMru: Number(body.receivedAmountMru),
+      verifiedTransactionReference: String(body.verifiedTransactionReference ?? ""),
+      recipientAccount: String(body.recipientAccount ?? ""),
+      receivedAt: new Date(String(body.receivedAt ?? "")),
+      verificationNote: String(body.verificationNote ?? ""),
+      paymentMethod: String(body.paymentMethod ?? "") as "bankily" | "masrvi" | "sedad" | "other",
+      verificationSource: String(body.verificationSource ?? "merchant_wallet_statement"),
+      ipAddress: req.ip,
+    });
+    res.json({ success: true, data: { subscription } });
+  } catch (err) {
+    const code = err instanceof Error ? err.message : "VERIFICATION_FAILED";
+    res.status(code.includes("MISMATCH") ? 422 : 409).json({ success: false, error: { code, message: "Manual payment verification failed; no subscription was activated" } });
+  }
+});
+
+router.get("/manual-payment-methods", requirePermission("payments.methods.manage"), async (_req, res) => {
+  const methods = await db.select().from(manualPaymentMethodsTable).orderBy(manualPaymentMethodsTable.displayOrder);
+  res.json({ success: true, data: methods });
+});
+
+router.patch("/manual-payment-methods/:method", requirePermission("payments.methods.manage"), async (req, res) => {
+  try {
+    const method = String(req.params.method);
+    if (!["bankily", "masrvi", "sedad", "other"].includes(method)) { res.status(400).json({ success: false, error: { code: "INVALID_METHOD", message: "Invalid payment method" } }); return; }
+    const body = req.body as Record<string, unknown>;
+    const values = {
+      method,
+      isEnabled: Boolean(body.isEnabled),
+      recipientDisplayName: String(body.recipientDisplayName ?? "").trim(),
+      recipientAccount: String(body.recipientAccount ?? "").trim(),
+      instructionsAr: String(body.instructionsAr ?? "").trim(),
+      instructionsFr: String(body.instructionsFr ?? "").trim(),
+      minimumAmountMru: body.minimumAmountMru == null ? null : Number(body.minimumAmountMru),
+      maximumAmountMru: body.maximumAmountMru == null ? null : Number(body.maximumAmountMru),
+      evidenceRequired: body.evidenceRequired !== false,
+      transactionReferenceRequired: Boolean(body.transactionReferenceRequired),
+      displayOrder: Number(body.displayOrder ?? 0),
+      maintenanceMessageAr: body.maintenanceMessageAr ? String(body.maintenanceMessageAr) : null,
+      maintenanceMessageFr: body.maintenanceMessageFr ? String(body.maintenanceMessageFr) : null,
+      updatedAt: new Date(),
+    };
+    if (!values.recipientDisplayName || !values.recipientAccount || !values.instructionsAr || !values.instructionsFr) { res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "Recipient and localized instructions are required" } }); return; }
+    const [existing] = await db.select().from(manualPaymentMethodsTable).where(eq(manualPaymentMethodsTable.method, method)).limit(1);
+    const [saved] = existing ? await db.update(manualPaymentMethodsTable).set(values).where(eq(manualPaymentMethodsTable.id, existing.id)).returning() : await db.insert(manualPaymentMethodsTable).values(values).returning();
+    await db.insert(auditLogsTable).values({ userId: req.userId!, action: "payments.methods.manage", targetType: "manual_payment_method", targetId: saved.id, metadata: { oldState: existing ?? null, newState: saved }, ipAddress: req.ip });
+    res.json({ success: true, data: saved });
+  } catch (err) { req.log.error({ err }, "UpdateManualPaymentMethod error"); res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } }); }
+});
+
+
+// POST /notifications/send
+router.post("/notifications/send", requireAuth, requireRole("super_admin"), async (req, res) => {
+  try {
+    const { title, body, userId, departmentId, levelId } = req.body as {
+      title: string;
+      body: string;
+      userId?: string;
+      departmentId?: string;
+      levelId?: string;
+    };
+
+    if (!title || !body) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "title and body are required" } });
+      return;
+    }
+
+    const { pushTokensTable, profilesTable, notificationsTable } = await import("@workspace/db");
+
+    // 1. Query target users and their push tokens
+    let tokensQuery;
+    if (userId) {
+      // Direct user targeting
+      tokensQuery = db.select({
+        token: pushTokensTable.token,
+        userId: pushTokensTable.userId,
+      }).from(pushTokensTable).where(eq(pushTokensTable.userId, userId));
+    } else if (departmentId || levelId) {
+      // Targeted department/level
+      const conditions = [];
+      if (departmentId) conditions.push(eq(profilesTable.departmentId, departmentId));
+      if (levelId) conditions.push(eq(profilesTable.levelId, levelId));
+
+      tokensQuery = db.select({
+        token: pushTokensTable.token,
+        userId: pushTokensTable.userId,
+      })
+      .from(pushTokensTable)
+      .innerJoin(profilesTable, eq(profilesTable.userId, pushTokensTable.userId))
+      .where(and(...conditions));
+    } else {
+      // All users
+      tokensQuery = db.select({
+        token: pushTokensTable.token,
+        userId: pushTokensTable.userId,
+      }).from(pushTokensTable);
+    }
+
+    const rows = await tokensQuery;
+
+    if (rows.length === 0) {
+      res.json({ success: true, message: "No target users with push tokens found" });
+      return;
+    }
+
+    // 2. Identify unique users to insert persistent in-app notifications
+    const uniqueUserIds = Array.from(new Set(rows.map(r => r.userId)));
+    
+    // Batch insert notifications in chunks of 50
+    const batchSize = 50;
+    for (let i = 0; i < uniqueUserIds.length; i += batchSize) {
+      const chunk = uniqueUserIds.slice(i, i + batchSize);
+      const values = chunk.map(uid => ({
+        userId: uid,
+        type: "admin_broadcast",
+        title,
+        body,
+        data: { senderId: req.userId },
+      }));
+      await db.insert(notificationsTable).values(values);
+    }
+
+    // 3. Send Push Notifications via Expo API
+    const messages = rows.map(r => ({
+      to: r.token,
+      sound: "default",
+      title,
+      body,
+      data: { type: "admin_broadcast" },
+    }));
+
+    // Chunk messages by 100 for Expo Push API limits
+    const expoChunkSize = 100;
+    for (let i = 0; i < messages.length; i += expoChunkSize) {
+      const chunk = messages.slice(i, i + expoChunkSize);
+      try {
+        const response = await fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip, deflate",
+          },
+          body: JSON.stringify(chunk),
+        });
+        if (!response.ok) {
+          req.log.error({ status: response.status }, "Expo Push API error response");
+        }
+      } catch (expoErr) {
+        req.log.error({ err: expoErr }, "Failed sending push chunk to Expo");
+      }
+    }
+
+    res.json({ success: true, message: `Notification sent to ${rows.length} devices.` });
+  } catch (err) {
+    req.log.error({ err }, "AdminSendNotification error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
 export default router;
+

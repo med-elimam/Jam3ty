@@ -13,6 +13,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminUniversities from "./pages/AdminUniversities";
 import AdminUsers from "./pages/AdminUsers";
 import AdminPayments from "./pages/AdminPayments";
+import AdminManualPayments from "./pages/AdminManualPayments";
+import AdminPaymentMethods from "./pages/AdminPaymentMethods";
 import AdminAcademicStructure from "./pages/AdminAcademicStructure";
 import AdminCourses from "./pages/AdminCourses";
 import AdminFiles from "./pages/AdminFiles";
@@ -27,6 +29,7 @@ import AdminClubs from "./pages/AdminClubs";
 import AdminSubscriptions from "./pages/AdminSubscriptions";
 import AdminAgents from "./pages/AdminAgents";
 import AdminSettings from "./pages/AdminSettings";
+import AdminNotifications from "./pages/AdminNotifications";
 
 const queryClient = new QueryClient();
 
@@ -71,8 +74,11 @@ function Router() {
         <Route path="/admin/clubs" component={() => <ProtectedAdminRoute component={AdminClubs} />} />
         <Route path="/admin/subscriptions" component={() => <ProtectedAdminRoute component={AdminSubscriptions} />} />
         <Route path="/admin/payments" component={() => <ProtectedAdminRoute component={AdminPayments} />} />
+        <Route path="/admin/manual-payments" component={() => <ProtectedAdminRoute component={AdminManualPayments} />} />
+        <Route path="/admin/payment-methods" component={() => <ProtectedAdminRoute component={AdminPaymentMethods} />} />
         <Route path="/admin/agents" component={() => <ProtectedAdminRoute component={AdminAgents} />} />
         <Route path="/admin/settings" component={() => <ProtectedAdminRoute component={AdminSettings} />} />
+        <Route path="/admin/notifications" component={() => <ProtectedAdminRoute component={AdminNotifications} />} />
 
         <Route path="/admin/404" component={NotFound} />
         <Route component={NotFound} />

@@ -66,3 +66,17 @@ export function requireRole(...roles: string[]) {
     next();
   };
 }
+
+const rolePermissions: Record<string, ReadonlySet<string>> = {
+  super_admin: new Set(["payments.manual.verify", "payments.manual.review", "payments.methods.manage", "subscriptions.grant"]),
+};
+
+export function requirePermission(permission: string) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.userRole || !rolePermissions[req.userRole]?.has(permission)) {
+      res.status(403).json({ success: false, error: { code: "FORBIDDEN", message: `Missing permission: ${permission}` } });
+      return;
+    }
+    next();
+  };
+}

@@ -463,6 +463,7 @@ export interface AcademicFile {
   uploaderName: string;
   approvalStatus: AcademicFileApprovalStatus;
   downloadCount: number;
+  viewCount: number;
   isFavorited: boolean;
   createdAt: string;
 }
@@ -1564,6 +1565,46 @@ export interface DashboardHome {
   unreadNotificationsCount: number;
 }
 
+export interface ManualPaymentCheckout {
+  id: string;
+  userId: string;
+  planId: string;
+  amountMru: number;
+  currency: string;
+  provider: string;
+  paymentMode: string;
+  manualPaymentMethod?: string;
+  manualReviewStatus?: string;
+  clientReference: string;
+  status: string;
+  expiresAt: string;
+  paidAt?: string | null;
+  planName: string;
+  recipientName: string;
+  recipientAccount: string;
+  instructions: string;
+  evidenceRequired: boolean;
+  transactionReferenceRequired: boolean;
+}
+
+export interface ManualPaymentOrder {
+  id: string;
+  userId: string;
+  planId: string;
+  amountMru: number;
+  currency: string;
+  provider: string;
+  paymentMode: string;
+  manualPaymentMethod?: string;
+  manualReviewStatus: string;
+  clientReference: string;
+  status: string;
+  expiresAt: string;
+  paidAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export type LogoutBody = {
   refreshToken: string;
 };
@@ -1680,6 +1721,20 @@ export type ToggleFileFavorite200Data = {
 export type ToggleFileFavorite200 = {
   success: boolean;
   data: ToggleFileFavorite200Data;
+};
+
+export type GetFile200 = {
+  success: boolean;
+  data: AcademicFile;
+};
+
+export type RecordFileView200Data = {
+  viewCount: number;
+};
+
+export type RecordFileView200 = {
+  success: boolean;
+  data: RecordFileView200Data;
 };
 
 export type ListAnnouncementsParams = {
@@ -1833,6 +1888,68 @@ export type ListMyPayments200 = {
   data: Payment[];
 };
 
+export type CreateManualPaymentOrderBodyMethod = typeof CreateManualPaymentOrderBodyMethod[keyof typeof CreateManualPaymentOrderBodyMethod];
+
+
+export const CreateManualPaymentOrderBodyMethod = {
+  bankily: 'bankily',
+  masrvi: 'masrvi',
+  sedad: 'sedad',
+  other: 'other',
+} as const;
+
+export type CreateManualPaymentOrderBodyLanguage = typeof CreateManualPaymentOrderBodyLanguage[keyof typeof CreateManualPaymentOrderBodyLanguage];
+
+
+export const CreateManualPaymentOrderBodyLanguage = {
+  ar: 'ar',
+  fr: 'fr',
+} as const;
+
+export type CreateManualPaymentOrderBody = {
+  planId: string;
+  method: CreateManualPaymentOrderBodyMethod;
+  language?: CreateManualPaymentOrderBodyLanguage;
+};
+
+export type CreateManualPaymentOrder201 = {
+  success: boolean;
+  data: ManualPaymentCheckout;
+};
+
+export type ListManualPaymentOrders200 = {
+  success: boolean;
+  data: ManualPaymentOrder[];
+};
+
+export type UploadManualPaymentEvidenceBody = {
+  file: Blob;
+};
+
+export type UploadManualPaymentEvidence201Data = {
+  evidenceId: string;
+  duplicateEvidence: boolean;
+};
+
+export type UploadManualPaymentEvidence201 = {
+  success: boolean;
+  data: UploadManualPaymentEvidence201Data;
+};
+
+export type SubmitManualPaymentEvidenceBody = {
+  evidenceId: string;
+  senderName?: string;
+  senderPhone: string;
+  transactionReference?: string;
+  paymentDate?: string;
+};
+
+export type SubmitManualPaymentEvidence202 = {
+  success: boolean;
+  data: ManualPaymentOrder;
+  message?: string;
+};
+
 export type ListNotificationsParams = {
 unreadOnly?: boolean;
 };
@@ -1841,6 +1958,20 @@ export type ListNotifications200 = {
   success: boolean;
   data: Notification[];
   unreadCount: number;
+};
+
+export type RegisterPushTokenBodyPlatform = typeof RegisterPushTokenBodyPlatform[keyof typeof RegisterPushTokenBodyPlatform];
+
+
+export const RegisterPushTokenBodyPlatform = {
+  ios: 'ios',
+  android: 'android',
+  web: 'web',
+} as const;
+
+export type RegisterPushTokenBody = {
+  token: string;
+  platform: RegisterPushTokenBodyPlatform;
 };
 
 export type AiChatBody = {
@@ -1878,6 +2009,14 @@ export type GetDashboardHome200 = {
 export type GetAdminDashboardStats200 = {
   success: boolean;
   data: AdminDashboardStats;
+};
+
+export type SendAdminNotificationBody = {
+  title: string;
+  body: string;
+  userId?: string;
+  departmentId?: string;
+  levelId?: string;
 };
 
 export type ListAdminUsersParams = {

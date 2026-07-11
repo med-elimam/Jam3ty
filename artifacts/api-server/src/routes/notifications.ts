@@ -34,4 +34,29 @@ router.post("/notifications/read-all", requireAuth, async (req, res) => {
   }
 });
 
+
+// POST /notifications/push-token
+router.post("/notifications/push-token", requireAuth, async (req, res) => {
+  try {
+    const { token, platform } = req.body as { token: string; platform: string };
+    if (!token || !platform) {
+      res.status(400).json({ success: false, error: { code: "MISSING_FIELDS", message: "token and platform are required" } });
+      return;
+    }
+
+    const { pushTokensTable } = await import("@workspace/db");
+    const existing = await db.select().from(pushTokensTable).where(eq(pushTokensTable.token, token)).limit(1);
+    if (existing.length > 0) {
+      await db.update(pushTokensTable).set({ userId: req.userId!, platform }).where(eq(pushTokensTable.token, token));
+    } else {
+      await db.insert(pushTokensTable).values({ userId: req.userId!, token, platform });
+    }
+
+    res.json({ success: true, message: "Token registered successfully" });
+  } catch (err) {
+    req.log.error({ err }, "RegisterPushToken error");
+    res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: "Internal server error" } });
+  }
+});
+
 export default router;
